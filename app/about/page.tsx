@@ -37,7 +37,7 @@ export default function AboutPage() {
             <div className="border border-line bg-paper p-3 shadow-md">
               <div className="relative aspect-[4/5] overflow-hidden bg-mist/40">
                 <Image
-                  src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80"
+                  src="/images/artist-studio.svg"
                   alt="Aura Vance in the studio"
                   fill
                   className="object-cover"

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a333d"/>
+      <stop offset="35%" stop-color="#3e4c59"/>
+      <stop offset="60%" stop-color="#586978"/>
+      <stop offset="80%" stop-color="#8ba0b3"/>
+      <stop offset="100%" stop-color="#dfe8e2"/>
+    </linearGradient>
+    <radialGradient id="waterGlow" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#e8f0eb" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#8ba0b3" stop-opacity="0.45"/>
+      <stop offset="80%" stop-color="#2a333d" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#1c232b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="watercolorGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.12 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#waterGrad)"/>
+  <circle cx="600" cy="800" r="700" fill="url(#waterGlow)"/>
+
+  <!-- Wet-on-wet Horizon Bleed -->
+  <path d="M0,750 C300,720 700,770 1200,730 L1200,1500 L0,1500 Z" fill="#202933" opacity="0.8"/>
+  <path d="M0,880 C400,840 800,900 1200,860 L1200,1500 L0,1500 Z" fill="#2d3a47" opacity="0.85"/>
+  <path d="M0,1050 C350,1010 750,1080 1200,1030 L1200,1500 L0,1500 Z" fill="#3f4e5c" opacity="0.9"/>
+
+  <!-- Shimmering Water Horizon Bands -->
+  <ellipse cx="600" cy="1120" rx="500" ry="5" fill="#f7f6f4" opacity="0.45"/>
+  <ellipse cx="650" cy="1190" rx="380" ry="4" fill="#dfe8e2" opacity="0.4"/>
+  <ellipse cx="550" cy="1270" rx="280" ry="3" fill="#ecd3d8" opacity="0.3"/>
+
+  <rect width="1200" height="1500" filter="url(#watercolorGrain)" opacity="0.85" pointer-events="none"/>
+</svg>

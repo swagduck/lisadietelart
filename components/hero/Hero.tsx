@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '../shop/CartContext';
 import { ARTWORKS_DATA } from '@/lib/data';
+import { formatPrice } from '@/lib/format';
 
 export function Hero() {
   const { addItem } = useCart();
@@ -104,7 +105,7 @@ export function Hero() {
               </div>
               <div className="text-right">
                 <span className="block font-medium tracking-wider text-ink">
-                  ${heroArtwork.price.toLocaleString()}
+                  {formatPrice(heroArtwork.price)}
                 </span>
                 <span className="text-[10px] uppercase tracking-wider text-sage">
                   Original Available

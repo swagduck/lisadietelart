@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e24"/>
+      <stop offset="35%" stop-color="#2b2a2e"/>
+      <stop offset="65%" stop-color="#735738"/>
+      <stop offset="85%" stop-color="#b88944"/>
+      <stop offset="100%" stop-color="#d4aa63"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="75%" r="60%">
+      <stop offset="0%" stop-color="#ebd092" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#c9954a" stop-opacity="0.6"/>
+      <stop offset="70%" stop-color="#6e4f2e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#2b2a2e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mistLayer" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#dfe8e2" stop-opacity="0.4"/>
+      <stop offset="40%" stop-color="#5f7b6b" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#2b2a2e" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="canvasGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.12 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <!-- Base Canvas Background -->
+  <rect width="1200" height="1500" fill="url(#bgGrad)"/>
+
+  <!-- Atmospheric Glow -->
+  <circle cx="620" cy="1050" r="700" fill="url(#sunGlow)"/>
+
+  <!-- Mountain Strata / Ridge 1 -->
+  <path d="M0,860 Q280,820 620,890 T1200,840 L1200,1500 L0,1500 Z" fill="#2d2b27" opacity="0.85"/>
+
+  <!-- Ridge 2 with Ochre Glaze -->
+  <path d="M0,970 Q400,920 800,990 T1200,940 L1200,1500 L0,1500 Z" fill="#54402a" opacity="0.9"/>
+
+  <!-- Lowland Ridge with Mineral Glow -->
+  <path d="M0,1100 Q320,1040 680,1120 T1200,1070 L1200,1500 L0,1500 Z" fill="#8c6837" opacity="0.85"/>
+
+  <!-- Foreland Shoreline & Water Shimmer -->
+  <path d="M0,1260 Q500,1210 1200,1280 L1200,1500 L0,1500 Z" fill="#212023"/>
+  <rect x="0" y="1270" width="1200" height="230" fill="url(#mistLayer)"/>
+
+  <!-- Fine Mineral Strokes & Organic Marks -->
+  <ellipse cx="640" cy="1330" rx="420" ry="8" fill="#ebd092" opacity="0.55"/>
+  <ellipse cx="580" cy="1370" rx="310" ry="5" fill="#d4aa63" opacity="0.45"/>
+  <ellipse cx="700" cy="1420" rx="220" ry="4" fill="#f7f6f4" opacity="0.35"/>
+
+  <!-- Linen Texture Overlay -->
+  <rect width="1200" height="1500" filter="url(#canvasGrain)" opacity="0.85" pointer-events="none"/>
+</svg>

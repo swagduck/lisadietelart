@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ebe7e0"/>
+      <stop offset="50%" stop-color="#f7f6f4"/>
+      <stop offset="100%" stop-color="#ded8cf"/>
+    </linearGradient>
+    <radialGradient id="inkWash" cx="55%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#8a6138" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#54391e" stop-opacity="0.7"/>
+      <stop offset="70%" stop-color="#2b2a2e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ebe7e0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="paperGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.12 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#paperGrad)"/>
+
+  <!-- Expressive Gestural Ink Strokes -->
+  <path d="M200,250 C450,150 750,400 950,220 C1050,450 850,750 980,1050 C800,1250 450,1100 250,1250 C150,950 350,650 200,250 Z" fill="url(#inkWash)"/>
+
+  <!-- Sienna Dynamic Light Beam Passages -->
+  <path d="M100,550 L1100,350 L1050,480 L150,700 Z" fill="#c9954a" opacity="0.35"/>
+  <path d="M150,750 L1150,550 L1100,680 L200,900 Z" fill="#d4aa63" opacity="0.45"/>
+  <path d="M250,980 L1050,820 L1000,920 L300,1100 Z" fill="#ebd092" opacity="0.55"/>
+
+  <!-- Fine Charcoal Line Studies -->
+  <path d="M250,320 Q600,280 920,400" stroke="#2b2a2e" stroke-width="4" fill="none" opacity="0.75"/>
+  <path d="M220,620 Q550,580 980,720" stroke="#2b2a2e" stroke-width="3" fill="none" opacity="0.6"/>
+  <path d="M300,950 Q650,920 900,1020" stroke="#2b2a2e" stroke-width="5" fill="none" opacity="0.7"/>
+
+  <rect width="1200" height="1500" filter="url(#paperGrain)" opacity="0.85" pointer-events="none"/>
+</svg>

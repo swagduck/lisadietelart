@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="earthGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1f1e21"/>
+      <stop offset="30%" stop-color="#2b2a2e"/>
+      <stop offset="60%" stop-color="#473e35"/>
+      <stop offset="85%" stop-color="#6e5a47"/>
+      <stop offset="100%" stop-color="#3d332a"/>
+    </linearGradient>
+    <radialGradient id="subtleEarthGlow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#947c63" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#473e35" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#1f1e21" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="coarseLinenGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.16 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#earthGrad)"/>
+  <circle cx="600" cy="550" r="600" fill="url(#subtleEarthGlow)"/>
+
+  <!-- Basalt Cliff Layers & Heavy Textured Impasto -->
+  <path d="M-50,600 Q300,520 650,620 T1250,560 L1250,1550 L-50,1550 Z" fill="#242226" opacity="0.9"/>
+  <path d="M-50,780 Q450,710 850,800 T1250,740 L1250,1550 L-50,1550 Z" fill="#38322c" opacity="0.85"/>
+  <path d="M-50,980 Q350,910 750,1000 T1250,940 L1250,1550 L-50,1550 Z" fill="#4a4037" opacity="0.9"/>
+  <path d="M-50,1180 Q550,1110 950,1210 T1250,1140 L1250,1550 L-50,1550 Z" fill="#26221f"/>
+
+  <!-- Delicate Chalk Dust Markings -->
+  <line x1="200" y1="650" x2="1000" y2="670" stroke="#dfe8e2" stroke-width="2" opacity="0.35"/>
+  <line x1="150" y1="840" x2="1050" y2="860" stroke="#ecd3d8" stroke-width="1.5" opacity="0.3"/>
+  <line x1="250" y1="1040" x2="950" y2="1055" stroke="#f7f6f4" stroke-width="3" opacity="0.25"/>
+
+  <rect width="1200" height="1500" filter="url(#coarseLinenGrain)" opacity="0.85" pointer-events="none"/>
+</svg>

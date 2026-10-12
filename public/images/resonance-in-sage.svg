@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24332b"/>
+      <stop offset="40%" stop-color="#3d5246"/>
+      <stop offset="70%" stop-color="#5f7b6b"/>
+      <stop offset="100%" stop-color="#8ba696"/>
+    </linearGradient>
+    <radialGradient id="verdigrisCore" cx="45%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#b8d4c4" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#5f7b6b" stop-opacity="0.5"/>
+      <stop offset="80%" stop-color="#2b2a2e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#24332b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="distemperTexture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.15 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#sageGrad)"/>
+  <circle cx="540" cy="750" r="700" fill="url(#verdigrisCore)"/>
+
+  <!-- Organic Field Strata / Abstract Painterly Shapes -->
+  <path d="M-100,500 C400,300 800,600 1300,400 L1300,1600 L-100,1600 Z" fill="#2b3b32" opacity="0.75"/>
+  <path d="M-100,750 C300,650 750,900 1300,700 L1300,1600 L-100,1600 Z" fill="#4d6657" opacity="0.6"/>
+  <path d="M-100,1050 C500,950 850,1150 1300,1000 L1300,1600 L-100,1600 Z" fill="#759482" opacity="0.5"/>
+
+  <!-- Subtle Blush & Chalk Veils -->
+  <ellipse cx="620" cy="680" rx="360" ry="140" fill="#ecd3d8" opacity="0.25"/>
+  <ellipse cx="500" cy="980" rx="420" ry="80" fill="#dfe8e2" opacity="0.35"/>
+
+  <rect width="1200" height="1500" filter="url(#distemperTexture)" opacity="0.85" pointer-events="none"/>
+</svg>

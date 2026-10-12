@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from '@/lib/format';
 import { Eye, Plus } from 'lucide-react';
 import { useCart } from '../shop/CartContext';
 

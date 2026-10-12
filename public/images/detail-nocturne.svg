@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="detailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a3723"/>
+      <stop offset="40%" stop-color="#8c6837"/>
+      <stop offset="70%" stop-color="#b88944"/>
+      <stop offset="100%" stop-color="#2b2a2e"/>
+    </linearGradient>
+    <filter id="macroGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.18 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#detailGrad)"/>
+
+  <!-- Impasto Brushstrokes -->
+  <path d="M-100,300 C300,200 600,450 1300,250 L1300,550 C800,650 300,400 -100,600 Z" fill="#d4aa63" opacity="0.65"/>
+  <path d="M-100,500 C400,450 700,750 1300,550 L1300,800 C700,900 200,650 -100,850 Z" fill="#ebd092" opacity="0.45"/>
+  <path d="M100,700 C500,650 800,950 1400,800 L1400,1050 C800,1150 400,900 100,1100 Z" fill="#6e4f2e" opacity="0.75"/>
+
+  <!-- Scraped Wax Lines -->
+  <line x1="50" y1="200" x2="1150" y2="400" stroke="#f7f6f4" stroke-width="3" opacity="0.2"/>
+  <line x1="80" y1="420" x2="1120" y2="580" stroke="#f7f6f4" stroke-width="2" opacity="0.25"/>
+  <line x1="120" y1="650" x2="1080" y2="800" stroke="#f7f6f4" stroke-width="4" opacity="0.15"/>
+
+  <rect width="1200" height="1200" filter="url(#macroGrain)" opacity="0.9" pointer-events="none"/>
+</svg>

@@ -20,11 +20,8 @@ export const ARTWORKS_DATA: IArtwork[] = [
       { size: '24 × 30 in', price: 260, editionLimit: 30, available: true },
       { size: '32 × 40 in', price: 420, editionLimit: 15, available: true },
     ],
-    imageUrl:
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1400&q=85',
-    detailImages: [
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
-    ],
+    imageUrl: '/images/nocturne-in-ochre.svg',
+    detailImages: ['/images/detail-nocturne.svg'],
     description:
       'An immersive contemplation on fading crepuscular light over highland topography. Built up in twelve translucent glazes of French walnut oil and mineral pigments.',
     story:
@@ -49,8 +46,7 @@ export const ARTWORKS_DATA: IArtwork[] = [
       { size: '16 × 20 in', price: 140, editionLimit: 50, available: true },
       { size: '24 × 32 in', price: 280, editionLimit: 25, available: true },
     ],
-    imageUrl:
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1400&q=85',
+    imageUrl: '/images/the-breath-of-dawn.svg',
     description:
       'Ethereal morning illumination dispersing maritime fog over still water. Delicate balance of textured impasto and scraped veil coats.',
     story:
@@ -75,8 +71,7 @@ export const ARTWORKS_DATA: IArtwork[] = [
       { size: '18 × 24 in', price: 180, editionLimit: 75, available: true },
       { size: '24 × 32 in', price: 290, editionLimit: 40, available: true },
     ],
-    imageUrl:
-      'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1400&q=85',
+    imageUrl: '/images/resonance-in-sage.svg',
     description:
       'A warm atmospheric tapestry echoing weathered cliff lichen and aged verdigris. Commissioned for a private collection in Zurich.',
     story:
@@ -100,8 +95,7 @@ export const ARTWORKS_DATA: IArtwork[] = [
       { size: '12 × 16 in', price: 95, editionLimit: 100, available: true },
       { size: '18 × 24 in', price: 160, editionLimit: 50, available: true },
     ],
-    imageUrl:
-      'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1400&q=85',
+    imageUrl: '/images/passage-of-light.svg',
     description:
       'A loose, expressive field study capturing fleeting afternoon beam reflections against limestone canyon walls.',
     story:
@@ -122,8 +116,7 @@ export const ARTWORKS_DATA: IArtwork[] = [
     isOriginalAvailable: true,
     hasPrints: true,
     printOptions: [{ size: '16 × 20 in', price: 135, editionLimit: 60, available: true }],
-    imageUrl:
-      'https://images.unsplash.com/photo-1578925518470-4def7a0f08bb?auto=format&fit=crop&w=1400&q=85',
+    imageUrl: '/images/silence-water.svg',
     description:
       'Layered washes of deep indigo and slate gray forming an introspective lake horizon at dusk.',
     story:
@@ -147,8 +140,7 @@ export const ARTWORKS_DATA: IArtwork[] = [
       { size: '20 × 26 in', price: 210, editionLimit: 40, available: true },
       { size: '30 × 39 in', price: 380, editionLimit: 20, available: true },
     ],
-    imageUrl:
-      'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1400&q=85',
+    imageUrl: '/images/earthen-soliloquy.svg',
     description:
       'Tonalist exploration of tactile soil strata and weathered basalt cliffs under an overcast November sky.',
     story:

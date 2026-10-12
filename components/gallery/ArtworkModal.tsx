@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from '@/lib/format';
 import { useCart } from '../shop/CartContext';
 import { X, Check, ShieldCheck, Truck, Sparkles } from 'lucide-react';
 import Link from 'next/link';

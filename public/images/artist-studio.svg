@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="studioRoom" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ded8cf"/>
+      <stop offset="35%" stop-color="#c4bbb0"/>
+      <stop offset="70%" stop-color="#8c8276"/>
+      <stop offset="100%" stop-color="#3d3730"/>
+    </linearGradient>
+    <linearGradient id="windowLight" x1="0%" y1="0%" x2="70%" y2="80%">
+      <stop offset="0%" stop-color="#f7f6f4" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#dfe8e2" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#8c8276" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="studioAtmosphere">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.12 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#studioRoom)"/>
+
+  <!-- High Studio Window Inflow -->
+  <polygon points="0,0 650,0 850,1500 0,1500" fill="url(#windowLight)"/>
+
+  <!-- Timber Studio Ceiling Beams -->
+  <rect x="0" y="40" width="1200" height="45" fill="#2b2520" opacity="0.8"/>
+  <rect x="0" y="140" width="1200" height="35" fill="#383029" opacity="0.7"/>
+
+  <!-- Large Stretched Canvases Leaning on Wall -->
+  <polygon points="120,450 480,410 440,1350 80,1390" fill="#f7f6f4" stroke="#c4bbb0" stroke-width="4"/>
+  <polygon points="180,480 540,440 500,1380 140,1420" fill="#ecd3d8" opacity="0.35"/>
+
+  <!-- Tall Cedar Studio Easel -->
+  <polygon points="680,250 720,250 880,1450 830,1450" fill="#423428"/>
+  <polygon points="695,250 705,250 540,1450 590,1450" fill="#3a2d22"/>
+  <rect x="520" y="620" width="360" height="24" fill="#524032" rx="4"/>
+  <rect x="540" y="1050" width="320" height="20" fill="#524032" rx="4"/>
+
+  <!-- Working Canvas Resting on Easel -->
+  <rect x="560" y="420" width="360" height="480" fill="#f7f6f4" stroke="#e3dfda" stroke-width="4" rx="2"/>
+  <path d="M580,680 Q720,630 900,670 L900,880 L580,880 Z" fill="#5f7b6b" opacity="0.65"/>
+  <circle cx="740" cy="590" r="60" fill="#ecd3d8" opacity="0.5"/>
+
+  <!-- Painter Silhouette in Daylight -->
+  <path d="M420,720 C420,660 460,610 510,610 C560,610 600,660 600,720 C600,780 570,830 540,860 L570,1450 L380,1450 L430,860 C410,830 420,780 420,720 Z" fill="#2b2a2e" opacity="0.9"/>
+  <circle cx="510" cy="560" r="55" fill="#2b2a2e"/>
+
+  <!-- Wooden Studio Table with Glass Pigment Jars -->
+  <polygon points="850,1100 1200,1040 1200,1500 800,1500" fill="#33281f"/>
+  <rect x="920" y="1010" width="40" height="70" fill="#8c6837" rx="3" opacity="0.85"/>
+  <rect x="980" y="990" width="45" height="90" fill="#5f7b6b" rx="3" opacity="0.85"/>
+  <rect x="1045" y="1020" width="35" height="60" fill="#b88944" rx="3" opacity="0.85"/>
+
+  <rect width="1200" height="1500" filter="url(#studioAtmosphere)" opacity="0.8" pointer-events="none"/>
+</svg>

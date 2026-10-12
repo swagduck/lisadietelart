@@ -174,9 +174,7 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-line px-6 py-6 md:px-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-[11px] text-muted sm:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} Aura Vance Fine Art. All rights reserved.
-          </p>
+          <p>&copy; 2025 Aura Vance Fine Art. All rights reserved.</p>
           <div className="flex space-x-6 text-[10px] uppercase tracking-wider">
             <span>Privacy Policy</span>
             <span>Terms of Acquisition</span>
