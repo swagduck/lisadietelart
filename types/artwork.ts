@@ -1,7 +1,11 @@
 export type ArtworkType = 'original' | 'print';
 
 export type ArtworkCategory =
-  'All' | 'Oil on Linen' | 'Watercolors' | 'Studies & Sketches' | 'Selected Archive';
+  | 'All'
+  | 'Oil on Linen'
+  | 'Watercolors'
+  | 'Studies & Sketches'
+  | 'Selected Archive';
 
 export type ArtworkStatus = 'available' | 'reserved' | 'sold';
 
@@ -14,28 +18,49 @@ export interface IPrintOption {
 
 export interface IArtwork {
   _id?: string;
-  id: string;
+  id?: string;
   title: string;
   slug: string;
-  year: number;
   type: ArtworkType;
-  category: ArtworkCategory;
   medium: string;
-  dimensions: string; // e.g. "36 × 48 in (91 × 122 cm)"
-  surface?: string;
+  size?: string;
   price: number;
-  status: ArtworkStatus;
-  isSoldOut: boolean;
+  currency?: string;
+  description: string;
+  images?: string[];
+  sold?: boolean;
+  featured?: boolean;
+  createdAt?: string | Date;
+
+  // Compatibility helpers and UI properties
+  year?: number;
+  category?: ArtworkCategory | string;
+  dimensions?: string;
+  surface?: string;
+  status?: ArtworkStatus;
+  isSoldOut?: boolean;
   isOriginalAvailable?: boolean;
   hasPrints?: boolean;
   printOptions?: IPrintOption[];
-  imageUrl: string;
+  imageUrl?: string;
   detailImages?: string[];
-  description: string;
   story?: string;
-  featured?: boolean;
   exhibitions?: string[];
-  createdAt?: string;
+}
+
+export interface IInquiry {
+  _id?: string;
+  name: string;
+  email: string;
+  message: string;
+  artworkSlug?: string | null;
+  createdAt?: string | Date;
+}
+
+export interface ISubscriber {
+  _id?: string;
+  email: string;
+  createdAt?: string | Date;
 }
 
 export interface ITestimonial {

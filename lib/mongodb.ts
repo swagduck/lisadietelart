@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 /**
- * MongoDB connection helper optimized for Next.js App Router and Vercel Serverless.
- * Caches the connection across serverless invocations and hot-reloads to prevent
- * exhausting MongoDB Atlas Free Tier (M0) connection pools (limit: 500 connections).
+ * MongoDB connection helper targeting MongoDB Atlas free tier (M0).
+ * Caches the connection globally to prevent serverless function executions
+ * from exhausting connection limits (max 500 on Atlas M0).
  */
 
 interface MongooseCache {
@@ -26,10 +26,8 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {
-    if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        '⚠️ MONGODB_URI is not defined in environment variables. Falling back to in-memory static store.'
-      );
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ MONGODB_URI is not set. Data layer will operate in mock fallback mode.');
     }
     return null;
   }
@@ -41,8 +39,9 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
   if (!cached.promise) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
-      maxPoolSize: 10, // Optimized for Vercel serverless free tier limits
+      maxPoolSize: 10, // Conservative pool size for Atlas M0 free tier in serverless
       serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
@@ -52,10 +51,11 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (error) {
     cached.promise = null;
-    console.error('❌ Failed to connect to MongoDB Atlas:', e);
-    throw e;
+    // Log generic error message without leaking sensitive URI credentials
+    console.error('Database connection error: Unable to connect to MongoDB instance.');
+    throw new Error('Database connection failed');
   }
 
   return cached.conn;

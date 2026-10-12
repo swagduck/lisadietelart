@@ -64,7 +64,7 @@ export function Hero() {
           <div className="relative border border-line bg-paper p-3 shadow-2xl shadow-ink/5 transition-transform duration-500 hover:-translate-y-1">
             <div className="group relative aspect-[4/5] overflow-hidden bg-mist/60">
               <Image
-                src={heroArtwork.imageUrl}
+                src={heroArtwork.imageUrl || heroArtwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
                 alt={heroArtwork.title}
                 fill
                 priority
@@ -73,17 +73,20 @@ export function Hero() {
               />
               <div className="absolute inset-0 flex items-end justify-between bg-ink/15 p-6 opacity-0 transition-opacity group-hover:opacity-100">
                 <span className="bg-paper/95 px-3 py-1.5 text-[11px] uppercase tracking-widest text-ink shadow-sm">
-                  {heroArtwork.dimensions}
+                  {heroArtwork.dimensions || heroArtwork.size}
                 </span>
                 <button
                   onClick={() =>
                     addItem({
-                      artworkId: heroArtwork.id,
+                      artworkId: heroArtwork.id || heroArtwork._id || heroArtwork.slug,
                       title: heroArtwork.title,
                       slug: heroArtwork.slug,
                       type: 'original',
                       price: heroArtwork.price,
-                      imageUrl: heroArtwork.imageUrl,
+                      imageUrl:
+                        heroArtwork.imageUrl ||
+                        heroArtwork.images?.[0] ||
+                        '/images/nocturne-in-ochre.svg',
                       medium: heroArtwork.medium,
                     })
                   }

@@ -9,8 +9,8 @@ export const metadata = {
     'Explore original oil and mineral paintings on raw Belgian linen by Lisa Dietel. Worldwide insured shipping available.',
 };
 
-export default function OriginalsPage() {
-  const originals = getOriginals();
+export default async function OriginalsPage() {
+  const originals = await getOriginals();
 
   return (
     <div className="min-h-screen bg-paper pt-24">

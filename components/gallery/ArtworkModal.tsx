@@ -22,27 +22,29 @@ export function ArtworkModal({ artwork, onClose }: ArtworkModalProps) {
   if (!artwork) return null;
 
   const currentPrint = artwork.printOptions?.[selectedPrintIndex];
+  const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const artworkIdentifier = artwork.id || artwork._id || artwork.slug;
 
   const handleAddToCart = () => {
     if (selectedType === 'original' && artwork.isOriginalAvailable) {
       addItem({
-        artworkId: artwork.id,
+        artworkId: artworkIdentifier,
         title: artwork.title,
         slug: artwork.slug,
         type: 'original',
         price: artwork.price,
-        imageUrl: artwork.imageUrl,
+        imageUrl: artworkImg,
         medium: artwork.medium,
       });
     } else if (currentPrint) {
       addItem({
-        artworkId: artwork.id,
+        artworkId: artworkIdentifier,
         title: artwork.title,
         slug: artwork.slug,
         type: 'print',
         variant: `Archival Pigment Print (${currentPrint.size})`,
         price: currentPrint.price,
-        imageUrl: artwork.imageUrl,
+        imageUrl: artworkImg,
         medium: artwork.medium,
       });
     }
@@ -80,7 +82,7 @@ export function ArtworkModal({ artwork, onClose }: ArtworkModalProps) {
             <div className="space-y-4 md:col-span-6">
               <div className="relative aspect-[4/5] border border-line bg-mist/30 p-2 shadow-sm">
                 <Image
-                  src={artwork.imageUrl}
+                  src={artworkImg}
                   alt={artwork.title}
                   fill
                   className="object-cover"

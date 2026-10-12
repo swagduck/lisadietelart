@@ -19,20 +19,20 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: ArtworkDetailPageProps): Metadata {
-  const artwork = getArtworkBySlug(params.slug);
+export async function generateMetadata({ params }: ArtworkDetailPageProps): Promise<Metadata> {
+  const artwork = await getArtworkBySlug(params.slug);
   if (!artwork) {
     return { title: 'Artwork Not Found' };
   }
 
   return {
     title: `${artwork.title} — Lisa Dietel Art`,
-    description: `${artwork.title} (${artwork.year}) — ${artwork.medium}. ${artwork.dimensions}.`,
+    description: `${artwork.title} — ${artwork.medium}. ${artwork.size || artwork.dimensions}.`,
   };
 }
 
-export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
-  const artwork = getArtworkBySlug(params.slug);
+export default async function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
+  const artwork = await getArtworkBySlug(params.slug);
 
   if (!artwork) {
     notFound();
@@ -41,7 +41,7 @@ export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
   // Pre-fill mailto inquiry link with artwork title and dimensions
   const mailtoSubject = encodeURIComponent(`Acquisition Enquiry: "${artwork.title}"`);
   const mailtoBody = encodeURIComponent(
-    `Hello Lisa,\n\nI am interested in "${artwork.title}" (${artwork.dimensions}, ${artwork.medium}).\n\nPlease let me know further details regarding acquisition, shipping, or viewing.\n\nThank you,\n`
+    `Hello Lisa,\n\nI am interested in "${artwork.title}" (${artwork.size || artwork.dimensions}, ${artwork.medium}).\n\nPlease let me know further details regarding acquisition, shipping, or viewing.\n\nThank you,\n`
   );
   const mailtoUrl = `mailto:studio@lisadietelart.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
@@ -70,7 +70,7 @@ export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
             <div className="border border-line bg-paper p-3 shadow-md">
               <div className="relative aspect-[4/5] overflow-hidden bg-mist/30">
                 <Image
-                  src={artwork.imageUrl}
+                  src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
                   alt={artwork.title}
                   fill
                   priority
@@ -150,7 +150,7 @@ export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
                   Size
                 </span>
                 <span className="col-span-2 font-light text-ink">
-                  {artwork.dimensions}
+                  {artwork.size || artwork.dimensions}
                 </span>
               </div>
               {artwork.surface && (

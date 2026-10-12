@@ -53,7 +53,7 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
                 aria-label={`View details for ${artwork.title}`}
               >
                 <Image
-                  src={artwork.imageUrl}
+                  src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
                   alt={artwork.title}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

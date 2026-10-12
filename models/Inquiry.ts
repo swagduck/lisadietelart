@@ -1,26 +1,13 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { IInquiry } from '@/types/inquiry';
+import { IInquiry } from '@/types/artwork';
 
 const InquirySchema = new Schema<IInquiry>(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, lowercase: true, trim: true },
-    phone: { type: String, trim: true },
-    artworkTitle: { type: String },
-    artworkId: { type: String },
-    subject: { type: String, required: true },
-    message: { type: String, required: true },
-    type: {
-      type: String,
-      enum: [
-        'artwork_inquiry',
-        'commission',
-        'gallery_representation',
-        'studio_visit',
-        'general',
-      ],
-      default: 'general',
-    },
+    message: { type: String, required: true, trim: true },
+    artworkSlug: { type: String, trim: true, default: null },
+    createdAt: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

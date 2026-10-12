@@ -46,14 +46,16 @@ export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+    const artworkIdentifier = artwork.id || artwork._id || artwork.slug;
     if (artwork.isOriginalAvailable) {
       addItem({
-        artworkId: artwork.id,
+        artworkId: artworkIdentifier,
         title: artwork.title,
         slug: artwork.slug,
         type: 'original',
         price: artwork.price,
-        imageUrl: artwork.imageUrl,
+        imageUrl: artworkImg,
         medium: artwork.medium,
       });
     } else if (
@@ -63,13 +65,13 @@ export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
     ) {
       const firstPrint = artwork.printOptions[0];
       addItem({
-        artworkId: artwork.id,
+        artworkId: artworkIdentifier,
         title: artwork.title,
         slug: artwork.slug,
         type: 'print',
         variant: `Archival Print ${firstPrint.size}`,
         price: firstPrint.price,
-        imageUrl: artwork.imageUrl,
+        imageUrl: artworkImg,
         medium: artwork.medium,
       });
     } else {
@@ -85,7 +87,7 @@ export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
       {/* Frame Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-mist/40">
         <Image
-          src={artwork.imageUrl}
+          src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
           alt={artwork.title}
           fill
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

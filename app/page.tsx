@@ -18,8 +18,8 @@ export const metadata = {
     'Original oil and mineral paintings, limited archival prints, and bespoke commissions by contemporary painter Lisa Dietel.',
 };
 
-export default function HomePage() {
-  const selectedWorks = getSelectedWorks(6);
+export default async function HomePage() {
+  const selectedWorks = await getSelectedWorks(6);
 
   return (
     <>

@@ -26,7 +26,7 @@ export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
         aria-label={`View ${artwork.title}${artwork.isSoldOut ? ' (Sold Out)' : ''}`}
       >
         <Image
-          src={artwork.imageUrl}
+          src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
           alt={artwork.title}
           fill
           className={cn(
@@ -67,7 +67,7 @@ export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
             {artwork.medium}
           </p>
           <p className="font-sans text-[11px] tracking-wide text-muted/80">
-            {artwork.dimensions}
+            {artwork.size || artwork.dimensions}
           </p>
         </div>
 

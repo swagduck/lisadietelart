@@ -9,8 +9,8 @@ export const metadata = {
     'Museum-grade limited edition archival pigment prints on 310gsm Hahnemühle German Etching cotton paper by Lisa Dietel.',
 };
 
-export default function PrintsPage() {
-  const prints = getPrints();
+export default async function PrintsPage() {
+  const prints = await getPrints();
 
   return (
     <div className="min-h-screen bg-paper pt-24">
