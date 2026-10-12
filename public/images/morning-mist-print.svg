@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="printTone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3833"/>
+      <stop offset="30%" stop-color="#4a5c53"/>
+      <stop offset="65%" stop-color="#829c8e"/>
+      <stop offset="85%" stop-color="#c5d9cf"/>
+      <stop offset="100%" stop-color="#f7f6f4"/>
+    </linearGradient>
+    <filter id="etchingFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise"/>
+      <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.12 0" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#printTone)"/>
+
+  <!-- Minimalist Ridge Wash -->
+  <path d="M0,700 Q300,640 650,710 T1200,660 L1200,1500 L0,1500 Z" fill="#323f3a" opacity="0.6"/>
+  <path d="M0,880 Q400,820 800,890 T1200,840 L1200,1500 L0,1500 Z" fill="#4a5c53" opacity="0.7"/>
+  <path d="M0,1050 Q500,990 1200,1060 L1200,1500 L0,1500 Z" fill="#2d3833"/>
+
+  <!-- Soft Light Horizon -->
+  <ellipse cx="600" cy="1120" rx="460" ry="6" fill="#f7f6f4" opacity="0.7"/>
+  <ellipse cx="570" cy="1180" rx="380" ry="5" fill="#dfe8e2" opacity="0.6"/>
+
+  <rect width="1200" height="1500" filter="url(#etchingFilter)" opacity="0.85" pointer-events="none"/>
+</svg>

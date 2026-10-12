@@ -41,6 +41,16 @@
     background-color: #ecd3d8;
     color: #2b2a2e;
   }
+
+  /* Accessible visible focus styles for all interactive elements */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #5f7b6b;
+    outline-offset: 2px;
+  }
 }
 
 /* Custom subtle scrollbar */

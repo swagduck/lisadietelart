@@ -6,25 +6,26 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'About the Artist & Studio — Aura Vance',
+  title: 'About the Artist & Studio — Lisa Dietel',
   description:
-    'Read the story, artist statement, painterly philosophy, and exhibition CV of independent painter Aura Vance.',
+    'Read the story, artist statement, painterly philosophy, and exhibition CV of contemporary independent painter Lisa Dietel.',
 };
 
 export default function AboutPage() {
   return (
-    <div className="bg-paper pt-8">
+    <div className="min-h-screen bg-paper pt-24">
       {/* Editorial Header */}
       <section className="border-b border-line bg-mist/20 px-6 py-16 md:px-12">
         <div className="mx-auto max-w-4xl space-y-3 text-center">
           <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
             Biography &middot; Philosophy
           </span>
-          <h1 className="font-heading text-4xl font-normal text-ink md:text-6xl">
-            Aura Vance
+          <h1 className="font-heading text-4xl font-normal text-ink sm:text-5xl md:text-6xl">
+            Lisa Dietel
           </h1>
           <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-muted md:text-base">
-            Independent painter living and working in Hudson, New York.
+            Independent contemporary painter exploring geological memory, mineral pigment,
+            and quiet atmospheric horizons.
           </p>
         </div>
       </section>
@@ -38,13 +39,14 @@ export default function AboutPage() {
               <div className="relative aspect-[4/5] overflow-hidden bg-mist/40">
                 <Image
                   src="/images/artist-studio.svg"
-                  alt="Aura Vance in the studio"
+                  alt="Lisa Dietel in the studio"
                   fill
                   className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
                 />
               </div>
               <p className="mt-3 text-center text-[11px] italic text-muted">
-                Aura Vance mixing dry ochre pigments in the Hudson studio, 2024.
+                Lisa Dietel hand-grinding dry mineral pigments in the studio, 2024.
               </p>
             </div>
 
@@ -54,20 +56,20 @@ export default function AboutPage() {
               </span>
               <ul className="space-y-2 font-light leading-relaxed text-ink/80">
                 <li>
-                  &bull; <strong className="font-medium">Born:</strong> 1989, Mendocino
-                  Coast, California
-                </li>
-                <li>
-                  &bull; <strong className="font-medium">Education:</strong> BFA Rhode
-                  Island School of Design
+                  &bull; <strong className="font-medium">Education:</strong> BFA in Fine
+                  Arts &amp; Painting
                 </li>
                 <li>
                   &bull; <strong className="font-medium">Primary Media:</strong> Oil on
-                  linen, distemper, beeswax
+                  linen, cold wax, raw minerals, distemper
+                </li>
+                <li>
+                  &bull; <strong className="font-medium">Substrates:</strong>{' '}
+                  Hand-stretched European flax linen
                 </li>
                 <li>
                   &bull; <strong className="font-medium">Selected Collections:</strong>{' '}
-                  Private collections in New York, London, Paris, and Zurich
+                  Private collections across New York, London, Paris, and Zurich
                 </li>
               </ul>
             </div>
@@ -79,8 +81,8 @@ export default function AboutPage() {
               <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
                 Artist Statement
               </span>
-              <h2 className="font-heading text-3xl font-normal leading-snug text-ink md:text-4xl">
-                &ldquo;I am drawn to the subtle moments where physical terrain dissolves
+              <h2 className="font-heading text-3xl font-normal leading-snug text-ink sm:text-4xl">
+                &ldquo;I am drawn to the subtle threshold where physical terrain dissolves
                 into atmosphere.&rdquo;
               </h2>
             </div>
@@ -94,16 +96,16 @@ export default function AboutPage() {
               <p>
                 Rather than rendering literal landscapes, I endeavor to capture the
                 tactile memory of silence and illumination. I prepare all linen substrates
-                by hand using historical rabbit-skin glue sizing and chalk grounds,
+                by hand using traditional rabbit-skin glue sizing and chalk grounds,
                 allowing the texture of the organic fiber to breathe through thin,
                 luminous veils of oil.
               </p>
               <p>
                 Color in my work is deeply rooted in geology. I grind natural lapis
                 lazuli, French ochres, German vine blacks, and Italian umbers with
-                cold-pressed Swedish walnut oils. Because mineral pigments have irregular
-                particle sizes, they scatter incoming light organically, giving the canvas
-                an active presence that shifts with changing ambient conditions.
+                cold-pressed walnut oils. Because mineral pigments have irregular particle
+                sizes, they scatter incoming light organically, giving the canvas an
+                active presence that shifts with changing ambient conditions.
               </p>
             </div>
 
@@ -134,18 +136,18 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Link
-                href="/shop"
-                className="bg-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-colors hover:bg-sage"
+                href="/originals"
+                className="bg-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
-                View Available Works
+                View Originals
               </Link>
               <Link
-                href="/contact"
-                className="border border-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper"
+                href="/commissions"
+                className="border border-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
-                Inquire With Artist
+                Commission a Piece
               </Link>
             </div>
           </div>

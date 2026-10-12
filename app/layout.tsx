@@ -22,26 +22,27 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: 'Aura Vance — Fine Art & Studio',
+  title: 'Lisa Dietel — Fine Art & Studio',
   description:
-    'Contemporary landscape and meditative figurative paintings exploring memory, organic texture, and natural luminescence on raw Belgian linen.',
+    'Contemporary painter exploring atmospheric horizons, memory, and silence on raw Belgian linen. Original paintings, archival prints, and bespoke commissions.',
   keywords: [
+    'Lisa Dietel',
     'independent painter',
     'oil painting',
     'fine art portfolio',
-    'art shop',
+    'art prints',
     'original paintings',
     'archival pigment prints',
-    'Hudson Valley art',
+    'art commissions',
   ],
-  authors: [{ name: 'Aura Vance' }],
+  authors: [{ name: 'Lisa Dietel' }],
   openGraph: {
-    title: 'Aura Vance — Fine Art & Studio',
+    title: 'Lisa Dietel — Fine Art & Studio',
     description:
-      'Contemporary landscape and meditative figurative paintings exploring memory, organic texture, and natural luminescence on raw Belgian linen.',
+      'Contemporary painter exploring atmospheric horizons, memory, and silence on raw Belgian linen. Original paintings, archival prints, and bespoke commissions.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'Aura Vance Fine Art',
+    siteName: 'Lisa Dietel Art',
   },
 };
 
