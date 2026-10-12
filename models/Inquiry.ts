@@ -15,6 +15,10 @@ const InquirySchema = new Schema<IInquiry>(
 );
 
 export const Inquiry: Model<IInquiry> =
-  mongoose.models.Inquiry || mongoose.model<IInquiry>('Inquiry', InquirySchema);
+  (mongoose?.models && mongoose.models.Inquiry)
+    ? (mongoose.models.Inquiry as Model<IInquiry>)
+    : (typeof mongoose?.model === 'function'
+        ? mongoose.model<IInquiry>('Inquiry', InquirySchema)
+        : ({} as Model<IInquiry>));
 
 export default Inquiry;

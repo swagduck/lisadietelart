@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { EXHIBITIONS_DATA } from '@/lib/data';
 import { IExhibition } from '@/types/inquiry';

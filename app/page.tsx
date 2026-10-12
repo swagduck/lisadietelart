@@ -7,10 +7,10 @@ import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { ValuePropsSection } from '@/components/home/ValuePropsSection';
 import {
   HERO_SLIDES,
-  getSelectedWorks,
   TESTIMONIALS_DATA,
   VALUE_PROPS_DATA,
 } from '@/lib/data';
+import { getSelectedWorks } from '@/lib/server-data';
 
 export const metadata = {
   title: 'Lisa Dietel — Contemporary Painter & Studio',

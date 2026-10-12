@@ -1,5 +1,5 @@
 import React from 'react';
-import { getPrints } from '@/lib/data';
+import { getPrints } from '@/lib/server-data';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 import Link from 'next/link';
 

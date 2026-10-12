@@ -41,6 +41,7 @@ export default function AboutPage() {
                   src="/images/artist-studio.svg"
                   alt="Lisa Dietel in the studio"
                   fill
+                  priority
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />

@@ -22,6 +22,10 @@ const ArtworkSchema = new Schema<IArtwork>(
 );
 
 export const Artwork: Model<IArtwork> =
-  mongoose.models.Artwork || mongoose.model<IArtwork>('Artwork', ArtworkSchema);
+  (mongoose?.models && mongoose.models.Artwork)
+    ? (mongoose.models.Artwork as Model<IArtwork>)
+    : (typeof mongoose?.model === 'function'
+        ? mongoose.model<IArtwork>('Artwork', ArtworkSchema)
+        : ({} as Model<IArtwork>));
 
 export default Artwork;
