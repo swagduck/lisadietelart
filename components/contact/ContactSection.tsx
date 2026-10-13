@@ -78,7 +78,7 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
 
         <div aria-live="polite">
           {status === 'success' ? (
-            <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8">
+            <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8 animate-in fade-in duration-300 motion-reduce:animate-none">
               <h3 className="font-heading text-2xl text-ink">Message received</h3>
               <p className="text-xs leading-relaxed text-muted">
                 Thank you for reaching out. Lisa Dietel or the studio assistant will review
@@ -99,7 +99,7 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
               {errorMessage && (
                 <div
                   role="alert"
-                  className="border border-red-200 bg-red-50/80 p-4 text-xs font-normal text-red-800"
+                  className="border border-red-200 bg-red-50/80 p-4 text-xs font-normal text-red-800 animate-error-shake"
                 >
                   {errorMessage}
                 </div>

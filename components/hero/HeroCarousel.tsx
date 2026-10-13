@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { IHeroSlide } from '@/types/artwork';
 import { cn } from '@/lib/utils';
 import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
@@ -73,18 +73,18 @@ function HeroSlideContent({
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link
+            <TransitionLink
               href={slide.primaryCta.href}
               className="bg-paper px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-ink shadow-md transition-all duration-300 hover:bg-sage hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
               {slide.primaryCta.label}
-            </Link>
-            <Link
+            </TransitionLink>
+            <TransitionLink
               href={slide.secondaryCta.href}
               className="border border-white/40 px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-paper transition-all duration-300 hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
               {slide.secondaryCta.label}
-            </Link>
+            </TransitionLink>
           </div>
         </div>
 

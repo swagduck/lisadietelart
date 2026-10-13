@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { NewsletterForm } from './NewsletterForm';
 import { Instagram, Globe, Mail, Truck, ShieldCheck } from 'lucide-react';
 
@@ -57,28 +57,28 @@ export function Footer() {
           </span>
           <ul className="space-y-2 text-ink/80">
             <li>
-              <Link
+              <TransitionLink
                 href="/originals"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 Original paintings
-              </Link>
+              </TransitionLink>
             </li>
             <li>
-              <Link
+              <TransitionLink
                 href="/prints"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 Archival art prints
-              </Link>
+              </TransitionLink>
             </li>
             <li>
-              <Link
+              <TransitionLink
                 href="/commissions"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 Bespoke commissions
-              </Link>
+              </TransitionLink>
             </li>
           </ul>
         </nav>
@@ -90,20 +90,20 @@ export function Footer() {
           </span>
           <ul className="space-y-2 text-ink/80">
             <li>
-              <Link
+              <TransitionLink
                 href="/about"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 About the artist
-              </Link>
+              </TransitionLink>
             </li>
             <li>
-              <Link
+              <TransitionLink
                 href="/contact"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 Private inquiries &amp; appointments
-              </Link>
+              </TransitionLink>
             </li>
             <li className="flex items-center gap-1.5 text-muted pt-1">
               <Truck className="h-3.5 w-3.5 text-sage flex-shrink-0" />

@@ -44,7 +44,7 @@ export function NewsletterForm() {
   return (
     <div aria-live="polite" className="mx-auto max-w-md pt-2">
       {errorMessage && (
-        <p role="alert" className="mb-2 text-center text-xs text-red-600">
+        <p role="alert" className="mb-2 text-center text-xs text-red-600 animate-error-shake">
           {errorMessage}
         </p>
       )}

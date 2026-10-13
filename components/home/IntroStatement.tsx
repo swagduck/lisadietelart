@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 
 export function IntroStatement() {
   return (
@@ -23,20 +23,20 @@ export function IntroStatement() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-4 pt-4">
-          <Link
+          <TransitionLink
             href="/originals"
             prefetch={true}
             className="rounded-sm bg-ink px-8 py-3.5 text-xs font-normal text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
           >
             Explore originals
-          </Link>
-          <Link
+          </TransitionLink>
+          <TransitionLink
             href="/prints"
             prefetch={true}
             className="rounded-sm border border-line bg-paper px-8 py-3.5 text-xs font-normal text-ink transition-all duration-300 hover:border-ink hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
           >
             View art prints
-          </Link>
+          </TransitionLink>
         </div>
       </div>
     </section>

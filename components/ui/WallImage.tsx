@@ -31,6 +31,8 @@ export function WallImage({
   sizes = '(min-width:1280px) 23vw, (min-width:768px) 40vw, 80vw',
   className,
 }: WallImageProps) {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
   // If the artwork already has a real staged photo, render full-bleed cover
   if (useWallMockup === false) {
     return (
@@ -47,7 +49,11 @@ export function WallImage({
           sizes={sizes}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="object-cover pointer-events-none"
+          onLoad={() => setIsLoaded(true)}
+          className={cn(
+            'object-cover pointer-events-none transition-opacity duration-500 ease-out',
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          )}
         />
       </div>
     );
@@ -91,8 +97,11 @@ export function WallImage({
             blurDataURL={getCloudinaryBlurUrl(src)}
             sizes={sizes}
             draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            className="object-contain pointer-events-none"
+            onLoad={() => setIsLoaded(true)}
+            className={cn(
+              'object-contain pointer-events-none transition-opacity duration-500 ease-out',
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            )}
           />
         </div>
       </div>

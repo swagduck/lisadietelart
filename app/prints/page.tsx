@@ -1,7 +1,7 @@
 import React from 'react';
 import { getPrints } from '@/lib/server-data';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
@@ -73,12 +73,12 @@ export default async function PrintsPage() {
           <span className="text-muted">
             Showing {prints.length} print editions
           </span>
-          <Link
+          <TransitionLink
             href="/originals"
             className="rounded-sm font-normal text-sage transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
             Interested in unique canvases? Explore originals &rarr;
-          </Link>
+          </TransitionLink>
         </div>
 
         {prints.length === 0 ? (
@@ -90,18 +90,18 @@ export default async function PrintsPage() {
               Archival pigment editions are produced in strictly limited runs on Hahnemühle cotton paper. Check back soon or browse available original canvases.
             </p>
             <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
-              <Link
+              <TransitionLink
                 href="/originals"
                 className="bg-ink text-paper px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:bg-sage transition-colors"
               >
                 Explore originals
-              </Link>
-              <Link
+              </TransitionLink>
+              <TransitionLink
                 href="/contact"
                 className="border border-line text-ink px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:border-ink transition-colors"
               >
                 Inquire with studio
-              </Link>
+              </TransitionLink>
             </div>
           </div>
         ) : (

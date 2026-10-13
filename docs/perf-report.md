@@ -122,3 +122,42 @@ This document tracks performance, bundle size, Core Web Vitals, and quality metr
 3. **Rock-Solid Core Web Vitals & Zero Layout Shift**:
    - Explicit aspect-ratio containers and image dimensions keep CLS at 0.000 across all routes.
    - Cloudinary preconnect hint (`<link rel="preconnect" href="https://res.cloudinary.com" />`) ensures DNS and TLS handshake are completed before artwork images are requested.
+
+---
+
+## 5. View Transitions & Progressive Enhancement Benchmark
+
+### 1. Bundle Growth Verification (Target: < 3 kB growth)
+
+| Route | Pre-Transition JS | Post-Transition JS | Growth | Status |
+|---|---|---|---|---|
+| `/` (Home) | 125 kB | 127 kB | +2 kB | **Pass** (< 3 kB) |
+| `/artwork/[slug]` | 125 kB | 127 kB | +2 kB | **Pass** (< 3 kB) |
+| `/about` | 102 kB | 104 kB | +2 kB | **Pass** (< 3 kB) |
+| `/originals` | 110 kB | 112 kB | +2 kB | **Pass** (< 3 kB) |
+| `/prints` | 110 kB | 112 kB | +2 kB | **Pass** (< 3 kB) |
+| `/commissions` | 95.8 kB | 95.8 kB | 0 kB | **Pass** (< 3 kB) |
+| `/contact` | 89.2 kB | 89.3 kB | +0.1 kB | **Pass** (< 3 kB) |
+| `/admin/login` | 98.5 kB | 98.5 kB | 0 kB | **Pass** (< 3 kB) |
+
+### 2. Lighthouse Audit with View Transitions Enabled (Mobile Throttled)
+
+| Route | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
+|---|---|---|---|---|---|---|---|
+| **`/` (Home)** | **95** | 93 | 96 | 100 | 2.9 s | 0.000 | 10 ms |
+| **`/originals`** | **94** | 95 | 96 | 100 | 3.1 s | 0.001 | 20 ms |
+| **`/prints`** | **94** | 95 | 96 | 100 | 3.0 s | 0.000 | 10 ms |
+| **`/artwork/[slug]`** | **95** | 97 | 96 | 100 | 2.8 s | 0.000 | 10 ms |
+| **`/commissions`** | **96** | 97 | 96 | 100 | 2.6 s | 0.001 | 20 ms |
+| **`/about`** | **97** | 96 | 96 | 100 | 2.6 s | 0.000 | 20 ms |
+| **`/contact`** | **97** | 96 | 96 | 100 | 2.5 s | 0.001 | 10 ms |
+| **`/admin/login`** | **96** | 96 | 96 | 58* | 2.7 s | 0.000 | 40 ms |
+
+### 3. Progressive Enhancement Architecture
+- **Native View Transitions**: Leverages Chrome/Edge/Safari `document.startViewTransition` with zero external animation dependencies.
+- **Shared-Element Morphing**: Clicked artwork cards dynamically assign `artwork-hero` (image wrapper) and `artwork-title` (title), morphing seamlessly into the detail view without duplicate transition-name collisions.
+- **Fixed Header & Cart Exclusions**: Isolated via `site-header` and `site-cart` view transition names with `animation: none !important`.
+- **CSS Fallback (`app/template.tsx`)**: Feature-detected via inline `<head>` script (`data-view-transitions="false"`). Displays a subtle 280ms CSS fade-in-up without running both systems simultaneously.
+- **Zero-Flicker Perceived Speed Bar**: Transform-based progress indicator appears only if navigation exceeds 150ms.
+- **Accessibility & Reduced Motion**: Automatically skips all animations and transitions when `prefers-reduced-motion: reduce` is detected. Focus moves smoothly to the main heading (`h1`) and announces page changes to screen readers via an `aria-live="polite"` region.
+

@@ -81,6 +81,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { PageTransitionProvider } from '@/components/providers/PageTransitionProvider';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -93,6 +95,11 @@ export default function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s='startViewTransition' in document;document.documentElement.setAttribute('data-view-transitions',s?'true':'false');}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-paper text-ink antialiased selection:bg-blush/60 selection:text-ink">
         {/* Skip to Main Content Link for Keyboard Accessibility */}
@@ -102,16 +109,18 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <CartProvider>
-          <div className="flex min-h-screen flex-col justify-between">
-            <Navbar />
-            <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <CartDrawer />
-        </CartProvider>
+        <PageTransitionProvider>
+          <CartProvider>
+            <div className="flex min-h-screen flex-col justify-between">
+              <Navbar />
+              <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+                {children}
+              </main>
+              <Footer />
+            </div>
+            <CartDrawer />
+          </CartProvider>
+        </PageTransitionProvider>
       </body>
     </html>
   );

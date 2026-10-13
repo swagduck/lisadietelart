@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '../shop/CartContext';
 import { ShoppingBag, Menu, X } from 'lucide-react';
@@ -78,6 +78,8 @@ export function Navbar() {
     };
   }, []);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+
   // Prevent background scroll and support Escape key when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -99,11 +101,49 @@ export function Navbar() {
     };
   }, [mobileMenuOpen]);
 
+  // Trap focus inside mobile navigation drawer when open
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const menuEl = menuRef.current;
+    if (!menuEl) return;
+
+    const focusables = menuEl.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    first?.focus();
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleTab);
+    return () => window.removeEventListener('keydown', handleTab);
+  }, [mobileMenuOpen]);
+
+  // Close mobile drawer on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   const isSolid = !isHome || isScrolled;
 
   return (
     <>
       <header
+        style={{ viewTransitionName: 'site-header' }}
         className={cn(
           'fixed left-0 right-0 top-0 z-40 transition-all duration-300 ease-in-out',
           isVisible || mobileMenuOpen ? 'translate-y-0' : '-translate-y-full',
@@ -114,7 +154,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-12">
           {/* Brand Signature - Links to "/" */}
-          <Link
+          <TransitionLink
             href="/"
             className={cn(
               'group flex flex-col rounded-sm p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
@@ -133,7 +173,7 @@ export function Navbar() {
             >
               Fine art &middot; Studio
             </span>
-          </Link>
+          </TransitionLink>
 
           {/* Desktop Navigation with Active Page Highlighting & Subtle Sage Underline */}
           <nav
@@ -143,11 +183,10 @@ export function Navbar() {
             {navLinks.map((link) => {
               const isActive = isLinkActive(link.href);
               return (
-                <Link
+                <TransitionLink
                   key={link.label}
                   href={link.href}
                   prefetch={true}
-                  onMouseEnter={() => router.prefetch(link.href)}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'relative rounded-sm px-1 py-1.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
@@ -168,7 +207,7 @@ export function Navbar() {
                       className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-sage rounded-full transition-all"
                     />
                   )}
-                </Link>
+                </TransitionLink>
               );
             })}
           </nav>
@@ -177,6 +216,7 @@ export function Navbar() {
           <div className="flex items-center space-x-3">
             <button
               onClick={openCart}
+              style={{ viewTransitionName: 'site-cart' }}
               className={cn(
                 'relative rounded-full p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
                 isSolid ? 'text-ink hover:text-sage' : 'text-paper hover:text-paper/80'
@@ -207,18 +247,19 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Full-Screen Menu with Smooth Slide */}
+      {/* Mobile Full-Screen Menu with Smooth Slide and Backdrop */}
       {mobileMenuOpen && (
         <div
+          ref={menuRef}
           id="mobile-navigation-fullscreen"
-          className="fixed inset-0 z-50 flex flex-col justify-between bg-paper p-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-300"
+          className="fixed inset-0 z-50 flex flex-col justify-between bg-paper p-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-300 motion-reduce:animate-none"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation Menu"
         >
           {/* Header Bar inside Menu - Logo Links to "/" */}
           <div className="flex items-center justify-between border-b border-line/60 pb-6">
-            <Link
+            <TransitionLink
               href="/"
               onClick={() => setMobileMenuOpen(false)}
               className="flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
@@ -229,7 +270,7 @@ export function Navbar() {
               <span className="text-xs text-muted">
                 Fine art &middot; Studio
               </span>
-            </Link>
+            </TransitionLink>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-full p-2.5 text-ink transition-colors hover:bg-mist/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
@@ -244,7 +285,7 @@ export function Navbar() {
             {navLinks.map((link) => {
               const isActive = isLinkActive(link.href);
               return (
-                <Link
+                <TransitionLink
                   key={link.label}
                   href={link.href}
                   prefetch={true}
@@ -258,7 +299,7 @@ export function Navbar() {
                   )}
                 >
                   {link.label}
-                </Link>
+                </TransitionLink>
               );
             })}
           </nav>

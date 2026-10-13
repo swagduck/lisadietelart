@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { Compass, ArrowRight } from 'lucide-react';
 
 export default function NotFound() {
@@ -24,13 +24,13 @@ export default function NotFound() {
         </div>
 
         <div className="pt-4">
-          <Link
+          <TransitionLink
             href="/"
             className="inline-flex items-center gap-2 rounded-sm bg-ink px-6 py-3 text-xs font-normal text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
           >
             <span>Return to studio</span>
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </TransitionLink>
         </div>
       </div>
     </main>

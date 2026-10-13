@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useCart } from './CartContext';
 import { formatPrice } from '@/lib/format';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, totalItems } =
@@ -189,13 +189,13 @@ export function CartDrawer() {
                   Proceed to Secure Checkout
                   <ArrowRight className="h-4 w-4" />
                 </button>
-                <Link
+                <TransitionLink
                   href="/contact"
                   onClick={closeCart}
                   className="block w-full pt-1 text-center text-[11px] uppercase tracking-widest text-muted underline hover:text-ink"
                 >
                   Request Certificate of Authenticity or Framing Inquiries
-                </Link>
+                </TransitionLink>
               </div>
             </div>
           )}

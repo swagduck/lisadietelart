@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { ARTWORKS_DATA } from '@/lib/data';
 import { getArtworkBySlug, getOriginals, getPrints } from '@/lib/server-data';
 import { formatPrice } from '@/lib/format';
@@ -146,13 +146,13 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
-          <Link
+          <TransitionLink
             href={backLink}
             className="inline-flex items-center gap-2 rounded-sm text-xs text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>{backLabel}</span>
-          </Link>
+          </TransitionLink>
         </nav>
 
         {/* Artwork Presentation Grid: Clean Two-Column Layout */}
@@ -193,7 +193,10 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
                 )}
               </div>
 
-              <h1 className="font-heading text-4xl font-normal leading-tight text-ink sm:text-5xl">
+              <h1
+                style={{ viewTransitionName: 'artwork-title' }}
+                className="font-heading text-4xl font-normal leading-tight text-ink sm:text-5xl"
+              >
                 {artwork.title}
               </h1>
 
@@ -263,12 +266,12 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
                     Lisa creates a limited number of bespoke commissions each season based
                     on specific dimensions and tone palette.
                   </p>
-                  <Link
+                  <TransitionLink
                     href="/commissions"
                     className="inline-block text-xs text-sage underline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                   >
                     Learn about commissioning a bespoke canvas &rarr;
-                  </Link>
+                  </TransitionLink>
                 </div>
               )}
 

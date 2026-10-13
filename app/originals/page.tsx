@@ -1,7 +1,7 @@
 import React from 'react';
 import { getOriginals } from '@/lib/server-data';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
@@ -72,12 +72,12 @@ export default async function OriginalsPage() {
           <span className="text-muted">
             Showing {originals.length} original paintings
           </span>
-          <Link
+          <TransitionLink
             href="/commissions"
             className="rounded-sm font-normal text-sage transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
             Looking for custom sizing? Commission a piece &rarr;
-          </Link>
+          </TransitionLink>
         </div>
 
         {originals.length === 0 ? (
@@ -89,18 +89,18 @@ export default async function OriginalsPage() {
               Original canvases are released in small seasonal collections. You can request a bespoke commissioned piece or join the studio dispatch for notifications of upcoming studio releases.
             </p>
             <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
-              <Link
+              <TransitionLink
                 href="/commissions"
                 className="bg-ink text-paper px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:bg-sage transition-colors"
               >
                 Commission a painting
-              </Link>
-              <Link
+              </TransitionLink>
+              <TransitionLink
                 href="/prints"
                 className="border border-line text-ink px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:border-ink transition-colors"
               >
                 Browse prints
-              </Link>
+              </TransitionLink>
             </div>
           </div>
         ) : (

@@ -53,7 +53,7 @@ export function CommissionForm() {
 
   if (status === 'success') {
     return (
-      <div className="space-y-4 border border-line bg-paper p-8 text-center shadow-sm">
+      <div className="space-y-4 border border-line bg-paper p-8 text-center shadow-sm animate-in fade-in duration-300 motion-reduce:animate-none">
         <CheckCircle2 className="mx-auto h-10 w-10 text-sage" />
         <h3 className="font-heading text-3xl text-ink">Inquiry Received</h3>
         <p className="mx-auto max-w-md text-sm font-light leading-relaxed text-muted">
@@ -90,7 +90,7 @@ export function CommissionForm() {
       {errorMessage && (
         <div
           role="alert"
-          className="border border-red-200 bg-red-50/80 p-4 text-xs font-normal text-red-800"
+          className="border border-red-200 bg-red-50/80 p-4 text-xs font-normal text-red-800 animate-error-shake"
         >
           {errorMessage}
         </div>

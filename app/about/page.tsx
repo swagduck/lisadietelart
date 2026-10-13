@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ExhibitionList } from '@/components/exhibitions/ExhibitionList';
 import { EXHIBITIONS_DATA } from '@/lib/data';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 export const metadata: Metadata = {
@@ -165,18 +165,18 @@ export default function AboutPage() {
             </div>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <Link
+              <TransitionLink
                 href="/originals"
                 className="bg-ink px-6 py-3 text-xs font-medium text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
                 View originals
-              </Link>
-              <Link
+              </TransitionLink>
+              <TransitionLink
                 href="/commissions"
                 className="border border-ink px-6 py-3 text-xs font-medium text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
                 Commission a piece
-              </Link>
+              </TransitionLink>
             </div>
           </div>
         </div>

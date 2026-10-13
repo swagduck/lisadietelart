@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
 import Image from 'next/image';
 
 export function CommissionsSection() {
@@ -61,18 +61,18 @@ export function CommissionsSection() {
           </div>
 
           <div className="flex flex-wrap gap-4 pt-4">
-            <Link
+            <TransitionLink
               href="/commissions"
               className="rounded-sm bg-ink px-8 py-3.5 text-xs font-normal text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
               Explore commission process &amp; pricing
-            </Link>
-            <Link
+            </TransitionLink>
+            <TransitionLink
               href="/contact"
               className="rounded-sm border border-line bg-paper px-8 py-3.5 text-xs font-normal text-ink transition-all duration-300 hover:border-ink hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
               Inquire directly
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </div>

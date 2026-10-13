@@ -862,6 +862,13 @@ export function Lightbox({
       const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
 
+      // Swipe down to close lightbox
+      if (deltaY > 80 && Math.abs(deltaX) < 80) {
+        onClose();
+        touchStartRef.current = null;
+        return;
+      }
+
       if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
         if (deltaX < 0 && currentIndex < images.length - 1) {
           setCurrentIndex((prev) => prev + 1);
@@ -1100,6 +1107,9 @@ export function GalleryCarousel({
                     }
                   }}
                   aria-label={`Open fullscreen view of ${title} (Slide ${idx + 1} of ${displayImages.length})`}
+                  style={{
+                    viewTransitionName: idx === 0 ? 'artwork-hero' : undefined,
+                  }}
                   className={cn(
                     'group/thumb relative block w-full overflow-hidden bg-mist/30 cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage',
                     aspectRatio

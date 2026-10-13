@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { TransitionLink } from '@/components/ui/TransitionLink';
+import { useRouter } from 'next/navigation';
 import { IArtwork } from '@/types/artwork';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -35,6 +36,36 @@ export function SelectedWorkGrid({
 }: SelectedWorkGridProps) {
   const displayItems = artworks.slice(0, 8);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  // Idle prefetch up to 6 visible slider cards
+  useEffect(() => {
+    const prefetchCards = () => {
+      const itemsToPrefetch = displayItems.slice(0, 6);
+      for (const item of itemsToPrefetch) {
+        if (item.slug) {
+          router.prefetch(`/artwork/${item.slug}`);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const handle = (
+        window as unknown as { requestIdleCallback: (cb: () => void) => number }
+      ).requestIdleCallback(prefetchCards);
+      return () => {
+        if ('cancelIdleCallback' in window) {
+          (
+            window as unknown as { cancelIdleCallback: (id: number) => void }
+          ).cancelIdleCallback(handle);
+        }
+      };
+    } else {
+      const timer = setTimeout(prefetchCards, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [displayItems, router]);
+
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Stored values in refs to avoid redundant re-renders
@@ -469,12 +500,12 @@ export function SelectedWorkGrid({
           </div>
 
           <div className="self-start sm:self-end">
-            <Link
+            <TransitionLink
               href={viewAllHref}
               className="text-sm font-normal text-ink hover:text-sage transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
             >
               {viewAllLabel}
-            </Link>
+            </TransitionLink>
           </div>
         </div>
 
