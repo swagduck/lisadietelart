@@ -36,6 +36,8 @@ export function ArtworkCardItem({
     <Link
       href={`/artwork/${artwork.slug}`}
       prefetch={true}
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
       onClick={onClick}
       className={cn(
         'group block w-full select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',

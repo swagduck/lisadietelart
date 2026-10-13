@@ -45,7 +45,9 @@ export function WallImage({
           placeholder="blur"
           blurDataURL={getCloudinaryBlurUrl(src)}
           sizes={sizes}
-          className="object-cover"
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
+          className="object-cover pointer-events-none"
         />
       </div>
     );
@@ -88,7 +90,9 @@ export function WallImage({
             placeholder="blur"
             blurDataURL={getCloudinaryBlurUrl(src)}
             sizes={sizes}
-            className="object-contain"
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            className="object-contain pointer-events-none"
           />
         </div>
       </div>

@@ -37,25 +37,69 @@ export function SelectedWorkGrid({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  // Scroll state driven strictly by track.scrollLeft
+  // Stored values in refs to avoid redundant re-renders
+  const canPrevRef = useRef(false);
+  const canNextRef = useRef(true);
   const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
+  const [canNext, setCanNext] = useState(true);
 
-  // Mouse drag state with click suppression when pointer moved > 5px
+  // Pointer drag state with threshold check
   const isPointerDownRef = useRef(false);
+  const hasCapturedRef = useRef(false);
   const startXRef = useRef(0);
   const startScrollLeftRef = useRef(0);
   const hasDraggedRef = useRef(false);
   const justDraggedRef = useRef(false);
 
-  // Update arrow disabled states directly from track.scrollLeft
+  // Smooth scroll navigation flags to ignore mid-animation scroll updates
+  const isNavigatingRef = useRef(false);
+  const scrollEndTimerRef = useRef<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const lastImgHeightRef = useRef(0);
+
+  // Update arrow disabled/visibility states with hysteresis
   const updateScrollState = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
     const { scrollLeft, clientWidth, scrollWidth } = track;
-    setCanPrev(scrollLeft > 4);
-    setCanNext(scrollLeft + clientWidth < scrollWidth - 4);
+    const remaining = scrollWidth - (scrollLeft + clientWidth);
+
+    // Hysteresis for Prev: hide when scrollLeft < 4, show when scrollLeft > 12
+    let nextCanPrev = canPrevRef.current;
+    if (canPrevRef.current) {
+      if (scrollLeft < 4) nextCanPrev = false;
+    } else {
+      if (scrollLeft > 12) nextCanPrev = true;
+    }
+
+    // Hysteresis for Next: hide when remaining < 4, show when remaining > 12
+    let nextCanNext = canNextRef.current;
+    if (canNextRef.current) {
+      if (remaining < 4) nextCanNext = false;
+    } else {
+      if (remaining > 12) nextCanNext = true;
+    }
+
+    // Update state only if values actually changed
+    if (nextCanPrev !== canPrevRef.current) {
+      canPrevRef.current = nextCanPrev;
+      setCanPrev(nextCanPrev);
+    }
+    if (nextCanNext !== canNextRef.current) {
+      canNextRef.current = nextCanNext;
+      setCanNext(nextCanNext);
+    }
   }, []);
+
+  // Settle scroll handler when animation completes
+  const settleScroll = useCallback(() => {
+    isNavigatingRef.current = false;
+    if (scrollEndTimerRef.current !== null) {
+      clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = null;
+    }
+    updateScrollState();
+  }, [updateScrollState]);
 
   // Measure first slide's image wrapper and set --img-h on the slider container
   const updateImageHeight = useCallback(() => {
@@ -66,15 +110,18 @@ export function SelectedWorkGrid({
     // Measure the first slide's image wrapper (excluding title)
     const imgWrapper = track.querySelector<HTMLElement>('.artwork-image-wrapper');
     if (imgWrapper) {
-      const { height } = imgWrapper.getBoundingClientRect();
-      if (height > 0) {
-        wrapper.style.setProperty('--img-h', `${height}px`);
+      const h = Math.round(imgWrapper.getBoundingClientRect().height);
+      if (h > 0 && h !== lastImgHeightRef.current) {
+        lastImgHeightRef.current = h;
+        wrapper.style.setProperty('--img-h', `${h}px`);
       }
     }
   }, []);
 
+  // ResizeObserver observes the track only to avoid loops
   useIsomorphicLayoutEffect(() => {
     updateImageHeight();
+    updateScrollState();
 
     const track = trackRef.current;
     if (!track) return;
@@ -85,15 +132,6 @@ export function SelectedWorkGrid({
     });
 
     resizeObserver.observe(track);
-    const firstSlide = track.firstElementChild;
-    if (firstSlide) {
-      resizeObserver.observe(firstSlide);
-      const imgWrapper = firstSlide.querySelector('.artwork-image-wrapper');
-      if (imgWrapper) {
-        resizeObserver.observe(imgWrapper);
-      }
-    }
-
     window.addEventListener('resize', updateImageHeight, { passive: true });
 
     return () => {
@@ -102,36 +140,37 @@ export function SelectedWorkGrid({
     };
   }, [updateImageHeight, updateScrollState]);
 
+  // Scroll listeners on track with scrollend and debounced fallback
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
 
-    let rafId: number | null = null;
     const handleScroll = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
+      if (isNavigatingRef.current) {
+        if (scrollEndTimerRef.current !== null) {
+          clearTimeout(scrollEndTimerRef.current);
+        }
+        scrollEndTimerRef.current = window.setTimeout(settleScroll, 120);
+        return;
+      }
+
+      if (rafIdRef.current !== null) return;
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
         updateScrollState();
       });
     };
 
     track.addEventListener('scroll', handleScroll, { passive: true });
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateScrollState();
-    });
-    resizeObserver.observe(track);
-    Array.from(track.children).forEach((child) => resizeObserver.observe(child));
-
-    // Initial check
-    updateScrollState();
+    track.addEventListener('scrollend', settleScroll, { passive: true });
 
     return () => {
       track.removeEventListener('scroll', handleScroll);
-      resizeObserver.disconnect();
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      track.removeEventListener('scrollend', settleScroll);
+      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
+      if (scrollEndTimerRef.current !== null) clearTimeout(scrollEndTimerRef.current);
     };
-  }, [updateScrollState]);
+  }, [updateScrollState, settleScroll]);
 
   // Compute step size: first slide's offsetWidth + 12px gap
   const getStepSize = useCallback(() => {
@@ -147,28 +186,57 @@ export function SelectedWorkGrid({
   const scrollPrev = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
+    isNavigatingRef.current = true;
     const step = getStepSize();
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     track.scrollBy({ left: -step, behavior: prefersReduced ? 'auto' : 'smooth' });
-  }, [getStepSize]);
+
+    if (prefersReduced) {
+      isNavigatingRef.current = false;
+      updateScrollState();
+    } else {
+      if (scrollEndTimerRef.current !== null) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+      scrollEndTimerRef.current = window.setTimeout(settleScroll, 120);
+    }
+  }, [getStepSize, settleScroll, updateScrollState]);
 
   const scrollNext = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
+    isNavigatingRef.current = true;
     const step = getStepSize();
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     track.scrollBy({ left: step, behavior: prefersReduced ? 'auto' : 'smooth' });
-  }, [getStepSize]);
 
-  // Mouse Drag Support with click suppression when pointer moved > 5px
+    if (prefersReduced) {
+      isNavigatingRef.current = false;
+      updateScrollState();
+    } else {
+      if (scrollEndTimerRef.current !== null) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+      scrollEndTimerRef.current = window.setTimeout(settleScroll, 120);
+    }
+  }, [getStepSize, settleScroll, updateScrollState]);
+
+  // Mouse Drag Support attached to track only: capture only after > 5px movement
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Ignore clicks on arrow buttons or arrow layer
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('button, [data-arrow]')) return;
     if (e.button !== 0 || !trackRef.current) return;
+
+    // Reset drag state on every pointerdown
     isPointerDownRef.current = true;
     hasDraggedRef.current = false;
+    hasCapturedRef.current = false;
+    justDraggedRef.current = false;
     startXRef.current = e.clientX;
     startScrollLeftRef.current = trackRef.current.scrollLeft;
   };
@@ -176,26 +244,43 @@ export function SelectedWorkGrid({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isPointerDownRef.current || !trackRef.current) return;
     const deltaX = e.clientX - startXRef.current;
-    if (Math.abs(deltaX) > 5) {
+
+    // Capture pointer only if moved more than 5px
+    if (!hasCapturedRef.current && Math.abs(deltaX) > 5) {
+      hasCapturedRef.current = true;
       hasDraggedRef.current = true;
+      try {
+        trackRef.current.setPointerCapture(e.pointerId);
+      } catch {}
+    }
+
+    if (hasCapturedRef.current) {
       trackRef.current.scrollLeft = startScrollLeftRef.current - deltaX;
     }
   };
 
-  const handlePointerUpOrCancel = () => {
+  const handlePointerUpOrCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (hasCapturedRef.current && trackRef.current) {
+      try {
+        trackRef.current.releasePointerCapture(e.pointerId);
+      } catch {}
+      hasCapturedRef.current = false;
+    }
+
     if (isPointerDownRef.current) {
       isPointerDownRef.current = false;
       if (hasDraggedRef.current) {
         justDraggedRef.current = true;
         setTimeout(() => {
           justDraggedRef.current = false;
-        }, 120);
+        }, 50);
       }
     }
   };
 
+  // Click suppression strictly prevents opening links when dragging
   const handleClickCapture = (e: React.MouseEvent) => {
-    if (justDraggedRef.current || hasDraggedRef.current) {
+    if (hasDraggedRef.current || justDraggedRef.current) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -266,6 +351,7 @@ export function SelectedWorkGrid({
           position: relative;
           width: 100%;
           overflow: visible;
+          isolation: isolate;
         }
 
         .slider-nav-overlay {
@@ -280,7 +366,7 @@ export function SelectedWorkGrid({
           padding-left: calc(var(--gutter) + 16px);
           padding-right: calc(var(--gutter) + 16px);
           pointer-events: none;
-          z-index: 5;
+          z-index: 20;
         }
 
         .slider-track {
@@ -294,6 +380,7 @@ export function SelectedWorkGrid({
           scroll-padding-right: var(--gutter);
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
+          z-index: 0;
         }
 
         .selected-work-slide {
@@ -317,8 +404,8 @@ export function SelectedWorkGrid({
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          pointer-events: auto;
-          transition: opacity 200ms ease, transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
+          user-select: none;
+          -webkit-user-select: none;
         }
 
         @media (hover: hover) and (pointer: fine) {
@@ -327,9 +414,28 @@ export function SelectedWorkGrid({
           }
         }
 
+        .slider-nav-btn.is-visible {
+          opacity: 1;
+          visibility: visible;
+          pointer-events: auto;
+          transition: opacity 200ms ease, visibility 0s linear 0s, background-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .slider-nav-btn.is-hidden {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: opacity 200ms ease, visibility 0s linear 200ms, background-color 150ms ease, box-shadow 150ms ease;
+        }
+
         .slider-nav-btn:hover {
           background-color: #ffffff;
-          transform: scale(1.06);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+        }
+
+        .slider-nav-btn:active {
+          background-color: #f7f6f4;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
         .slider-nav-btn:focus-visible {
@@ -337,30 +443,16 @@ export function SelectedWorkGrid({
           box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5f7b6b, 0 4px 16px rgba(0, 0, 0, 0.12);
         }
 
-        .slider-nav-btn.cannot-prev,
-        .slider-nav-btn.cannot-next {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .slider-nav-btn.can-prev,
-        .slider-nav-btn.can-next {
-          opacity: 1;
-          pointer-events: auto;
-        }
-
         @media (prefers-reduced-motion: reduce) {
-          .slider-nav-btn {
+          .slider-nav-btn.is-visible,
+          .slider-nav-btn.is-hidden {
             transition: none;
-          }
-          .slider-nav-btn:hover {
-            transform: none;
           }
         }
       `}</style>
 
       <div className="selected-work-section space-y-10">
-        {/* Full-width Section Header Row: Title at Left, Plain "View all" at Right */}
+        {/* Full-width Section Header Row: OUTSIDE the track container */}
         <div className="selected-work-header flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
             <h2
@@ -393,19 +485,22 @@ export function SelectedWorkGrid({
             {/* Prev Arrow */}
             <button
               type="button"
+              data-arrow="prev"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 scrollPrev();
               }}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+              }}
               disabled={!canPrev}
               aria-label="Previous artworks"
               aria-hidden={!canPrev}
               tabIndex={canPrev ? 0 : -1}
               className={cn(
                 'slider-nav-btn slider-nav-prev',
-                canPrev ? 'can-prev' : 'cannot-prev'
+                canPrev ? 'is-visible' : 'is-hidden'
               )}
             >
               <ChevronLeft className="w-5 h-5 text-ink shrink-0" />
@@ -414,26 +509,29 @@ export function SelectedWorkGrid({
             {/* Next Arrow */}
             <button
               type="button"
+              data-arrow="next"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 scrollNext();
               }}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+              }}
               disabled={!canNext}
               aria-label="Next artworks"
               aria-hidden={!canNext}
               tabIndex={canNext ? 0 : -1}
               className={cn(
                 'slider-nav-btn slider-nav-next',
-                canNext ? 'can-next' : 'cannot-next'
+                canNext ? 'is-visible' : 'is-hidden'
               )}
             >
               <ChevronRight className="w-5 h-5 text-ink shrink-0" />
             </button>
           </div>
 
-          {/* Full-Bleed Scroll Track */}
+          {/* Full-Bleed Scroll Track: Drag listeners on track ONLY */}
           <div
             ref={trackRef}
             role="region"
