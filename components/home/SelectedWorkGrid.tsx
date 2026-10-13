@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { IArtwork } from '@/types/artwork';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
@@ -19,6 +19,9 @@ export interface SelectedWorkGridProps {
   priorityLimit?: number;
 }
 
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export function SelectedWorkGrid({
   artworks,
   title = 'Selected work',
@@ -31,6 +34,7 @@ export function SelectedWorkGrid({
   priorityLimit = 2,
 }: SelectedWorkGridProps) {
   const displayItems = artworks.slice(0, 8);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Scroll state driven strictly by track.scrollLeft
@@ -52,6 +56,51 @@ export function SelectedWorkGrid({
     setCanPrev(scrollLeft > 4);
     setCanNext(scrollLeft + clientWidth < scrollWidth - 4);
   }, []);
+
+  // Measure first slide's image wrapper and set --img-h on the slider container
+  const updateImageHeight = useCallback(() => {
+    const track = trackRef.current;
+    const wrapper = wrapperRef.current;
+    if (!track || !wrapper) return;
+
+    // Measure the first slide's image wrapper (excluding title)
+    const imgWrapper = track.querySelector<HTMLElement>('.artwork-image-wrapper');
+    if (imgWrapper) {
+      const { height } = imgWrapper.getBoundingClientRect();
+      if (height > 0) {
+        wrapper.style.setProperty('--img-h', `${height}px`);
+      }
+    }
+  }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    updateImageHeight();
+
+    const track = trackRef.current;
+    if (!track) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateImageHeight();
+      updateScrollState();
+    });
+
+    resizeObserver.observe(track);
+    const firstSlide = track.firstElementChild;
+    if (firstSlide) {
+      resizeObserver.observe(firstSlide);
+      const imgWrapper = firstSlide.querySelector('.artwork-image-wrapper');
+      if (imgWrapper) {
+        resizeObserver.observe(imgWrapper);
+      }
+    }
+
+    window.addEventListener('resize', updateImageHeight, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateImageHeight);
+    };
+  }, [updateImageHeight, updateScrollState]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -213,9 +262,25 @@ export function SelectedWorkGrid({
         }
 
         .slider-track-container {
+          --img-h: calc(var(--slide-w) * 1.25);
           position: relative;
           width: 100%;
           overflow: visible;
+        }
+
+        .slider-nav-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: var(--img-h);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-left: calc(var(--gutter) + 16px);
+          padding-right: calc(var(--gutter) + 16px);
+          pointer-events: none;
+          z-index: 5;
         }
 
         .slider-track {
@@ -239,9 +304,6 @@ export function SelectedWorkGrid({
 
         .slider-nav-btn {
           display: none;
-          position: absolute;
-          top: calc(var(--slide-w) * 0.625);
-          transform: translateY(-50%);
           width: 48px;
           height: 48px;
           min-width: 48px;
@@ -255,7 +317,7 @@ export function SelectedWorkGrid({
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          z-index: 20;
+          pointer-events: auto;
           transition: opacity 200ms ease, transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
         }
 
@@ -267,20 +329,12 @@ export function SelectedWorkGrid({
 
         .slider-nav-btn:hover {
           background-color: #ffffff;
-          transform: translateY(-50%) scale(1.06);
+          transform: scale(1.06);
         }
 
         .slider-nav-btn:focus-visible {
           outline: none;
           box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5f7b6b, 0 4px 16px rgba(0, 0, 0, 0.12);
-        }
-
-        .slider-nav-prev {
-          left: var(--gutter);
-        }
-
-        .slider-nav-next {
-          right: var(--gutter);
         }
 
         .slider-nav-btn.cannot-prev,
@@ -300,7 +354,7 @@ export function SelectedWorkGrid({
             transition: none;
           }
           .slider-nav-btn:hover {
-            transform: translateY(-50%);
+            transform: none;
           }
         }
       `}</style>
@@ -332,28 +386,52 @@ export function SelectedWorkGrid({
           </div>
         </div>
 
-        {/* Relative Slider Container spanning full viewport width with absolute end arrows */}
-        <div className="slider-track-container">
-          {/* Prev Arrow positioned at left: var(--gutter) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollPrev();
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            disabled={!canPrev}
-            aria-label="Previous artworks"
-            aria-hidden={!canPrev}
-            tabIndex={canPrev ? 0 : -1}
-            className={cn(
-              'slider-nav-btn slider-nav-prev',
-              canPrev ? 'can-prev' : 'cannot-prev'
-            )}
-          >
-            <ChevronLeft className="w-5 h-5 text-ink shrink-0" />
-          </button>
+        {/* Relative Slider Container: Starts exactly where the images start */}
+        <div ref={wrapperRef} className="slider-track-container">
+          {/* Overlay div: top: 0, left: 0, right: 0, height: var(--img-h), align-items: center */}
+          <div className="slider-nav-overlay">
+            {/* Prev Arrow */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollPrev();
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              disabled={!canPrev}
+              aria-label="Previous artworks"
+              aria-hidden={!canPrev}
+              tabIndex={canPrev ? 0 : -1}
+              className={cn(
+                'slider-nav-btn slider-nav-prev',
+                canPrev ? 'can-prev' : 'cannot-prev'
+              )}
+            >
+              <ChevronLeft className="w-5 h-5 text-ink shrink-0" />
+            </button>
+
+            {/* Next Arrow */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollNext();
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              disabled={!canNext}
+              aria-label="Next artworks"
+              aria-hidden={!canNext}
+              tabIndex={canNext ? 0 : -1}
+              className={cn(
+                'slider-nav-btn slider-nav-next',
+                canNext ? 'can-next' : 'cannot-next'
+              )}
+            >
+              <ChevronRight className="w-5 h-5 text-ink shrink-0" />
+            </button>
+          </div>
 
           {/* Full-Bleed Scroll Track */}
           <div
@@ -378,27 +456,6 @@ export function SelectedWorkGrid({
               </div>
             ))}
           </div>
-
-          {/* Next Arrow positioned at right: var(--gutter) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollNext();
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            disabled={!canNext}
-            aria-label="Next artworks"
-            aria-hidden={!canNext}
-            tabIndex={canNext ? 0 : -1}
-            className={cn(
-              'slider-nav-btn slider-nav-next',
-              canNext ? 'can-next' : 'cannot-next'
-            )}
-          >
-            <ChevronRight className="w-5 h-5 text-ink shrink-0" />
-          </button>
         </div>
       </div>
     </section>

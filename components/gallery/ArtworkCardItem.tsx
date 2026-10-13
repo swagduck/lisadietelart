@@ -44,7 +44,7 @@ export function ArtworkCardItem({
       aria-label={`View ${artwork.title}${isSold ? ' (Sold out)' : ''}`}
     >
       {/* Aspect Ratio 4/5 Image Area */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-mist/20">
+      <div className="artwork-image-wrapper relative aspect-[4/5] w-full overflow-hidden bg-mist/20">
         {/* Soft Hover Zoom (scale 1.02) over 400ms on desktop */}
         <div className="h-full w-full transition-transform duration-[400ms] ease-out group-hover:scale-[1.02] motion-reduce:transform-none">
           <WallImage
