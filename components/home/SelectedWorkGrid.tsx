@@ -27,7 +27,7 @@ export function SelectedWorkGrid({
   viewAllLabel = 'View all',
   ariaLabel = 'Selected work carousel',
   id = 'selected-work-title',
-  className = 'bg-paper py-20 md:py-28 overflow-hidden',
+  className = 'bg-paper py-20 md:py-28',
   priorityLimit = 2,
 }: SelectedWorkGridProps) {
   const displayItems = artworks.slice(0, 8);
@@ -165,43 +165,70 @@ export function SelectedWorkGrid({
 
   return (
     <section
-      className={cn('overflow-hidden', className)}
+      className={cn('w-full overflow-x-clip', className)}
       aria-labelledby={id}
     >
       {/* 
-        Container Gutter CSS variable matching page container:
-        Mobile: 24px
-        Tablet/Laptop: 48px
-        Desktop >= 1280px: calc((100vw - 1280px) / 2 + 48px)
+        Full-bleed gallery row specifications:
+        --gutter: clamp(16px, 4vw, 56px)
+        --gap: 12px
+        --scrollbar-w: calc(100vw - 100%)
+        --viewport-w: calc(100vw - var(--scrollbar-w, 0px))
+        Slide width:
+          Desktop (>=1280px): calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 3) / 4.2)
+          Laptop (>=1024px): calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 2) / 3.2)
+          Tablet (>=768px): calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 1) / 2.2)
+          Mobile (<768px): calc((var(--viewport-w) - var(--gutter) * 2) / 1.25)
       */}
       <style jsx>{`
         .selected-work-section {
-          --container-gutter: 24px;
-          --slide-w: calc((100vw - var(--container-gutter)) / 1.3);
-        }
-        @media (min-width: 640px) {
-          .selected-work-section {
-            --container-gutter: 24px;
-            --slide-w: calc((100vw - var(--container-gutter)) / 2.3);
-          }
+          --gutter: clamp(16px, 4vw, 56px);
+          --gap: 12px;
+          --scrollbar-w: calc(100vw - 100%);
+          --viewport-w: calc(100vw - var(--scrollbar-w, 0px));
+          --slide-w: calc((var(--viewport-w) - var(--gutter) * 2) / 1.25);
+          width: 100%;
+          overflow-x: clip;
         }
         @media (min-width: 768px) {
           .selected-work-section {
-            --container-gutter: 48px;
-            --slide-w: calc((100vw - var(--container-gutter)) / 2.3);
+            --slide-w: calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 1) / 2.2);
           }
         }
         @media (min-width: 1024px) {
           .selected-work-section {
-            --container-gutter: 48px;
-            --slide-w: calc((100vw - var(--container-gutter)) / 3.2);
+            --slide-w: calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 2) / 3.2);
           }
         }
         @media (min-width: 1280px) {
           .selected-work-section {
-            --container-gutter: max(48px, calc((100vw - 1280px) / 2 + 48px));
-            --slide-w: calc((100vw - var(--container-gutter)) / 4.3);
+            --slide-w: calc((var(--viewport-w) - var(--gutter) * 2 - var(--gap) * 3) / 4.2);
           }
+        }
+
+        .selected-work-header {
+          width: 100%;
+          padding-left: var(--gutter);
+          padding-right: var(--gutter);
+        }
+
+        .slider-track-container {
+          position: relative;
+          width: 100%;
+          overflow: visible;
+        }
+
+        .slider-track {
+          display: flex;
+          width: 100%;
+          overflow-x: auto;
+          column-gap: var(--gap);
+          padding-left: var(--gutter);
+          padding-right: var(--gutter);
+          scroll-padding-left: var(--gutter);
+          scroll-padding-right: var(--gutter);
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
         }
 
         .selected-work-slide {
@@ -249,11 +276,11 @@ export function SelectedWorkGrid({
         }
 
         .slider-nav-prev {
-          left: clamp(12px, 2vw, 32px);
+          left: var(--gutter);
         }
 
         .slider-nav-next {
-          right: clamp(12px, 2vw, 32px);
+          right: var(--gutter);
         }
 
         .slider-nav-btn.cannot-prev,
@@ -279,10 +306,8 @@ export function SelectedWorkGrid({
       `}</style>
 
       <div className="selected-work-section space-y-10">
-        {/* Section Header Row: Title & Subtitle at Left, Plain "View all" at Right */}
-        <div
-          className="mx-auto max-w-7xl px-6 md:px-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6"
-        >
+        {/* Full-width Section Header Row: Title at Left, Plain "View all" at Right */}
+        <div className="selected-work-header flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
             <h2
               id={id}
@@ -308,8 +333,8 @@ export function SelectedWorkGrid({
         </div>
 
         {/* Relative Slider Container spanning full viewport width with absolute end arrows */}
-        <div className="relative w-full overflow-visible">
-          {/* Prev Arrow at Left End */}
+        <div className="slider-track-container">
+          {/* Prev Arrow positioned at left: var(--gutter) */}
           <button
             type="button"
             onClick={(e) => {
@@ -342,14 +367,7 @@ export function SelectedWorkGrid({
             onPointerUp={handlePointerUpOrCancel}
             onPointerCancel={handlePointerUpOrCancel}
             onClickCapture={handleClickCapture}
-            className="flex w-full overflow-x-auto no-scrollbar gap-[12px] cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
-            style={{
-              scrollSnapType: 'x mandatory',
-              paddingInlineStart: 'var(--container-gutter)',
-              scrollPaddingInlineStart: 'var(--container-gutter)',
-              paddingInlineEnd: 'var(--container-gutter)',
-              WebkitOverflowScrolling: 'touch',
-            }}
+            className="slider-track no-scrollbar cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
           >
             {displayItems.map((artwork, idx) => (
               <div key={artwork.id || artwork._id || artwork.slug} className="selected-work-slide">
@@ -361,7 +379,7 @@ export function SelectedWorkGrid({
             ))}
           </div>
 
-          {/* Next Arrow at Right End */}
+          {/* Next Arrow positioned at right: var(--gutter) */}
           <button
             type="button"
             onClick={(e) => {

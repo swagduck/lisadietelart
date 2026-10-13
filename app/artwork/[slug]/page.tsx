@@ -293,7 +293,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
           viewAllLabel="View all"
           ariaLabel="More from this collection carousel"
           id="related-collection-title"
-          className="mt-20 border-t border-line/70 pt-16 pb-8 bg-paper overflow-hidden"
+          className="mt-20 border-t border-line/70 pt-16 pb-8 bg-paper overflow-x-clip"
           priorityLimit={0}
         />
       )}

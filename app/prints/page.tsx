@@ -38,7 +38,12 @@ export default async function PrintsPage() {
   return (
     <div className="min-h-screen bg-paper pt-24">
       {/* Editorial Header */}
-      <section className="border-b border-line bg-mist/20 px-6 py-16 md:px-12">
+      <section
+        className="border-b border-line bg-mist/20 py-16"
+        style={{
+          paddingInline: 'var(--gutter)',
+        }}
+      >
         <div className="mx-auto max-w-4xl space-y-4 text-center">
           <span className="block text-xs font-normal text-sage">
             Archival editions &middot; Museum stock
@@ -54,8 +59,13 @@ export default async function PrintsPage() {
         </div>
       </section>
 
-      {/* Grid */}
-      <section className="mx-auto max-w-7xl px-6 py-20 md:px-12">
+      {/* Grid: Full-width gallery catalog with --gutter */}
+      <section
+        className="w-full overflow-x-clip py-16 md:py-24"
+        style={{
+          paddingInline: 'var(--gutter)',
+        }}
+      >
         <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4 text-xs">
           <span className="text-muted">
             Showing {prints.length} print editions
