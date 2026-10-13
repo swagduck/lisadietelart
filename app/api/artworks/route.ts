@@ -181,6 +181,8 @@ export async function PUT(request: Request) {
   }
 }
 
+export const PATCH = PUT;
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

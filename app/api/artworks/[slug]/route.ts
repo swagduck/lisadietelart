@@ -90,6 +90,8 @@ export async function PUT(request: Request, { params }: RouteContext) {
   }
 }
 
+export const PATCH = PUT;
+
 export async function DELETE(request: Request, { params }: RouteContext) {
   try {
     const { slug } = params;

@@ -4,7 +4,13 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     // All assets are served locally from /public/images to avoid remote 404s
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

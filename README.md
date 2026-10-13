@@ -83,10 +83,36 @@ Upserting 6 sample artworks...
 2. In the [Vercel Dashboard](https://vercel.com/new), click **Add New...** > **Project** and import your GitHub repository (`swagduck/lisadietelart`).
 3. Under **Environment Variables**, add:
    - `MONGODB_URI`: Your MongoDB Atlas connection URI
-   - `ADMIN_PASSWORD`: Your admin secret
-   - `SESSION_SECRET`: Your 32-character session secret
+   - `ADMIN_PASSWORD`: Your admin password (for `/admin` access)
+   - `SESSION_SECRET`: Your 32-character session secret (for signed `jose` JWT cookies)
+   - `CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name
+   - `CLOUDINARY_API_KEY`: Your Cloudinary API key
+   - `CLOUDINARY_API_SECRET`: Your Cloudinary API secret
    - `NEXT_PUBLIC_SITE_URL`: Your production domain (e.g. `https://your-domain.vercel.app`)
 4. Click **Deploy**. Vercel will build and launch your production site automatically.
+
+---
+
+## 📱 Mobile-First Studio Admin Area (`/admin`)
+
+A dedicated management portal designed specifically for single-handed use on a phone:
+
+- **Authentication & Security**:
+  - Protected by Next.js Edge Middleware guarding `/admin/*` and write API endpoints (`POST`, `PUT`, `DELETE` on `/api/artworks`, `/api/upload`, and `/api/admin/*`).
+  - Single password verification (`ADMIN_PASSWORD`), issuing a signed `httpOnly` JWT session cookie using `jose`.
+  - In-memory rate limiting against brute-force login attempts (5 attempts per 15 min per IP).
+- **Artwork Management**:
+  - Live listing of all artworks with thumbnail preview, title, medium, size, and price.
+  - **One-tap instant toggles** for **Sold Out / Available** and **Featured ⭐** with instantaneous cache invalidation via `revalidatePath`.
+  - Create and edit dialog with automatic slug generator, type picker (Original vs Limited Print), and price.
+  - Safe delete with confirmation prompt.
+- **Image Uploads (Cloudinary + Local Fallback)**:
+  - Upload photos directly from phone camera or gallery via `/api/upload`.
+  - Secure server-side signed Cloudinary upload storing returned secure URLs in MongoDB.
+  - Automatic graceful fallback to local storage if Cloudinary account is pending activation.
+- **Inquiries & Subscribers**:
+  - **Inquiries Tab**: View collector acquisition messages, inquired artwork slug, with one-tap `mailto:` collector replies.
+  - **Subscribers Tab**: View newsletter signups with instant one-tap **CSV Export** for email marketing tools.
 
 ---
 
