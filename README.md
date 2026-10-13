@@ -1,8 +1,8 @@
-# Aura Vance — Fine Art Portfolio & Studio Shop
+# Lisa Dietel — Fine Art Portfolio & Studio Shop
 
-A bespoke art portfolio and e-commerce shop web application built for an independent painter using **Next.js 14+ (App Router)**, **TypeScript**, and **Tailwind CSS**.
+A bespoke art portfolio and e-commerce web application built for independent contemporary painter **Lisa Dietel** using **Next.js 14+ (App Router)**, **TypeScript**, **Tailwind CSS**, and **MongoDB Atlas (M0 Free Tier)** with **Mongoose**.
 
-Rebuilt directly from the `/index.html` visual reference into modular, type-safe React components while preserving the tactile, editorial gallery aesthetic.
+Targeted specifically for deployment on **Vercel's Free (Hobby) Tier** and **MongoDB Atlas M0 Free Tier** with zero operational cost.
 
 ---
 
@@ -11,131 +11,124 @@ Rebuilt directly from the `/index.html` visual reference into modular, type-safe
 Configured in [`tailwind.config.ts`](tailwind.config.ts):
 
 ### Color Palette
-
 - **`paper`**: `#f7f6f4` — Soft, museum-grade warm cotton rag paper background
-- **`ink`**: `#2b2a2e` — Deep charcoal pigment for fine typography
-- **`muted`**: `#6f6c72` — Soft graphite gray for metadata, captions, and secondary notes
-- **`sage`**: `#5f7b6b` — Weathered botanical accent color for interactive states and badges
-- **`blush`**: `#ecd3d8` — Gentle warm tone for print badges and text highlights
-- **`mist`**: `#dfe8e2` — Subtle tinted wash for container panels and section backdrops
+- **`ink`**: `#2b2a2e` — Deep charcoal mineral pigment for high-contrast typography (AAA compliant)
+- **`muted`**: `#6f6c72` — Soft graphite gray for metadata, captions, and secondary notes (AA compliant)
+- **`sage`**: `#5f7b6b` — Weathered botanical accent color for interactive states, badges, and focus rings
+- **`blush`**: `#ecd3d8` — Gentle warm rose tone for print badges and subtle highlights
+- **`mist`**: `#dfe8e2` — Soft tinted wash for container panels and section backdrops
 - **`line`**: `#e3dfda` — Delicate border tone defining frames and dividers
 
 ### Typography
-
 - **Headings**: `Cormorant Garamond` (loaded via `next/font/google` variable `--font-cormorant`)
 - **Body & Metadata**: `Jost` (loaded via `next/font/google` variable `--font-jost`)
 
 ---
 
-## 📁 Folder Structure
+## 🔐 Environment Variables
 
-```text
-d:/ArtWeb/
-├── app/                        # Next.js 14 App Router routes & layouts
-│   ├── about/                  # Artist biography, statement & studio practice
-│   ├── api/                    # Serverless API routes (Vercel-compatible)
-│   │   ├── artworks/           # Artwork listing & admin creation
-│   │   └── inquiries/          # Collector acquisition & commission inquiries
-│   ├── contact/                # Direct studio contact & appointment scheduling
-│   ├── shop/                   # Available original paintings & archival prints
-│   ├── works/                  # Comprehensive works archive with filters
-│   ├── globals.css             # Tailwind base layers, typography & custom scrollbar
-│   ├── layout.tsx              # Root layout injecting fonts & CartProvider
-│   └── page.tsx                # Homepage matching the /index.html reference layout
-├── components/                 # Reusable React components
-│   ├── about/                  # AboutSection (studio photo, philosophy, materials)
-│   ├── contact/                # ContactSection (interactive acquisition form)
-│   ├── exhibitions/            # ExhibitionList (solo/group exhibitions CV)
-│   ├── gallery/                # ArtworkGrid, ArtworkCard, ArtworkModal
-│   ├── hero/                   # Hero (editorial headline, framed painting showcase)
-│   ├── layout/                 # Navbar (sticky, announcement, mobile menu) & Footer
-│   └── shop/                   # CartContext & slide-over CartDrawer
-├── lib/                        # Utility functions & data helpers
-│   ├── data.ts                 # Realistic high-fidelity seed artworks & exhibitions
-│   ├── mongodb.ts              # Serverless-cached Mongoose connection pool
-│   └── utils.ts                # cn (clsx + tailwind-merge), formatPrice, slugify
-├── models/                     # Mongoose schemas & data models
-│   ├── Artwork.ts              # Original & limited print edition schema
-│   ├── Inquiry.ts              # Collector acquisition inquiry schema
-│   └── Order.ts                # Customer orders & checkout tracking schema
-├── types/                      # TypeScript declarations & interfaces
-│   ├── artwork.ts              # IArtwork, IPrintOption, ArtworkCategory, ArtworkStatus
-│   ├── cart.ts                 # ICartItem, ICartContext
-│   ├── inquiry.ts              # IInquiry, IExhibition
-│   └── index.ts                # Barrel export
-├── .env.example                # Environment variables template
-├── .eslintrc.json              # ESLint configuration with Next.js core web vitals
-├── .prettierrc                 # Prettier configuration with Tailwind plugin
-├── index.html                  # Visual prototype reference for layout, spacing & feel
-├── next.config.mjs             # Next.js configuration (Unsplash image optimization)
-├── package.json                # Project dependencies & npm scripts
-├── postcss.config.js           # PostCSS configuration
-├── tailwind.config.ts          # Tailwind tokens & typography configuration
-└── tsconfig.json               # TypeScript strict configuration
-```
-
----
-
-## 🚀 Getting Started
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Environment Configuration
-
-Copy `.env.example` to `.env.local`:
+Create `.env.local` for local development by copying `.env.example`:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Populate the required environment variables:
+| Variable | Required | Description | Example |
+| :--- | :---: | :--- | :--- |
+| `MONGODB_URI` | **Yes** (in prod) | MongoDB Atlas connection string (M0 compatible) | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/art_portfolio?retryWrites=true&w=majority` |
+| `ADMIN_PASSWORD` | **Yes** | Secure password/token for administrative actions and mutations | `your_secure_admin_password_here` |
+| `SESSION_SECRET` | **Yes** | 32+ character random secret string used for session encryption | `super_secret_session_key_min_32_characters_long` |
+| `NEXT_PUBLIC_SITE_URL` | Optional | Canonical public URL used for SEO Open Graph, sitemap, and JSON-LD | `https://lisadietelart.com` (defaults to `http://localhost:3000` locally) |
 
-```env
-# MongoDB Atlas M0 cluster connection string
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/art_portfolio?retryWrites=true&w=majority
-
-# Administrative access token
-ADMIN_PASSWORD=your_secure_admin_password_here
-
-# Session secret (min 32 characters)
-SESSION_SECRET=your_super_secret_session_key_min_32_characters_long
-```
-
-_(Note: If `MONGODB_URI` is not provided, the app gracefully falls back to the static curated mock catalog in `lib/data.ts`, ensuring zero crashes during local development or Vercel preview deploys)._
-
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 4. Linting and Formatting
-
-```bash
-npm run lint      # Runs ESLint (Next.js core web vitals)
-npm run format    # Formats files using Prettier and sorts Tailwind classes
-```
-
-### 5. Production Build
-
-```bash
-npm run build
-npm start
-```
+> **Security Note**: No database connection strings, credentials, or private secrets use the `NEXT_PUBLIC_` prefix. All `.env*` files are strictly gitignored via [`.gitignore`](.gitignore).
 
 ---
 
-## ☁️ Vercel Free Tier Compatibility
+## ☁️ Deployment Guide (Vercel + MongoDB Atlas)
 
-This project is tailored to run on **Vercel's Hobby (Free) Tier**:
+### Step 1: Set Up MongoDB Atlas Free Tier (M0)
+1. Sign up or log into [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Create a new cluster selecting the **M0 Sandbox (Free Tier)**.
+3. Under **Database Access**, create a database user with read & write privileges.
+4. Under **Network Access**, add an IP Access entry for `0.0.0.0/0` (Allow access from anywhere, required for serverless platforms like Vercel).
+5. Under **Database** > **Connect** > **Drivers**, copy your connection string URI and replace `<password>` with your database user password.
 
-1. **Serverless Connection Caching**: `lib/mongodb.ts` caches the Mongoose connection instance across invocations to avoid exhausting MongoDB Atlas Free Tier (M0) connection pool limits.
-2. **Standard App Router Handlers**: All routes in `app/api/` execute as standard serverless functions without heavy persistent background workers.
-3. **Optimized Next/Image**: Remote domains (Unsplash) are explicitly whitelisted in `next.config.mjs` with WebP and AVIF formats enabled.
-4. **Zero-Config Deployment**: Seamlessly links to GitHub and deploys automatically on Vercel with zero additional configuration.
+### Step 2: Seed the Database
+Run the automated seed script to populate the database with the 6 curated sample artworks:
+
+```bash
+# In your local terminal with MONGODB_URI set in .env.local:
+npm run seed
+```
+
+Output:
+```text
+Connecting to MongoDB Atlas (M0 free tier)...
+Validating 6 sample artworks with Zod schema...
+Upserting 6 sample artworks...
+ ✓ Seeded: "Nocturne in Ochre" [original] (Sold: false)
+ ✓ Seeded: "The Breath of Dawn" [original] (Sold: false)
+ ✓ Seeded: "Coastal Solitude" [original] (Sold: false)
+ ✓ Seeded: "Resonance in Sage" [original] (Sold: true)
+ ✓ Seeded: "Passage of Light IV (Print)" [print] (Sold: false)
+ ✓ Seeded: "Morning Mist (Collector Edition)" [print] (Sold: true)
+🎉 Successfully seeded 6 artworks to MongoDB Atlas.
+```
+
+### Step 3: Deploy to Vercel
+1. Push your repository to GitHub.
+2. In the [Vercel Dashboard](https://vercel.com/new), click **Add New...** > **Project** and import your GitHub repository (`swagduck/lisadietelart`).
+3. Under **Environment Variables**, add:
+   - `MONGODB_URI`: Your MongoDB Atlas connection URI
+   - `ADMIN_PASSWORD`: Your admin secret
+   - `SESSION_SECRET`: Your 32-character session secret
+   - `NEXT_PUBLIC_SITE_URL`: Your production domain (e.g. `https://your-domain.vercel.app`)
+4. Click **Deploy**. Vercel will build and launch your production site automatically.
+
+---
+
+## ⚡ Architecture & Production Optimizations
+
+- **`server-only` Isolation**: `lib/mongodb.ts` and `lib/server-data.ts` enforce `import "server-only"`, preventing Mongoose or server libraries from ever being accidentally imported into client JavaScript bundles.
+- **Serverless Connection Pooling**: `lib/mongodb.ts` implements a global cached connection with `maxPoolSize: 10`, `serverSelectionTimeoutMS: 5000`, and `socketTimeoutMS: 45000` to prevent Atlas M0 connection exhaustion.
+- **Incremental Static Regeneration (ISR)**: Public catalog pages (`/`, `/originals`, `/prints`, `/artwork/[slug]`) use ISR (`revalidate = 60`) for instant page loads.
+- **Instant Cache Revalidation**: Mutations in `/api/artworks` trigger `revalidatePath(...)` to instantly purge cached pages when artworks are added, modified, or marked as sold.
+- **Anti-Spam Honeypot & Rate Limiting**: Both `/api/inquiries` and `/api/subscribers` are protected by hidden honeypot fields to trap bots and in-memory sliding-window rate limiters returning HTTP 429 upon abuse.
+- **SEO & Social Sharing**:
+  - Full Open Graph and Twitter Card tags across every public route.
+  - Dynamic `sitemap.xml` generated at [`app/sitemap.ts`](app/sitemap.ts) with ISR.
+  - Standard `robots.txt` generated at [`app/robots.ts`](app/robots.ts).
+  - Schema.org `Product` JSON-LD structured data on artwork detail pages.
+- **Accessibility (WCAG 2.1)**:
+  - Screen reader "Skip to main content" link at the top of the body.
+  - Descriptive `alt` text on every image.
+  - Standard `<label htmlFor="...">` attributes on all form fields.
+  - Mobile menu and cart drawer support `Escape` key dismissal and full ARIA modal dialog roles.
+  - Visible focus indicators (`focus-visible:ring-2 focus-visible:ring-sage`) on all interactive controls.
+
+---
+
+## 🛠️ Local Development & Scripts
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run TypeScript type check
+npx tsc --noEmit
+
+# Run ESLint
+npm run lint
+
+# Seed MongoDB Atlas with sample artworks
+npm run seed
+
+# Build production bundle
+npm run build
+
+# Start production server
+npm start
+```

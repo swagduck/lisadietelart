@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Artwork } from '@/models/Artwork';
 import { artworkInputSchema } from '@/lib/validations';
@@ -86,6 +87,17 @@ export async function POST(request: Request) {
 
     const createdArtwork = await Artwork.create(parseResult.data);
 
+    // Call revalidatePath so public pages update immediately after creation
+    try {
+      revalidatePath('/');
+      revalidatePath('/originals');
+      revalidatePath('/prints');
+      revalidatePath(`/artwork/${createdArtwork.slug}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revalErr) {
+      console.warn('Path revalidation note:', revalErr);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -108,6 +120,113 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { success: false, error: 'Unable to process artwork creation request.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const json = await request.json();
+    const { slug, ...updateData } = json;
+
+    if (!slug) {
+      return NextResponse.json(
+        { success: false, error: 'Artwork slug is required for updates.' },
+        { status: 400 }
+      );
+    }
+
+    const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: 'Database service is currently unavailable.' },
+        { status: 503 }
+      );
+    }
+
+    const updated = await Artwork.findOneAndUpdate(
+      { slug },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'Artwork not found.' },
+        { status: 404 }
+      );
+    }
+
+    // Call revalidatePath for immediate cache invalidation
+    try {
+      revalidatePath('/');
+      revalidatePath('/originals');
+      revalidatePath('/prints');
+      revalidatePath(`/artwork/${updated.slug}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revalErr) {
+      console.warn('Path revalidation note:', revalErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Unable to process artwork update.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+
+    if (!slug) {
+      return NextResponse.json(
+        { success: false, error: 'Artwork slug is required for deletion.' },
+        { status: 400 }
+      );
+    }
+
+    const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: 'Database service is currently unavailable.' },
+        { status: 503 }
+      );
+    }
+
+    const deleted = await Artwork.findOneAndDelete({ slug });
+    if (!deleted) {
+      return NextResponse.json(
+        { success: false, error: 'Artwork not found.' },
+        { status: 404 }
+      );
+    }
+
+    // Call revalidatePath so cached public pages purge deleted artwork
+    try {
+      revalidatePath('/');
+      revalidatePath('/originals');
+      revalidatePath('/prints');
+      revalidatePath(`/artwork/${slug}`);
+      revalidatePath('/sitemap.xml');
+    } catch (revalErr) {
+      console.warn('Path revalidation note:', revalErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Artwork "${slug}" successfully deleted.`,
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Unable to process artwork deletion.' },
       { status: 500 }
     );
   }

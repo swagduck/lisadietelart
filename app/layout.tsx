@@ -21,8 +21,14 @@ const jost = Jost({
   display: 'swap',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lisadietelart.com';
+
 export const metadata: Metadata = {
-  title: 'Lisa Dietel — Fine Art & Studio',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Lisa Dietel — Fine Art & Studio',
+    template: '%s | Lisa Dietel Art',
+  },
   description:
     'Contemporary painter exploring atmospheric horizons, memory, and silence on raw Belgian linen. Original paintings, archival prints, and bespoke commissions.',
   keywords: [
@@ -36,13 +42,34 @@ export const metadata: Metadata = {
     'art commissions',
   ],
   authors: [{ name: 'Lisa Dietel' }],
+  creator: 'Lisa Dietel',
   openGraph: {
     title: 'Lisa Dietel — Fine Art & Studio',
     description:
       'Contemporary painter exploring atmospheric horizons, memory, and silence on raw Belgian linen. Original paintings, archival prints, and bespoke commissions.',
     type: 'website',
     locale: 'en_US',
+    url: siteUrl,
     siteName: 'Lisa Dietel Art',
+    images: [
+      {
+        url: '/images/nocturne-in-ochre.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Lisa Dietel Studio — Fine Art & Paintings',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lisa Dietel — Fine Art & Studio',
+    description:
+      'Contemporary painter exploring atmospheric horizons, memory, and silence on raw Belgian linen.',
+    images: ['/images/nocturne-in-ochre.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -57,10 +84,19 @@ export default function RootLayout({
       className={`${cormorantGaramond.variable} ${jost.variable} scroll-smooth`}
     >
       <body className="min-h-screen bg-paper text-ink antialiased selection:bg-blush/60 selection:text-ink">
+        {/* Skip to Main Content Link for Keyboard Accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-ink focus:px-4 focus:py-2 focus:text-xs focus:font-medium focus:uppercase focus:tracking-widest focus:text-paper focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-sage"
+        >
+          Skip to main content
+        </a>
         <CartProvider>
           <div className="flex min-h-screen flex-col justify-between">
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+              {children}
+            </main>
             <Footer />
           </div>
           <CartDrawer />

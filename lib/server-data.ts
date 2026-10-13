@@ -1,3 +1,4 @@
+import 'server-only';
 import { IArtwork } from '@/types/artwork';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Artwork } from '@/models/Artwork';

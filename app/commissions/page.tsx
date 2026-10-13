@@ -7,6 +7,27 @@ export const metadata = {
   title: 'Bespoke Art Commissions — Lisa Dietel Studio',
   description:
     'Collaborate directly with Lisa Dietel to create a custom original oil and mineral painting for your private home or architectural project.',
+  openGraph: {
+    title: 'Bespoke Art Commissions — Lisa Dietel Studio',
+    description:
+      'Collaborate directly with Lisa Dietel to create a custom original oil and mineral painting tailored to your interior space.',
+    url: '/commissions',
+    images: [
+      {
+        url: '/images/the-breath-of-dawn.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Bespoke Commissions by Lisa Dietel',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bespoke Art Commissions — Lisa Dietel Studio',
+    description:
+      'Collaborate directly with Lisa Dietel to create a custom original oil and mineral painting.',
+    images: ['/images/the-breath-of-dawn.svg'],
+  },
 };
 
 export default function CommissionsPage() {

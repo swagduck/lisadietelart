@@ -7,6 +7,27 @@ export const metadata: Metadata = {
   title: 'Contact & Studio Appointments — Lisa Dietel Art',
   description:
     'Contact painter Lisa Dietel regarding original painting acquisitions, private commissions, gallery representation, or studio appointments.',
+  openGraph: {
+    title: 'Contact & Studio Appointments — Lisa Dietel Art',
+    description:
+      'Contact painter Lisa Dietel regarding original painting acquisitions, private commissions, gallery representation, or studio appointments.',
+    url: '/contact',
+    images: [
+      {
+        url: '/images/coastal-solitude.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Contact Lisa Dietel Studio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact & Studio Appointments — Lisa Dietel Art',
+    description:
+      'Contact painter Lisa Dietel regarding original painting acquisitions or commissions.',
+    images: ['/images/coastal-solitude.svg'],
+  },
 };
 
 export default function ContactPage({

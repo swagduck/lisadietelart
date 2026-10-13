@@ -14,6 +14,8 @@ interface ArtworkDetailPageProps {
   };
 }
 
+export const revalidate = 60; // ISR: revalidate every 60 seconds
+
 export function generateStaticParams() {
   return ARTWORKS_DATA.map((artwork) => ({
     slug: artwork.slug,
@@ -26,9 +28,32 @@ export async function generateMetadata({ params }: ArtworkDetailPageProps): Prom
     return { title: 'Artwork Not Found' };
   }
 
+  const artworkImage = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const description = `${artwork.title} by Lisa Dietel. ${artwork.medium}, ${artwork.size || artwork.dimensions}. ${artwork.description.slice(0, 140)}...`;
+
   return {
     title: `${artwork.title} — Lisa Dietel Art`,
-    description: `${artwork.title} — ${artwork.medium}. ${artwork.size || artwork.dimensions}.`,
+    description,
+    openGraph: {
+      title: `${artwork.title} — Lisa Dietel Art`,
+      description,
+      url: `/artwork/${artwork.slug}`,
+      type: 'article',
+      images: [
+        {
+          url: artworkImage,
+          width: 1200,
+          height: 630,
+          alt: `${artwork.title} by Lisa Dietel`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${artwork.title} — Lisa Dietel Art`,
+      description,
+      images: [artworkImage],
+    },
   };
 }
 
@@ -38,6 +63,36 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
   if (!artwork) {
     notFound();
   }
+
+  const mainImage = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lisadietelart.com';
+
+  // JSON-LD Product & VisualArtwork structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: artwork.title,
+    image: [mainImage.startsWith('http') ? mainImage : `${siteUrl}${mainImage}`],
+    description: artwork.description,
+    category: artwork.type === 'original' ? 'Original Artwork' : 'Limited Edition Art Print',
+    material: artwork.medium,
+    size: artwork.size || artwork.dimensions,
+    brand: {
+      '@type': 'Person',
+      name: 'Lisa Dietel',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: artwork.price,
+      priceCurrency: artwork.currency || 'USD',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability:
+        artwork.isSoldOut || artwork.sold
+          ? 'https://schema.org/SoldOut'
+          : 'https://schema.org/InStock',
+      url: `${siteUrl}/artwork/${artwork.slug}`,
+    },
+  };
 
   // Pre-fill mailto inquiry link with artwork title and dimensions
   const mailtoSubject = encodeURIComponent(`Acquisition Enquiry: "${artwork.title}"`);
@@ -52,6 +107,12 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
 
   return (
     <div className="min-h-screen bg-paper pb-24 pt-28">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         {/* Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">

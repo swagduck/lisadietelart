@@ -30,15 +30,24 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Prevent background scroll when mobile menu is open
+  // Prevent background scroll and support Escape key when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [mobileMenuOpen]);
 
@@ -141,6 +150,8 @@ export function Navbar() {
                 isSolid ? 'text-ink hover:text-sage' : 'text-paper hover:text-paper/80'
               )}
               aria-label="Open mobile menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation-drawer"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -151,6 +162,7 @@ export function Navbar() {
       {/* Mobile Slide-in Menu (Drawer) */}
       {mobileMenuOpen && (
         <div
+          id="mobile-navigation-drawer"
           className="fixed inset-0 z-50 md:hidden"
           role="dialog"
           aria-modal="true"

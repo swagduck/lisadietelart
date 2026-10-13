@@ -23,10 +23,14 @@ export const inquiryInputSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   message: z.string().min(5, 'Message must be at least 5 characters').max(5000),
   artworkSlug: z.string().optional().nullable(),
+  honeypot: z.string().optional(),
+  website: z.string().optional(),
 });
 
 export const subscriberInputSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
+  honeypot: z.string().optional(),
+  website: z.string().optional(),
 });
 
 export type ArtworkInput = z.infer<typeof artworkInputSchema>;

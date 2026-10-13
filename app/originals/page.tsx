@@ -3,10 +3,33 @@ import { getOriginals } from '@/lib/server-data';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 import Link from 'next/link';
 
+export const revalidate = 60; // ISR: revalidate every 60 seconds
+
 export const metadata = {
   title: 'Original Paintings — Lisa Dietel Studio',
   description:
     'Explore original oil and mineral paintings on raw Belgian linen by Lisa Dietel. Worldwide insured shipping available.',
+  openGraph: {
+    title: 'Original Paintings — Lisa Dietel Studio',
+    description:
+      'Explore original oil and mineral paintings on raw Belgian linen by Lisa Dietel. Worldwide insured shipping available.',
+    url: '/originals',
+    images: [
+      {
+        url: '/images/nocturne-in-ochre.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Original Paintings by Lisa Dietel',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Original Paintings — Lisa Dietel Studio',
+    description:
+      'Explore original oil and mineral paintings on raw Belgian linen by Lisa Dietel.',
+    images: ['/images/nocturne-in-ochre.svg'],
+  },
 };
 
 export default async function OriginalsPage() {

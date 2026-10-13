@@ -11,6 +11,7 @@ export function CommissionForm() {
     budget: '',
     timeline: '',
     description: '',
+    honeypot: '',
   });
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
@@ -29,6 +30,7 @@ export function CommissionForm() {
           subject: `Bespoke Commission Inquiry (${formData.dimensions || 'Custom Size'})`,
           message: `Dimensions: ${formData.dimensions}\nBudget: ${formData.budget}\nTimeline: ${formData.timeline}\nDescription:\n${formData.description}`,
           type: 'commission',
+          honeypot: formData.honeypot,
         }),
       });
     } catch {
@@ -58,6 +60,7 @@ export function CommissionForm() {
               budget: '',
               timeline: '',
               description: '',
+              honeypot: '',
             });
           }}
           className="mt-4 border border-ink px-6 py-2.5 text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
@@ -73,6 +76,17 @@ export function CommissionForm() {
       onSubmit={handleSubmit}
       className="space-y-6 border border-line bg-paper p-8 shadow-sm"
     >
+      {/* Honeypot field for bot protection */}
+      <div className="hidden" aria-hidden="true">
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={formData.honeypot}
+          onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
+        />
+      </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
           <label

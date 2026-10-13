@@ -12,6 +12,7 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
     email: '',
     subject: initialArtworkTitle ? `Inquiry regarding "${initialArtworkTitle}"` : '',
     message: '',
+    honeypot: '',
   });
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
@@ -21,10 +22,20 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
     setStatus('loading');
 
     try {
+      const fullMessage = formData.subject
+        ? `[Subject: ${formData.subject}]\n\n${formData.message}`
+        : formData.message;
+
       await fetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: fullMessage,
+          artworkSlug: initialArtworkTitle || undefined,
+          honeypot: formData.honeypot,
+        }),
       });
     } catch {
       // Graceful fallback
@@ -54,25 +65,37 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
           or studio viewings in Hudson, NY.
         </p>
 
-        {status === 'success' ? (
-          <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8 shadow-sm">
-            <h3 className="font-heading text-2xl text-ink">Message Received</h3>
-            <p className="text-xs leading-relaxed text-muted">
-              Thank you for reaching out. Lisa Dietel or the studio assistant will review
-              your inquiry and respond within two business days.
-            </p>
-            <button
-              onClick={() => {
-                setStatus('idle');
-                setFormData({ name: '', email: '', subject: '', message: '' });
-              }}
-              className="mt-4 border border-ink px-6 py-2.5 text-xs uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-            >
-              Send Another Inquiry
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-4 text-left">
+        <div aria-live="polite">
+          {status === 'success' ? (
+            <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8 shadow-sm">
+              <h3 className="font-heading text-2xl text-ink">Message Received</h3>
+              <p className="text-xs leading-relaxed text-muted">
+                Thank you for reaching out. Lisa Dietel or the studio assistant will review
+                your inquiry and respond within two business days.
+              </p>
+              <button
+                onClick={() => {
+                  setStatus('idle');
+                  setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
+                }}
+                className="mt-4 border border-ink px-6 py-2.5 text-xs uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              >
+                Send Another Inquiry
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-4 text-left">
+              {/* Honeypot field for bot protection */}
+              <div className="hidden" aria-hidden="true">
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.honeypot}
+                  onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
+                />
+              </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label
@@ -155,6 +178,7 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
             </button>
           </form>
         )}
+        </div>
       </div>
     </section>
   );

@@ -9,6 +9,27 @@ export const metadata: Metadata = {
   title: 'About the Artist & Studio — Lisa Dietel',
   description:
     'Read the story, artist statement, painterly philosophy, and exhibition CV of contemporary independent painter Lisa Dietel.',
+  openGraph: {
+    title: 'About the Artist & Studio — Lisa Dietel',
+    description:
+      'Read the story, artist statement, painterly philosophy, and exhibition CV of contemporary independent painter Lisa Dietel.',
+    url: '/about',
+    images: [
+      {
+        url: '/images/artist-studio.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Lisa Dietel Studio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About the Artist & Studio — Lisa Dietel',
+    description:
+      'Read the story, artist statement, painterly philosophy, and exhibition CV of Lisa Dietel.',
+    images: ['/images/artist-studio.svg'],
+  },
 };
 
 export default function AboutPage() {

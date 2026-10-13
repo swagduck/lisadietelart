@@ -11,6 +11,16 @@ export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, totalItems } =
     useCart();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        closeCart();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, closeCart]);
+
   if (!isOpen) return null;
 
   return (

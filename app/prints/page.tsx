@@ -3,10 +3,33 @@ import { getPrints } from '@/lib/server-data';
 import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 import Link from 'next/link';
 
+export const revalidate = 60; // ISR: revalidate every 60 seconds
+
 export const metadata = {
   title: 'Limited Edition Art Prints — Lisa Dietel Studio',
   description:
     'Museum-grade limited edition archival pigment prints on 310gsm Hahnemühle German Etching cotton paper by Lisa Dietel.',
+  openGraph: {
+    title: 'Limited Edition Art Prints — Lisa Dietel Studio',
+    description:
+      'Museum-grade limited edition archival pigment prints on 310gsm Hahnemühle German Etching cotton paper by Lisa Dietel.',
+    url: '/prints',
+    images: [
+      {
+        url: '/images/passage-of-light.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Archival Art Prints by Lisa Dietel',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Limited Edition Art Prints — Lisa Dietel Studio',
+    description:
+      'Museum-grade limited edition archival pigment prints on 310gsm Hahnemühle German Etching paper.',
+    images: ['/images/passage-of-light.svg'],
+  },
 };
 
 export default async function PrintsPage() {

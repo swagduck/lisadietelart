@@ -12,10 +12,33 @@ import {
 } from '@/lib/data';
 import { getSelectedWorks } from '@/lib/server-data';
 
+export const revalidate = 60; // ISR: revalidate every 60 seconds
+
 export const metadata = {
   title: 'Lisa Dietel — Contemporary Painter & Studio',
   description:
     'Original oil and mineral paintings, limited archival prints, and bespoke commissions by contemporary painter Lisa Dietel.',
+  openGraph: {
+    title: 'Lisa Dietel — Contemporary Painter & Studio',
+    description:
+      'Original oil and mineral paintings, limited archival prints, and bespoke commissions by contemporary painter Lisa Dietel.',
+    url: '/',
+    images: [
+      {
+        url: '/images/nocturne-in-ochre.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Lisa Dietel Fine Art',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lisa Dietel — Contemporary Painter & Studio',
+    description:
+      'Original oil and mineral paintings, limited archival prints, and bespoke commissions.',
+    images: ['/images/nocturne-in-ochre.svg'],
+  },
 };
 
 export default async function HomePage() {
