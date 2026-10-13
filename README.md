@@ -36,6 +36,9 @@ cp .env.example .env.local
 | Variable | Required | Description | Example |
 | :--- | :---: | :--- | :--- |
 | `MONGODB_URI` | **Yes** (in prod) | MongoDB Atlas connection string (M0 compatible) | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/art_portfolio?retryWrites=true&w=majority` |
+| `CLOUDINARY_CLOUD_NAME` | Optional | Cloudinary cloud name for media assets | `my-art-studio` |
+| `CLOUDINARY_API_KEY` | Optional | Cloudinary API key | `123456789012345` |
+| `CLOUDINARY_API_SECRET` | Optional | Cloudinary API secret | `your_api_secret_here` |
 | `ADMIN_PASSWORD` | **Yes** | Secure password/token for administrative actions and mutations | `your_secure_admin_password_here` |
 | `SESSION_SECRET` | **Yes** | 32+ character random secret string used for session encryption | `super_secret_session_key_min_32_characters_long` |
 | `NEXT_PUBLIC_SITE_URL` | Optional | Canonical public URL used for SEO Open Graph, sitemap, and JSON-LD | `https://lisadietelart.com` (defaults to `http://localhost:3000` locally) |
