@@ -8,13 +8,7 @@ import { ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import { GalleryCarousel } from '@/components/ui/Carousel';
 import { ArtworkInteractive } from '@/components/artwork/ArtworkInteractive';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselDots,
-} from '@/components/ui/Carousel';
-import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
+import { SelectedWorkGrid } from '@/components/home/SelectedWorkGrid';
 
 interface ArtworkDetailPageProps {
   params: {
@@ -283,50 +277,26 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
           </div>
         </div>
 
-        {/* "More from this collection" Slider at Bottom */}
-        {relatedArtworks.length > 0 && (
-          <section className="mt-24 border-t border-line/70 pt-16">
-            <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <span className="text-xs font-normal text-sage">
-                  {artwork.type === 'original' ? 'Original works' : 'Archival prints'}
-                </span>
-                <h2 className="font-heading text-3xl font-normal text-ink md:text-4xl">
-                  More from this collection
-                </h2>
-              </div>
-
-              <Link
-                href={backLink}
-                className="text-xs text-muted hover:text-ink transition-colors"
-              >
-                {backLabel} &rarr;
-              </Link>
-            </div>
-
-            <Carousel
-              variant="cards"
-              ariaLabel="More from this collection"
-              totalSlidesCount={relatedArtworks.length}
-              showSideFade={true}
-              sideFadeColor="light"
-              className="space-y-6"
-            >
-              <CarouselContent className="py-2">
-                {relatedArtworks.map((item, idx) => (
-                  <CarouselItem key={item.slug} index={idx} total={relatedArtworks.length}>
-                    <ArtworkCardItem artwork={item} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-
-              <div className="pt-2">
-                <CarouselDots />
-              </div>
-            </Carousel>
-          </section>
-        )}
       </div>
+
+      {/* "More from this collection" Slider at Bottom */}
+      {relatedArtworks.length > 0 && (
+        <SelectedWorkGrid
+          artworks={relatedArtworks}
+          title="More from this collection"
+          subtitle={
+            artwork.type === 'original'
+              ? 'Original oil and mixed media paintings from the studio.'
+              : 'Archival pigment print editions from the studio.'
+          }
+          viewAllHref={backLink}
+          viewAllLabel="View all"
+          ariaLabel="More from this collection carousel"
+          id="related-collection-title"
+          className="mt-20 border-t border-line/70 pt-16 pb-8 bg-paper overflow-hidden"
+          priorityLimit={0}
+        />
+      )}
     </div>
   );
 }

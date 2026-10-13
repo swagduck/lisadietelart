@@ -7,11 +7,29 @@ import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface SelectedWorkGridProps {
+export interface SelectedWorkGridProps {
   artworks: IArtwork[];
+  title?: string;
+  subtitle?: string | null;
+  viewAllHref?: string;
+  viewAllLabel?: string;
+  ariaLabel?: string;
+  id?: string;
+  className?: string;
+  priorityLimit?: number;
 }
 
-export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
+export function SelectedWorkGrid({
+  artworks,
+  title = 'Selected work',
+  subtitle = 'Original paintings and archival print editions from the Hudson studio.',
+  viewAllHref = '/originals',
+  viewAllLabel = 'View all',
+  ariaLabel = 'Selected work carousel',
+  id = 'selected-work-title',
+  className = 'bg-paper py-20 md:py-28 overflow-hidden',
+  priorityLimit = 2,
+}: SelectedWorkGridProps) {
   const displayItems = artworks.slice(0, 8);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -147,8 +165,8 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
 
   return (
     <section
-      className="bg-paper py-20 md:py-28 overflow-hidden"
-      aria-labelledby="selected-work-title"
+      className={cn('overflow-hidden', className)}
+      aria-labelledby={id}
     >
       {/* 
         Container Gutter CSS variable matching page container:
@@ -159,119 +177,210 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
       <style jsx>{`
         .selected-work-section {
           --container-gutter: 24px;
+          --slide-w: calc((100vw - var(--container-gutter)) / 1.3);
+        }
+        @media (min-width: 640px) {
+          .selected-work-section {
+            --container-gutter: 24px;
+            --slide-w: calc((100vw - var(--container-gutter)) / 2.3);
+          }
         }
         @media (min-width: 768px) {
           .selected-work-section {
             --container-gutter: 48px;
+            --slide-w: calc((100vw - var(--container-gutter)) / 2.3);
+          }
+        }
+        @media (min-width: 1024px) {
+          .selected-work-section {
+            --container-gutter: 48px;
+            --slide-w: calc((100vw - var(--container-gutter)) / 3.2);
           }
         }
         @media (min-width: 1280px) {
           .selected-work-section {
             --container-gutter: max(48px, calc((100vw - 1280px) / 2 + 48px));
+            --slide-w: calc((100vw - var(--container-gutter)) / 4.3);
           }
         }
 
         .selected-work-slide {
-          width: calc((100vw - var(--container-gutter)) / 1.3);
+          width: var(--slide-w);
           flex-shrink: 0;
           scroll-snap-align: start;
         }
-        @media (min-width: 640px) {
-          .selected-work-slide {
-            width: calc((100vw - var(--container-gutter)) / 2.3);
+
+        .slider-nav-btn {
+          display: none;
+          position: absolute;
+          top: calc(var(--slide-w) * 0.625);
+          transform: translateY(-50%);
+          width: 48px;
+          height: 48px;
+          min-width: 48px;
+          min-height: 48px;
+          border-radius: 9999px;
+          background-color: rgba(255, 255, 255, 0.92);
+          border: 1px solid #e3dfda;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 20;
+          transition: opacity 200ms ease, transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .slider-nav-btn {
+            display: flex;
           }
         }
-        @media (min-width: 1024px) {
-          .selected-work-slide {
-            width: calc((100vw - var(--container-gutter)) / 3.2);
-          }
+
+        .slider-nav-btn:hover {
+          background-color: #ffffff;
+          transform: translateY(-50%) scale(1.06);
         }
-        @media (min-width: 1280px) {
-          .selected-work-slide {
-            width: calc((100vw - var(--container-gutter)) / 4.3);
+
+        .slider-nav-btn:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5f7b6b, 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .slider-nav-prev {
+          left: clamp(12px, 2vw, 32px);
+        }
+
+        .slider-nav-next {
+          right: clamp(12px, 2vw, 32px);
+        }
+
+        .slider-nav-btn.cannot-prev,
+        .slider-nav-btn.cannot-next {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .slider-nav-btn.can-prev,
+        .slider-nav-btn.can-next {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .slider-nav-btn {
+            transition: none;
+          }
+          .slider-nav-btn:hover {
+            transform: translateY(-50%);
           }
         }
       `}</style>
 
       <div className="selected-work-section space-y-10">
-        {/* Section Header Row: Title & Subtitle at Left, Plain "View all" and 40px Arrows at Right */}
+        {/* Section Header Row: Title & Subtitle at Left, Plain "View all" at Right */}
         <div
           className="mx-auto max-w-7xl px-6 md:px-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6"
         >
           <div>
             <h2
-              id="selected-work-title"
+              id={id}
               className="font-heading text-4xl sm:text-5xl text-ink font-normal tracking-tight"
             >
-              Selected work
+              {title}
             </h2>
-            <p className="mt-2 text-sm text-muted font-light">
-              Original paintings and archival print editions from the Hudson studio.
-            </p>
+            {subtitle && (
+              <p className="mt-2 text-sm text-muted font-light">
+                {subtitle}
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center gap-6 self-start sm:self-end">
+          <div className="self-start sm:self-end">
             <Link
-              href="/originals"
+              href={viewAllHref}
               className="text-sm font-normal text-ink hover:text-sage transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
             >
-              View all
+              {viewAllLabel}
             </Link>
-
-            {/* Small 40px round arrows next to "View all" on desktop, hidden on touch */}
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                type="button"
-                onClick={scrollPrev}
-                disabled={!canPrev}
-                aria-label="Previous artworks"
-                className="w-10 h-10 rounded-full border border-line bg-white flex items-center justify-center text-ink transition-all hover:border-ink disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={scrollNext}
-                disabled={!canNext}
-                aria-label="Next artworks"
-                className="w-10 h-10 rounded-full border border-line bg-white flex items-center justify-center text-ink transition-all hover:border-ink disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
           </div>
         </div>
 
-        {/* Full-Bleed Scroll Track */}
-        <div
-          ref={trackRef}
-          role="region"
-          aria-label="Selected work carousel"
-          tabIndex={0}
-          onKeyDown={handleKeyDown}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUpOrCancel}
-          onPointerCancel={handlePointerUpOrCancel}
-          onClickCapture={handleClickCapture}
-          className="flex w-full overflow-x-auto no-scrollbar gap-[12px] cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
-          style={{
-            scrollSnapType: 'x mandatory',
-            paddingInlineStart: 'var(--container-gutter)',
-            scrollPaddingInlineStart: 'var(--container-gutter)',
-            paddingInlineEnd: 'var(--container-gutter)',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {displayItems.map((artwork, idx) => (
-            <div key={artwork.id || artwork._id || artwork.slug} className="selected-work-slide">
-              <ArtworkCardItem
-                artwork={artwork}
-                priority={idx < 2}
-              />
-            </div>
-          ))}
+        {/* Relative Slider Container spanning full viewport width with absolute end arrows */}
+        <div className="relative w-full overflow-visible">
+          {/* Prev Arrow at Left End */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              scrollPrev();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            disabled={!canPrev}
+            aria-label="Previous artworks"
+            aria-hidden={!canPrev}
+            tabIndex={canPrev ? 0 : -1}
+            className={cn(
+              'slider-nav-btn slider-nav-prev',
+              canPrev ? 'can-prev' : 'cannot-prev'
+            )}
+          >
+            <ChevronLeft className="w-5 h-5 text-ink shrink-0" />
+          </button>
+
+          {/* Full-Bleed Scroll Track */}
+          <div
+            ref={trackRef}
+            role="region"
+            aria-label={ariaLabel}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUpOrCancel}
+            onPointerCancel={handlePointerUpOrCancel}
+            onClickCapture={handleClickCapture}
+            className="flex w-full overflow-x-auto no-scrollbar gap-[12px] cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
+            style={{
+              scrollSnapType: 'x mandatory',
+              paddingInlineStart: 'var(--container-gutter)',
+              scrollPaddingInlineStart: 'var(--container-gutter)',
+              paddingInlineEnd: 'var(--container-gutter)',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            {displayItems.map((artwork, idx) => (
+              <div key={artwork.id || artwork._id || artwork.slug} className="selected-work-slide">
+                <ArtworkCardItem
+                  artwork={artwork}
+                  priority={idx < priorityLimit}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Next Arrow at Right End */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              scrollNext();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            disabled={!canNext}
+            aria-label="Next artworks"
+            aria-hidden={!canNext}
+            tabIndex={canNext ? 0 : -1}
+            className={cn(
+              'slider-nav-btn slider-nav-next',
+              canNext ? 'can-next' : 'cannot-next'
+            )}
+          >
+            <ChevronRight className="w-5 h-5 text-ink shrink-0" />
+          </button>
         </div>
       </div>
     </section>
@@ -279,3 +388,4 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
 }
 
 export default SelectedWorkGrid;
+export { SelectedWorkGrid as ArtworkSlider };
