@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ISubscriber } from '@/types/artwork';
 import { formatDate } from '@/lib/format';
-import { Users } from 'lucide-react';
+import { Users, Download, RefreshCw, Trash2, Search } from 'lucide-react';
 
 interface SubscribersListProps {
   subscribers: ISubscriber[];
@@ -20,18 +20,19 @@ export function SubscribersList({
 }: SubscribersListProps) {
   const [search, setSearch] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const filtered = subscribers.filter((sub) =>
     sub.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this subscriber?')) return;
     try {
       setDeletingId(id);
       await onDeleteSubscriber(id);
     } finally {
       setDeletingId(null);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -60,19 +61,7 @@ export function SubscribersList({
       {/* Top Controls: Search, Export CSV, Refresh */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1">
-          <svg
-            className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="search"
             value={search}
@@ -87,12 +76,10 @@ export function SubscribersList({
             type="button"
             onClick={handleExportCSV}
             disabled={subscribers.length === 0}
-            className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-medium transition-all flex items-center justify-center gap-2 min-h-[44px] disabled:opacity-50"
+            className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-medium transition-all flex items-center justify-center gap-2 min-h-[44px] disabled:opacity-50 active:scale-95 shadow-sm"
             title="Download subscribers as CSV spreadsheet"
           >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+            <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
           </button>
 
@@ -101,24 +88,30 @@ export function SubscribersList({
             onClick={onRefresh}
             disabled={loading}
             className="px-4 py-2.5 rounded-xl bg-white hover:bg-paper border border-line text-xs font-medium text-muted hover:text-ink transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
+            title="Refresh subscribers list"
           >
-            <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* List Container */}
       {loading && subscribers.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-line">
-          <div className="w-8 h-8 border-2 border-sage border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-muted">Loading newsletter subscribers...</p>
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((n) => (
+            <div
+              key={n}
+              className="bg-white rounded-2xl border border-line p-4 flex items-center justify-between animate-pulse"
+            >
+              <div className="h-4 w-48 bg-line/80 rounded" />
+              <div className="h-4 w-24 bg-line/50 rounded" />
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 px-4 bg-white rounded-2xl border border-line">
           <Users className="h-8 w-8 text-sage mx-auto mb-2" strokeWidth={1.5} />
-          <h3 className="font-serif text-lg text-ink font-normal">
+          <h3 className="font-heading text-lg text-ink font-normal">
             {search ? 'No matching subscribers found' : 'No subscribers yet'}
           </h3>
           <p className="text-xs text-muted mt-1 max-w-sm mx-auto">
@@ -159,17 +152,35 @@ export function SubscribersList({
                 </div>
 
                 {subId && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(subId)}
-                    disabled={deletingId === subId}
-                    className="p-2 text-muted/60 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors shrink-0 min-w-[36px] min-h-[36px] flex items-center justify-center"
-                    title="Remove subscriber"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  confirmDeleteId === subId ? (
+                    <div className="flex items-center gap-1.5 animate-fadeIn">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(subId)}
+                        disabled={deletingId === subId}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-all min-h-[36px]"
+                      >
+                        {deletingId === subId ? 'Deleting...' : 'Delete'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-2 py-1.5 rounded-lg text-xs text-muted hover:text-ink bg-paper border border-line transition-all min-h-[36px]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteId(subId)}
+                      className="p-2 text-muted/60 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors shrink-0 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                      title="Remove subscriber"
+                      aria-label="Remove subscriber"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )
                 )}
               </div>
             );

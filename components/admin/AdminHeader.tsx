@@ -10,6 +10,7 @@ interface AdminHeaderProps {
   setActiveTab: (tab: 'artworks' | 'inquiries' | 'subscribers') => void;
   artworksCount: number;
   inquiriesCount: number;
+  unreadInquiriesCount?: number;
   subscribersCount: number;
 }
 
@@ -18,6 +19,7 @@ export function AdminHeader({
   setActiveTab,
   artworksCount,
   inquiriesCount,
+  unreadInquiriesCount = 0,
   subscribersCount,
 }: AdminHeaderProps) {
   const router = useRouter();
@@ -124,13 +126,19 @@ export function AdminHeader({
           >
             <Mail className="h-4 w-4" />
             <span>Inquiries</span>
-            <span
-              className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
-                activeTab === 'inquiries' ? 'bg-white/20 text-paper' : 'bg-line text-muted'
-              }`}
-            >
-              {inquiriesCount}
-            </span>
+            {unreadInquiriesCount > 0 ? (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sage text-paper shadow-sm animate-pulse">
+                {unreadInquiriesCount} new
+              </span>
+            ) : (
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
+                  activeTab === 'inquiries' ? 'bg-white/20 text-paper' : 'bg-line text-muted'
+                }`}
+              >
+                {inquiriesCount}
+              </span>
+            )}
           </button>
 
           <button

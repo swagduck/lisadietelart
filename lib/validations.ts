@@ -33,6 +33,9 @@ export const subscriberInputSchema = z.object({
   website: z.string().optional(),
 });
 
+export const artworkUpdateSchema = artworkInputSchema.partial();
+
 export type ArtworkInput = z.infer<typeof artworkInputSchema>;
+export type ArtworkUpdateInput = z.infer<typeof artworkUpdateSchema>;
 export type InquiryInput = z.infer<typeof inquiryInputSchema>;
 export type SubscriberInput = z.infer<typeof subscriberInputSchema>;

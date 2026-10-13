@@ -104,34 +104,14 @@ export async function POST(request: Request) {
       });
     }
 
-    // Graceful local fallback if Cloudinary account is inactive or offline
-    try {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const safeExt = path.extname(file.name) || '.jpg';
-      const cleanBase = path.basename(file.name, safeExt).replace(/[^a-zA-Z0-9_-]/g, '_');
-      const uniqueName = `${cleanBase}-${Date.now()}${safeExt}`;
-      const filePath = path.join(uploadsDir, uniqueName);
-
-      fs.writeFileSync(filePath, buffer);
-      const localUrl = `/uploads/${uniqueName}`;
-
-      return NextResponse.json({
-        success: true,
-        url: localUrl,
-        provider: 'local',
-        notice: 'Uploaded to local studio storage (Cloudinary is disabled or offline).',
-      });
-    } catch (localErr) {
-      console.error('Local fallback upload error:', localErr);
-      return NextResponse.json(
-        { success: false, error: 'Failed to save uploaded image.' },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          'Cloudinary upload failed or is not configured. Please verify CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.',
+      },
+      { status: 502 }
+    );
   } catch (err: any) {
     console.error('Upload route error:', err);
     return NextResponse.json(

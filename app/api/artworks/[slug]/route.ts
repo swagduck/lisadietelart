@@ -38,7 +38,9 @@ export async function GET(request: Request, { params }: RouteContext) {
     const { slug } = params;
     const db = await connectToDatabase();
     if (db) {
-      const doc = await Artwork.findOne({ slug }).lean().exec();
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(slug);
+      const query = isObjectId ? { $or: [{ slug }, { _id: slug }] } : { slug };
+      const doc = await Artwork.findOne(query).lean().exec();
       if (doc) {
         return NextResponse.json({
           success: true,
@@ -50,7 +52,7 @@ export async function GET(request: Request, { params }: RouteContext) {
       }
     }
 
-    const fallback = ARTWORKS_DATA.find((item) => item.slug === slug);
+    const fallback = ARTWORKS_DATA.find((item) => item.slug === slug || (item as any).id === slug);
     if (fallback) {
       return NextResponse.json({ success: true, data: fallback });
     }
@@ -77,8 +79,11 @@ export async function PUT(request: Request, { params }: RouteContext) {
       );
     }
 
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(slug);
+    const query = isObjectId ? { $or: [{ slug }, { _id: slug }] } : { slug };
+
     const updated = await Artwork.findOneAndUpdate(
-      { slug },
+      query,
       { $set: updateData },
       { new: true, runValidators: true }
     );
@@ -116,17 +121,20 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       );
     }
 
-    const deleted = await Artwork.findOneAndDelete({ slug });
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(slug);
+    const query = isObjectId ? { $or: [{ slug }, { _id: slug }] } : { slug };
+
+    const deleted = await Artwork.findOneAndDelete(query);
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'Artwork not found.' }, { status: 404 });
     }
 
     // Invalidate ISR cache tags and paths to purge deleted artwork
-    invalidateArtworkCaches(slug);
+    invalidateArtworkCaches(deleted.slug);
 
     return NextResponse.json({
       success: true,
-      message: `Artwork "${slug}" successfully deleted.`,
+      message: `Artwork "${deleted.slug}" successfully deleted.`,
     });
   } catch {
     return NextResponse.json(

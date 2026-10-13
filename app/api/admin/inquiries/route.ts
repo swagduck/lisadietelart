@@ -70,3 +70,52 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const json = await request.json();
+    const { id, read } = json;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Inquiry ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: 'Database service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    const updated = await Inquiry.findByIdAndUpdate(
+      id,
+      { $set: { read: Boolean(read) } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'Inquiry not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...updated.toObject(),
+        id: updated._id.toString(),
+      },
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Failed to update inquiry read status' },
+      { status: 500 }
+    );
+  }
+}
+

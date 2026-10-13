@@ -50,10 +50,12 @@ export interface IArtwork {
 
 export interface IInquiry {
   _id?: string;
+  id?: string;
   name: string;
   email: string;
   message: string;
   artworkSlug?: string | null;
+  read?: boolean;
   createdAt?: string | Date;
 }
 

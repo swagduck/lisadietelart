@@ -1,15 +1,32 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { IArtwork, IInquiry, ISubscriber } from '@/types/artwork';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { ArtworkCard } from '@/components/admin/ArtworkCard';
-import { ArtworkModal } from '@/components/admin/ArtworkModal';
 import { InquiriesList } from '@/components/admin/InquiriesList';
 import { SubscribersList } from '@/components/admin/SubscribersList';
-import { Palette, Check, X } from 'lucide-react';
+import {
+  Palette,
+  Check,
+  X,
+  Plus,
+  Search,
+  Undo2,
+  Sparkles,
+} from 'lucide-react';
+
+interface ToastState {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+  undoAction?: () => void;
+}
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'artworks' | 'inquiries' | 'subscribers'>('artworks');
 
   // Data states
@@ -26,18 +43,32 @@ export default function AdminDashboardPage() {
   const [artFilter, setArtFilter] = useState<'all' | 'original' | 'print' | 'available' | 'sold' | 'featured'>('all');
   const [artSearch, setArtSearch] = useState('');
 
-  // Modal State
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingArtwork, setEditingArtwork] = useState<IArtwork | null>(null);
+  // Toast notification with Undo support
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Toast notification
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' = 'success',
+    undoAction?: () => void
+  ) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
 
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => {
+    const toastId = `${Date.now()}-${Math.random()}`;
+    setToast({ id: toastId, message, type, undoAction });
+
+    toastTimeoutRef.current = setTimeout(() => {
       setToast(null);
-    }, 3500);
+    }, 5500);
+  };
+
+  const handleDismissToast = () => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToast(null);
   };
 
   // Fetch Artworks
@@ -95,16 +126,48 @@ export default function AdminDashboardPage() {
     fetchSubscribers();
   }, [fetchArtworks, fetchInquiries, fetchSubscribers]);
 
-  // Handle Sold Toggle
+  // Handle Sold Toggle with Optimistic UI & Undo Toast
   const handleToggleSold = async (slug: string, currentSold: boolean) => {
     const newSold = !currentSold;
-    // Optimistic update
+    const targetArtwork = artworks.find((a) => a.slug === slug);
+    const title = targetArtwork?.title || slug;
+
+    // 1. Optimistic local update
     setArtworks((prev) =>
       prev.map((item) =>
         item.slug === slug ? { ...item, sold: newSold, isSoldOut: newSold } : item
       )
     );
 
+    // 2. Undo callback definition
+    const undoAction = async () => {
+      // Revert in state
+      setArtworks((prev) =>
+        prev.map((item) =>
+          item.slug === slug ? { ...item, sold: currentSold, isSoldOut: currentSold } : item
+        )
+      );
+      // Revert in backend
+      try {
+        await fetch('/api/artworks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, sold: currentSold }),
+        });
+        showToast(`Undone: "${title}" status restored.`);
+      } catch {
+        showToast('Failed to revert status.', 'error');
+      }
+    };
+
+    // 3. Show undo toast immediately
+    showToast(
+      newSold ? `"${title}" marked as sold out.` : `"${title}" marked as available.`,
+      'success',
+      undoAction
+    );
+
+    // 4. Send network request
     try {
       const res = await fetch('/api/artworks', {
         method: 'PUT',
@@ -115,9 +178,8 @@ export default function AdminDashboardPage() {
       if (!res.ok || !data.success) {
         throw new Error(data.error);
       }
-      showToast(newSold ? 'Marked as Sold Out' : 'Marked as Available');
     } catch {
-      // Revert optimistic update
+      // Revert if network failed
       setArtworks((prev) =>
         prev.map((item) =>
           item.slug === slug ? { ...item, sold: currentSold, isSoldOut: currentSold } : item
@@ -127,16 +189,46 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Handle Featured Toggle
+  // Handle Featured Toggle with Optimistic UI & Undo Toast
   const handleToggleFeatured = async (slug: string, currentFeatured: boolean) => {
     const newFeatured = !currentFeatured;
-    // Optimistic update
+    const targetArtwork = artworks.find((a) => a.slug === slug);
+    const title = targetArtwork?.title || slug;
+
+    // 1. Optimistic update
     setArtworks((prev) =>
       prev.map((item) =>
         item.slug === slug ? { ...item, featured: newFeatured } : item
       )
     );
 
+    // 2. Undo callback
+    const undoAction = async () => {
+      setArtworks((prev) =>
+        prev.map((item) =>
+          item.slug === slug ? { ...item, featured: currentFeatured } : item
+        )
+      );
+      try {
+        await fetch('/api/artworks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, featured: currentFeatured }),
+        });
+        showToast(`Undone: "${title}" featured status restored.`);
+      } catch {
+        showToast('Failed to revert featured status.', 'error');
+      }
+    };
+
+    // 3. Show undo toast
+    showToast(
+      newFeatured ? `"${title}" added to featured works.` : `"${title}" removed from featured.`,
+      'success',
+      undoAction
+    );
+
+    // 4. Send request
     try {
       const res = await fetch('/api/artworks', {
         method: 'PUT',
@@ -147,9 +239,7 @@ export default function AdminDashboardPage() {
       if (!res.ok || !data.success) {
         throw new Error(data.error);
       }
-      showToast(newFeatured ? 'Added to Featured works' : 'Removed from Featured');
     } catch {
-      // Revert
       setArtworks((prev) =>
         prev.map((item) =>
           item.slug === slug ? { ...item, featured: currentFeatured } : item
@@ -173,6 +263,36 @@ export default function AdminDashboardPage() {
       showToast('Artwork deleted successfully');
     } catch {
       showToast('Failed to delete artwork', 'error');
+    }
+  };
+
+  // Handle Mark as Read / Unread Inquiry
+  const handleToggleReadInquiry = async (id: string, currentRead: boolean) => {
+    const nextRead = !currentRead;
+    // Optimistic update
+    setInquiries((prev) =>
+      prev.map((item) =>
+        (item.id || item._id) === id ? { ...item, read: nextRead } : item
+      )
+    );
+
+    try {
+      const res = await fetch('/api/admin/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, read: nextRead }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error);
+      showToast(nextRead ? 'Inquiry marked as read' : 'Inquiry marked as unread');
+    } catch {
+      // Revert on error
+      setInquiries((prev) =>
+        prev.map((item) =>
+          (item.id || item._id) === id ? { ...item, read: currentRead } : item
+        )
+      );
+      showToast('Failed to update inquiry status', 'error');
     }
   };
 
@@ -206,27 +326,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Open Create Modal
-  const handleOpenCreate = () => {
-    setEditingArtwork(null);
-    setModalOpen(true);
-  };
-
-  // Open Edit Modal
-  const handleOpenEdit = (art: IArtwork) => {
-    setEditingArtwork(art);
-    setModalOpen(true);
-  };
-
   // Filtered artworks
   const filteredArtworks = artworks.filter((item) => {
-    // Search query
     const q = artSearch.toLowerCase();
     const matchesSearch =
       !q ||
       item.title.toLowerCase().includes(q) ||
       item.medium.toLowerCase().includes(q) ||
-      item.slug.toLowerCase().includes(q);
+      item.slug.toLowerCase().includes(q) ||
+      (item.description && item.description.toLowerCase().includes(q));
 
     if (!matchesSearch) return false;
 
@@ -239,35 +347,63 @@ export default function AdminDashboardPage() {
     return true;
   });
 
+  const unreadInquiriesCount = inquiries.filter((inq) => !inq.read).length;
+
   return (
-    <div className="min-h-screen bg-paper pb-28 sm:pb-16">
-      {/* Top Header & Mobile Tab Bar */}
+    <div className="min-h-screen bg-paper pb-32 sm:pb-20">
+      {/* Top Header & Mobile Navigation Tabs */}
       <AdminHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         artworksCount={artworks.length}
         inquiriesCount={inquiries.length}
+        unreadInquiriesCount={unreadInquiriesCount}
         subscribersCount={subscribers.length}
       />
 
       {/* Main Content Area */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
-        {/* Toast Alert */}
+        {/* Floating Toast Alert with Undo Capability */}
         {toast && (
           <div
             role="status"
-            className={`fixed bottom-20 sm:bottom-8 right-4 left-4 sm:left-auto sm:right-8 z-50 p-4 rounded-2xl shadow-xl flex items-center gap-3 transition-all animate-slideUp sm:animate-fadeIn border ${
-              toast.type === 'success'
-                ? 'bg-ink text-paper border-ink/40'
-                : 'bg-red-900 text-white border-red-800'
-            }`}
+            className="fixed bottom-20 sm:bottom-8 right-4 left-4 sm:left-auto sm:right-8 z-50 p-4 rounded-2xl shadow-xl flex items-center justify-between gap-3 transition-all animate-slideUp sm:animate-fadeIn border bg-ink text-paper border-ink/40 max-w-md"
           >
-            {toast.type === 'success' ? (
-              <Check className="h-4 w-4 text-sage shrink-0" />
-            ) : (
-              <X className="h-4 w-4 text-red-300 shrink-0" />
-            )}
-            <span className="text-xs sm:text-sm font-medium">{toast.message}</span>
+            <div className="flex items-center gap-2.5 min-w-0">
+              {toast.type === 'error' ? (
+                <X className="h-4 w-4 text-red-300 shrink-0" />
+              ) : (
+                <Check className="h-4 w-4 text-sage shrink-0" />
+              )}
+              <span className="text-xs sm:text-sm font-medium truncate">
+                {toast.message}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {toast.undoAction && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.undoAction?.();
+                    handleDismissToast();
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center gap-1 transition-all active:scale-95"
+                >
+                  <Undo2 className="h-3.5 w-3.5" />
+                  <span>Undo</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleDismissToast}
+                className="p-1 rounded-lg text-paper/70 hover:text-paper"
+                aria-label="Dismiss message"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -278,58 +414,43 @@ export default function AdminDashboardPage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* Search Field */}
               <div className="relative flex-1">
-                <svg
-                  className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+                <Search className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="search"
                   value={artSearch}
                   onChange={(e) => setArtSearch(e.target.value)}
-                  placeholder="Search title, medium, slug..."
+                  placeholder="Search title, medium, description..."
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-line bg-white text-ink text-sm placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage min-h-[44px]"
                 />
               </div>
 
-              {/* Add Artwork Button (Desktop view) */}
-              <button
-                type="button"
-                onClick={handleOpenCreate}
+              {/* Add Artwork Button -> Navigates to full-page form */}
+              <Link
+                href="/admin/artworks/new"
                 className="hidden sm:inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-ink text-paper hover:bg-ink/90 active:scale-95 text-xs font-medium tracking-wide transition-all shadow-sm min-h-[44px]"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add Artwork</span>
-              </button>
+                <Plus className="w-4 h-4" />
+                <span>Add artwork</span>
+              </Link>
             </div>
 
             {/* Filter Pills (Scrollable on small mobile screens) */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
               {(
                 [
-                  { id: 'all', label: 'All Works' },
+                  { id: 'all', label: 'All works' },
                   { id: 'original', label: 'Originals' },
                   { id: 'print', label: 'Prints' },
                   { id: 'available', label: 'Available' },
-                  { id: 'sold', label: 'Sold Out' },
-                  { id: 'featured', label: 'Featured ⭐' },
+                  { id: 'sold', label: 'Sold out' },
+                  { id: 'featured', label: 'Featured' },
                 ] as const
               ).map((f) => (
                 <button
                   key={f.id}
                   type="button"
                   onClick={() => setArtFilter(f.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap min-h-[36px] ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap min-h-[38px] ${
                     artFilter === f.id
                       ? 'bg-ink text-paper shadow-sm'
                       : 'bg-white text-muted hover:text-ink border border-line'
@@ -342,28 +463,47 @@ export default function AdminDashboardPage() {
 
             {/* Artworks List Grid */}
             {loadingArtworks && artworks.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl border border-line">
-                <div className="w-8 h-8 border-2 border-sage border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-xs text-muted">Loading studio artwork collection...</p>
+              // Skeletons while loading artworks
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div
+                    key={n}
+                    className="bg-white rounded-2xl border border-line p-5 space-y-4 animate-pulse"
+                  >
+                    <div className="flex gap-4">
+                      <div className="w-24 h-24 rounded-xl bg-line/80 shrink-0" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 w-32 bg-line/80 rounded" />
+                        <div className="h-3 w-24 bg-line/60 rounded" />
+                        <div className="h-3 w-20 bg-line/50 rounded" />
+                        <div className="h-4 w-16 bg-line/70 rounded mt-2" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
+                      <div className="h-10 bg-line/60 rounded-xl" />
+                      <div className="h-10 bg-line/60 rounded-xl" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredArtworks.length === 0 ? (
               <div className="text-center py-20 px-4 bg-white rounded-2xl border border-line">
                 <Palette className="h-8 w-8 text-sage mx-auto mb-2" strokeWidth={1.5} />
-                <h3 className="font-serif text-lg text-ink font-normal">
-                  {artSearch || artFilter !== 'all' ? 'No matching artworks found' : 'No artworks in catalog'}
+                <h3 className="font-heading text-lg text-ink font-normal">
+                  {artSearch || artFilter !== 'all' ? 'No matching artworks' : 'No artworks in catalog'}
                 </h3>
                 <p className="text-xs text-muted mt-1 max-w-sm mx-auto mb-4">
                   {artSearch || artFilter !== 'all'
                     ? 'Try clearing filters or search terms.'
-                    : 'Click Add Artwork to upload your first studio painting or print.'}
+                    : 'Click Add Artwork to create your first studio painting or print.'}
                 </p>
-                <button
-                  type="button"
-                  onClick={handleOpenCreate}
-                  className="px-4 py-2 rounded-xl bg-ink text-paper text-xs font-medium"
+                <Link
+                  href="/admin/artworks/new"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-ink text-paper text-xs font-medium"
                 >
-                  + Add Artwork
-                </button>
+                  <Plus className="w-4 h-4" />
+                  <span>Add artwork</span>
+                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -371,7 +511,6 @@ export default function AdminDashboardPage() {
                   <ArtworkCard
                     key={artwork.slug}
                     artwork={artwork}
-                    onEdit={handleOpenEdit}
                     onDelete={handleDeleteArtwork}
                     onToggleSold={handleToggleSold}
                     onToggleFeatured={handleToggleFeatured}
@@ -388,6 +527,7 @@ export default function AdminDashboardPage() {
             inquiries={inquiries}
             loading={loadingInquiries}
             onDeleteInquiry={handleDeleteInquiry}
+            onToggleReadInquiry={handleToggleReadInquiry}
             onRefresh={fetchInquiries}
           />
         )}
@@ -403,32 +543,18 @@ export default function AdminDashboardPage() {
         )}
       </main>
 
-      {/* Floating Action Button (Mobile view "+ Add Artwork") */}
+      {/* Floating Action Button (Mobile view "+ Add Artwork" linking to /admin/artworks/new) */}
       {activeTab === 'artworks' && (
-        <div className="sm:hidden fixed bottom-6 right-6 z-40">
-          <button
-            type="button"
-            onClick={handleOpenCreate}
+        <div className="sm:hidden fixed bottom-6 right-6 z-30">
+          <Link
+            href="/admin/artworks/new"
             aria-label="Add new artwork"
-            className="w-14 h-14 rounded-full bg-ink text-paper shadow-lg hover:bg-ink/90 active:scale-95 flex items-center justify-center border border-white/20"
+            className="w-14 h-14 rounded-full bg-ink text-paper shadow-xl hover:bg-ink/90 active:scale-95 flex items-center justify-center border border-white/20 transition-all"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
+            <Plus className="w-6 h-6" strokeWidth={2.5} />
+          </Link>
         </div>
       )}
-
-      {/* Artwork Modal (Create / Edit) */}
-      <ArtworkModal
-        isOpen={modalOpen}
-        artwork={editingArtwork}
-        onClose={() => setModalOpen(false)}
-        onSaved={() => {
-          fetchArtworks();
-          showToast(editingArtwork ? 'Artwork updated successfully' : 'New artwork created');
-        }}
-      />
     </div>
   );
 }

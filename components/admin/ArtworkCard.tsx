@@ -4,11 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
-import { Star } from 'lucide-react';
+import { Star, Eye, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 
 interface ArtworkCardProps {
   artwork: IArtwork;
-  onEdit: (artwork: IArtwork) => void;
   onDelete: (slug: string) => Promise<void>;
   onToggleSold: (slug: string, currentSold: boolean) => Promise<void>;
   onToggleFeatured: (slug: string, currentFeatured: boolean) => Promise<void>;
@@ -16,7 +15,6 @@ interface ArtworkCardProps {
 
 export function ArtworkCard({
   artwork,
-  onEdit,
   onDelete,
   onToggleSold,
   onToggleFeatured,
@@ -33,6 +31,7 @@ export function ArtworkCard({
 
   const isSold = Boolean(artwork.sold || artwork.isSoldOut);
   const isFeatured = Boolean(artwork.featured);
+  const artworkIdentifier = artwork.slug || artwork.id || artwork._id || '';
 
   const handleSoldClick = async () => {
     if (togglingSold) return;
@@ -65,7 +64,7 @@ export function ArtworkCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-line p-4 sm:p-5 shadow-sm transition-all hover:shadow-md flex flex-col gap-4">
+    <div className="bg-white rounded-2xl border border-line p-4 sm:p-5 shadow-sm transition-all hover:border-sage/40 flex flex-col gap-4">
       {/* Top Section: Thumbnail & Core Details */}
       <div className="flex gap-4 items-start">
         {/* Thumbnail Preview */}
@@ -95,7 +94,7 @@ export function ArtworkCard({
         {/* Text Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1">
-            <h3 className="font-serif text-lg sm:text-xl font-normal text-ink truncate leading-tight">
+            <h3 className="font-heading text-lg sm:text-xl font-normal text-ink truncate leading-tight">
               {artwork.title}
             </h3>
           </div>
@@ -119,7 +118,7 @@ export function ArtworkCard({
         </div>
       </div>
 
-      {/* Instant Action Toggles (Phone friendly touch buttons) */}
+      {/* Instant Action Toggles (Phone-friendly touch buttons) */}
       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
         {/* Sold Toggle */}
         <button
@@ -127,7 +126,7 @@ export function ArtworkCard({
           onClick={handleSoldClick}
           disabled={togglingSold}
           aria-label={`Toggle sold state. Currently ${isSold ? 'Sold' : 'Available'}`}
-          className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-all border ${
+          className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-all border active:scale-[0.98] ${
             isSold
               ? 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'
               : 'bg-sage/15 text-sage hover:bg-sage/20 border-sage/30'
@@ -138,7 +137,7 @@ export function ArtworkCard({
           ) : isSold ? (
             <>
               <span className="w-2 h-2 rounded-full bg-red-600 inline-block" />
-              <span>Sold Out</span>
+              <span>Sold out</span>
             </>
           ) : (
             <>
@@ -154,7 +153,7 @@ export function ArtworkCard({
           onClick={handleFeaturedClick}
           disabled={togglingFeatured}
           aria-label={`Toggle featured state. Currently ${isFeatured ? 'Featured' : 'Not Featured'}`}
-          className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-all border ${
+          className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-all border active:scale-[0.98] ${
             isFeatured
               ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
               : 'bg-paper text-muted hover:text-ink border-line hover:border-muted/40'
@@ -170,33 +169,25 @@ export function ArtworkCard({
           ) : (
             <>
               <Star className="w-3.5 h-3.5 text-muted/60" />
-              <span>Not Featured</span>
+              <span>Not featured</span>
             </>
           )}
         </button>
       </div>
 
-      {/* Bottom Row Actions: Edit, Delete, View */}
+      {/* Bottom Row Actions: Edit (full-page route), Preview on site, Delete */}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-line/40">
         <div className="flex items-center gap-2">
-          {/* Edit Button */}
-          <button
-            type="button"
-            onClick={() => onEdit(artwork)}
-            className="px-3.5 py-2 rounded-xl text-xs font-medium text-ink bg-paper hover:bg-line border border-line transition-all min-h-[40px] flex items-center gap-1.5"
+          {/* Edit Full-Page Form Button */}
+          <Link
+            href={`/admin/artworks/${encodeURIComponent(artworkIdentifier)}`}
+            className="px-3.5 py-2 rounded-xl text-xs font-medium text-ink bg-paper hover:bg-line border border-line transition-all min-h-[40px] flex items-center gap-1.5 active:scale-95"
           >
-            <svg className="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
+            <Pencil className="w-3.5 h-3.5 text-muted" />
             <span>Edit</span>
-          </button>
+          </Link>
 
-          {/* View on Public Site */}
+          {/* Preview on Public Site */}
           <Link
             href={`/artwork/${artwork.slug}`}
             target="_blank"
@@ -204,10 +195,8 @@ export function ArtworkCard({
             className="px-3 py-2 rounded-xl text-xs text-muted hover:text-ink hover:bg-paper transition-all min-h-[40px] flex items-center gap-1"
             title="Preview artwork on public website"
           >
-            <span>Preview</span>
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
+            <Eye className="w-3.5 h-3.5 text-sage" />
+            <span>Preview on site</span>
           </Link>
         </div>
 
@@ -220,7 +209,7 @@ export function ArtworkCard({
               disabled={deleting}
               className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-all min-h-[38px]"
             >
-              {deleting ? 'Deleting...' : 'Confirm'}
+              {deleting ? 'Deleting...' : 'Delete'}
             </button>
             <button
               type="button"
@@ -234,18 +223,11 @@ export function ArtworkCard({
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            className="p-2 text-muted/80 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="p-2 text-muted/80 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95"
             title="Delete artwork"
             aria-label={`Delete artwork ${artwork.title}`}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.75}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
+            <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>
