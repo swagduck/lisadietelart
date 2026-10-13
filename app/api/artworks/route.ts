@@ -1,11 +1,32 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Artwork } from '@/models/Artwork';
 import { artworkInputSchema } from '@/lib/validations';
 import { ARTWORKS_DATA } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
+
+function invalidateArtworkCaches(slug?: string) {
+  try {
+    revalidateTag('artworks');
+    revalidateTag('artworks-originals');
+    revalidateTag('artworks-prints');
+    revalidateTag('artworks-selected');
+    if (slug) {
+      revalidateTag(`artwork-${slug}`);
+    }
+    revalidatePath('/');
+    revalidatePath('/originals');
+    revalidatePath('/prints');
+    if (slug) {
+      revalidatePath(`/artwork/${slug}`);
+    }
+    revalidatePath('/sitemap.xml');
+  } catch (revalErr) {
+    console.warn('Cache revalidation note:', revalErr);
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -24,6 +45,7 @@ export async function GET(request: Request) {
       }
 
       const artworks = await Artwork.find(query)
+        .select('title slug type medium size dimensions price currency images sold featured createdAt')
         .sort({ createdAt: -1 })
         .lean()
         .exec();
@@ -87,16 +109,8 @@ export async function POST(request: Request) {
 
     const createdArtwork = await Artwork.create(parseResult.data);
 
-    // Call revalidatePath so public pages update immediately after creation
-    try {
-      revalidatePath('/');
-      revalidatePath('/originals');
-      revalidatePath('/prints');
-      revalidatePath(`/artwork/${createdArtwork.slug}`);
-      revalidatePath('/sitemap.xml');
-    } catch (revalErr) {
-      console.warn('Path revalidation note:', revalErr);
-    }
+    // Invalidate ISR cache tags and paths so public pages update immediately
+    invalidateArtworkCaches(createdArtwork.slug);
 
     return NextResponse.json(
       {
@@ -158,16 +172,8 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Call revalidatePath for immediate cache invalidation
-    try {
-      revalidatePath('/');
-      revalidatePath('/originals');
-      revalidatePath('/prints');
-      revalidatePath(`/artwork/${updated.slug}`);
-      revalidatePath('/sitemap.xml');
-    } catch (revalErr) {
-      console.warn('Path revalidation note:', revalErr);
-    }
+    // Call revalidateTag & revalidatePath for immediate cache invalidation
+    invalidateArtworkCaches(updated.slug);
 
     return NextResponse.json({
       success: true,
@@ -211,16 +217,8 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Call revalidatePath so cached public pages purge deleted artwork
-    try {
-      revalidatePath('/');
-      revalidatePath('/originals');
-      revalidatePath('/prints');
-      revalidatePath(`/artwork/${slug}`);
-      revalidatePath('/sitemap.xml');
-    } catch (revalErr) {
-      console.warn('Path revalidation note:', revalErr);
-    }
+    // Invalidate ISR cache tags and paths so deleted artwork purges instantly
+    invalidateArtworkCaches(slug);
 
     return NextResponse.json({
       success: true,

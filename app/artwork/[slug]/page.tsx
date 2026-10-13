@@ -7,6 +7,7 @@ import { getArtworkBySlug } from '@/lib/server-data';
 import { formatPrice } from '@/lib/format';
 import { Mail, ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface ArtworkDetailPageProps {
   params: {
@@ -132,10 +133,12 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
             <div className="border border-line bg-paper p-3 shadow-md">
               <div className="relative aspect-[4/5] overflow-hidden bg-mist/30">
                 <Image
-                  src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
+                  src={mainImage}
                   alt={artwork.title}
                   fill
-                  priority
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL={getCloudinaryBlurUrl(mainImage)}
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                 />
@@ -154,8 +157,11 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
                       src={img}
                       alt={`${artwork.title} texture detail ${idx + 1}`}
                       fill
+                      loading="lazy"
+                      placeholder="blur"
+                      blurDataURL={getCloudinaryBlurUrl(img)}
                       className="object-cover"
-                      sizes="200px"
+                      sizes="(max-width: 640px) 33vw, 160px"
                     />
                   </div>
                 ))}

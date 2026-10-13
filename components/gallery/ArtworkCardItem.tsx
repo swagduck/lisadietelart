@@ -4,12 +4,15 @@ import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface ArtworkCardItemProps {
   artwork: IArtwork;
 }
 
 export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
+  const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+
   return (
     <article
       className={cn(
@@ -22,15 +25,19 @@ export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
       {/* Artwork Image Frame */}
       <Link
         href={`/artwork/${artwork.slug}`}
+        prefetch={true}
         className="relative block aspect-[3/4] overflow-hidden bg-mist/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
         aria-label={`View ${artwork.title}${artwork.isSoldOut ? ' (Sold Out)' : ''}`}
       >
         <Image
-          src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
+          src={artworkImg}
           alt={artwork.title}
           fill
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL={getCloudinaryBlurUrl(artworkImg)}
           className={cn(
-            'object-cover transition-transform duration-700 ease-out',
+            'object-cover transition-transform duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none',
             artwork.isSoldOut
               ? 'group-hover:scale-102 grayscale-[20%]'
               : 'group-hover:scale-105'
@@ -58,6 +65,7 @@ export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
           <h2 className="font-heading text-2xl leading-snug text-ink transition-colors group-hover:text-sage">
             <Link
               href={`/artwork/${artwork.slug}`}
+              prefetch={true}
               className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
             >
               {artwork.title}
@@ -84,6 +92,7 @@ export function ArtworkCardItem({ artwork }: ArtworkCardItemProps) {
 
           <Link
             href={`/artwork/${artwork.slug}`}
+            prefetch={true}
             className="flex items-center gap-1 rounded-sm text-[10px] font-medium uppercase tracking-wider text-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage group-hover:text-ink"
           >
             {artwork.isSoldOut ? 'View Archive &rarr;' : 'View Details &rarr;'}

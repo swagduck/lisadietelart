@@ -8,7 +8,7 @@ import { CartDrawer } from '@/components/shop/CartDrawer';
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
   display: 'swap',
@@ -16,7 +16,7 @@ const cormorantGaramond = Cormorant_Garamond({
 
 const jost = Jost({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500'],
   variable: '--font-jost',
   display: 'swap',
 });

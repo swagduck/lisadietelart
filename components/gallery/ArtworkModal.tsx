@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/format';
 import { useCart } from '../shop/CartContext';
 import { X, Check, ShieldCheck, Truck, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface ArtworkModalProps {
   artwork: IArtwork | null;
@@ -85,6 +86,9 @@ export function ArtworkModal({ artwork, onClose }: ArtworkModalProps) {
                   src={artworkImg}
                   alt={artwork.title}
                   fill
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL={getCloudinaryBlurUrl(artworkImg)}
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />

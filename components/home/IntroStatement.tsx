@@ -25,12 +25,14 @@ export function IntroStatement() {
         <div className="flex flex-wrap justify-center gap-4 pt-4">
           <Link
             href="/originals"
+            prefetch={true}
             className="bg-ink px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
           >
             Originals
           </Link>
           <Link
             href="/prints"
+            prefetch={true}
             className="border border-ink px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-ink transition-all duration-300 hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
           >
             Art prints

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { IHeroSlide } from '@/types/artwork';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface HeroCarouselProps {
   slides: IHeroSlide[];
@@ -58,6 +59,8 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
       {/* Slides Container with Crossfade */}
       {slides.map((slide, idx) => {
         const isActive = idx === currentSlide;
+        const isFirst = idx === 0;
+
         return (
           <div
             key={slide.id}
@@ -75,8 +78,11 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                 src={slide.imageUrl}
                 alt={slide.artworkTitle}
                 fill
-                priority={idx === 0}
-                className="scale-105 object-cover object-center transition-transform duration-1000 ease-out"
+                priority={isFirst}
+                loading={isFirst ? 'eager' : 'lazy'}
+                placeholder="blur"
+                blurDataURL={getCloudinaryBlurUrl(slide.imageUrl)}
+                className="scale-105 object-cover object-center transition-transform duration-1000 ease-out motion-reduce:transform-none motion-reduce:transition-none"
                 sizes="100vw"
               />
               {/* Atmospheric Dark & Film Vignette Overlay */}

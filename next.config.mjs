@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    loader: 'custom',
+    loaderFile: './lib/image-loader.ts',
     formats: ['image/avif', 'image/webp'],
-    // All assets are served locally from /public/images to avoid remote 404s
     remotePatterns: [
       {
         protocol: 'https',

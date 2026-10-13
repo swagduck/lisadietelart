@@ -105,6 +105,7 @@ export function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
+                  prefetch={true}
                   className={cn(
                     'relative rounded-sm px-1 py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
                     isSolid
@@ -204,6 +205,7 @@ export function Navbar() {
                     <Link
                       key={link.label}
                       href={link.href}
+                      prefetch={true}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
                         'block rounded-sm border-b border-line/40 py-2 text-sm uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage',

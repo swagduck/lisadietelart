@@ -1,8 +1,31 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Artwork } from '@/models/Artwork';
 import { ARTWORKS_DATA } from '@/lib/data';
+
+function invalidateArtworkCaches(slug: string, newSlug?: string) {
+  try {
+    revalidateTag('artworks');
+    revalidateTag('artworks-originals');
+    revalidateTag('artworks-prints');
+    revalidateTag('artworks-selected');
+    revalidateTag(`artwork-${slug}`);
+    if (newSlug && newSlug !== slug) {
+      revalidateTag(`artwork-${newSlug}`);
+    }
+    revalidatePath('/');
+    revalidatePath('/originals');
+    revalidatePath('/prints');
+    revalidatePath(`/artwork/${slug}`);
+    if (newSlug && newSlug !== slug) {
+      revalidatePath(`/artwork/${newSlug}`);
+    }
+    revalidatePath('/sitemap.xml');
+  } catch (revalErr) {
+    console.warn('Cache revalidation note:', revalErr);
+  }
+}
 
 interface RouteContext {
   params: {
@@ -64,19 +87,8 @@ export async function PUT(request: Request, { params }: RouteContext) {
       return NextResponse.json({ success: false, error: 'Artwork not found.' }, { status: 404 });
     }
 
-    // Call revalidatePath for immediate ISR cache invalidation
-    try {
-      revalidatePath('/');
-      revalidatePath('/originals');
-      revalidatePath('/prints');
-      revalidatePath(`/artwork/${slug}`);
-      if (updated.slug !== slug) {
-        revalidatePath(`/artwork/${updated.slug}`);
-      }
-      revalidatePath('/sitemap.xml');
-    } catch (revalErr) {
-      console.warn('Path revalidation note:', revalErr);
-    }
+    // Call revalidateTag & revalidatePath for immediate ISR cache invalidation
+    invalidateArtworkCaches(slug, updated.slug);
 
     return NextResponse.json({
       success: true,
@@ -109,16 +121,8 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       return NextResponse.json({ success: false, error: 'Artwork not found.' }, { status: 404 });
     }
 
-    // Call revalidatePath to purge deleted artwork from ISR cache
-    try {
-      revalidatePath('/');
-      revalidatePath('/originals');
-      revalidatePath('/prints');
-      revalidatePath(`/artwork/${slug}`);
-      revalidatePath('/sitemap.xml');
-    } catch (revalErr) {
-      console.warn('Path revalidation note:', revalErr);
-    }
+    // Invalidate ISR cache tags and paths to purge deleted artwork
+    invalidateArtworkCaches(slug);
 
     return NextResponse.json({
       success: true,

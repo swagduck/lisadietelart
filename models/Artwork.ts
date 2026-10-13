@@ -4,7 +4,7 @@ import { IArtwork } from '@/types/artwork';
 const ArtworkSchema = new Schema<IArtwork>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, lowercase: true, index: true },
+    slug: { type: String, required: true, trim: true, lowercase: true },
     type: { type: String, enum: ['original', 'print'], required: true },
     medium: { type: String, required: true, trim: true },
     size: { type: String, required: true, trim: true },
@@ -20,6 +20,11 @@ const ArtworkSchema = new Schema<IArtwork>(
     timestamps: true,
   }
 );
+
+// Performance indexes for fast catalog filtering and unique slug resolution
+ArtworkSchema.index({ slug: 1 }, { unique: true });
+ArtworkSchema.index({ type: 1, sold: 1, createdAt: -1 });
+ArtworkSchema.index({ featured: 1, createdAt: -1 });
 
 export const Artwork: Model<IArtwork> =
   (mongoose?.models && mongoose.models.Artwork)

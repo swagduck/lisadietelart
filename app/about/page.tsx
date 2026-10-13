@@ -4,6 +4,7 @@ import { ExhibitionList } from '@/components/exhibitions/ExhibitionList';
 import { EXHIBITIONS_DATA } from '@/lib/data';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 export const metadata: Metadata = {
   title: 'About the Artist & Studio — Lisa Dietel',
@@ -62,7 +63,9 @@ export default function AboutPage() {
                   src="/images/artist-studio.svg"
                   alt="Lisa Dietel in the studio"
                   fill
-                  priority
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL={getCloudinaryBlurUrl('/images/artist-studio.svg')}
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />

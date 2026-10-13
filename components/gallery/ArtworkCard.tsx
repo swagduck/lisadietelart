@@ -1,11 +1,11 @@
 'use client';
-
 import React from 'react';
 import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
 import { Eye, Plus } from 'lucide-react';
 import { useCart } from '../shop/CartContext';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface ArtworkCardProps {
   artwork: IArtwork;
@@ -14,6 +14,7 @@ interface ArtworkCardProps {
 
 export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
   const { addItem } = useCart();
+  const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
 
   const getStatusBadge = () => {
     if (artwork.status === 'available' && artwork.isOriginalAvailable) {
@@ -46,7 +47,6 @@ export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
     const artworkIdentifier = artwork.id || artwork._id || artwork.slug;
     if (artwork.isOriginalAvailable) {
       addItem({
@@ -87,10 +87,13 @@ export function ArtworkCard({ artwork, onQuickView }: ArtworkCardProps) {
       {/* Frame Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-mist/40">
         <Image
-          src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
+          src={artworkImg}
           alt={artwork.title}
           fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL={getCloudinaryBlurUrl(artworkImg)}
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
 

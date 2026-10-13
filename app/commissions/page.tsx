@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { CommissionForm } from '@/components/commissions/CommissionForm';
 import { Palette, Compass, Layers, Truck } from 'lucide-react';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 export const metadata = {
   title: 'Bespoke Art Commissions — Lisa Dietel Studio',
@@ -128,6 +129,9 @@ export default function CommissionsPage() {
                   src="/images/artist-studio.svg"
                   alt="Lisa Dietel studio workspace"
                   fill
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL={getCloudinaryBlurUrl('/images/artist-studio.svg')}
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />

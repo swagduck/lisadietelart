@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
 import { ArrowRight } from 'lucide-react';
+import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 
 interface SelectedWorkGridProps {
   artworks: IArtwork[];
@@ -42,23 +43,30 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
 
         {/* 6-item Grid */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-3">
-          {displayItems.map((artwork) => (
-            <article
-              key={artwork.id}
-              className="group flex h-full flex-col border border-line bg-paper p-3 shadow-sm transition-all duration-300 hover:border-ink/20 hover:shadow-xl"
-            >
-              <Link
-                href={`/artwork/${artwork.slug}`}
-                className="relative block aspect-[3/4] overflow-hidden bg-mist/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-                aria-label={`View details for ${artwork.title}`}
+          {displayItems.map((artwork) => {
+            const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+
+            return (
+              <article
+                key={artwork.id}
+                className="group flex h-full flex-col border border-line bg-paper p-3 shadow-sm transition-all duration-300 hover:border-ink/20 hover:shadow-xl"
               >
-                <Image
-                  src={artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg'}
-                  alt={artwork.title}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
+                <Link
+                  href={`/artwork/${artwork.slug}`}
+                  prefetch={true}
+                  className="relative block aspect-[3/4] overflow-hidden bg-mist/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  aria-label={`View details for ${artwork.title}`}
+                >
+                  <Image
+                    src={artworkImg}
+                    alt={artwork.title}
+                    fill
+                    loading="lazy"
+                    placeholder="blur"
+                    blurDataURL={getCloudinaryBlurUrl(artworkImg)}
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
 
                 {/* Status Badges */}
                 <div className="absolute right-3 top-3 z-10">
@@ -118,7 +126,8 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
                 </div>
               </div>
             </article>
-          ))}
+          );
+        })}
         </div>
       </div>
     </section>
