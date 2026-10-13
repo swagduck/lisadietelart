@@ -8,6 +8,7 @@ import { formatPrice } from '@/lib/format';
 import { Mail, ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
+import { GalleryCarousel } from '@/components/ui/Carousel';
 
 interface ArtworkDetailPageProps {
   params: {
@@ -128,48 +129,24 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
 
         {/* Artwork Presentation Grid */}
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
-          {/* Left Column: Large Image */}
+          {/* Left Column: Gallery Carousel with Lightbox */}
           <div className="space-y-4 lg:col-span-7">
-            <div className="border border-line bg-paper p-3 shadow-md">
-              <div className="relative aspect-[4/5] overflow-hidden bg-mist/30">
-                <Image
-                  src={mainImage}
-                  alt={artwork.title}
-                  fill
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL={getCloudinaryBlurUrl(mainImage)}
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 60vw"
-                />
-              </div>
-            </div>
-
-            {/* Optional Detail Views */}
-            {artwork.detailImages && artwork.detailImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 pt-2">
-                {artwork.detailImages.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="relative aspect-square border border-line bg-paper p-1"
-                  >
-                    <Image
-                      src={img}
-                      alt={`${artwork.title} texture detail ${idx + 1}`}
-                      fill
-                      loading="lazy"
-                      placeholder="blur"
-                      blurDataURL={getCloudinaryBlurUrl(img)}
-                      className="object-cover"
-                      sizes="(max-width: 640px) 33vw, 160px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <GalleryCarousel
+              images={Array.from(
+                new Set(
+                  [
+                    mainImage,
+                    ...(artwork.images || []),
+                    ...(artwork.detailImages || []),
+                  ].filter(Boolean) as string[]
+                )
+              )}
+              title={artwork.title}
+              aspectRatio="aspect-[4/5]"
+            />
 
             <div className="flex justify-between pt-1 text-[11px] text-muted">
-              <span>Natural ambient daylight rendering</span>
+              <span>Natural ambient daylight rendering &bull; Click to inspect fullscreen</span>
               <span>Direct from Lisa Dietel Studio</span>
             </div>
           </div>
