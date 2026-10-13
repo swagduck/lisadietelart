@@ -6,9 +6,16 @@ import { getArtworkBySlug, getOriginals, getPrints } from '@/lib/server-data';
 import { formatPrice } from '@/lib/format';
 import { ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { GalleryCarousel } from '@/components/ui/Carousel';
 import { ArtworkInteractive } from '@/components/artwork/ArtworkInteractive';
-import { SelectedWorkGrid } from '@/components/home/SelectedWorkGrid';
+
+const SelectedWorkGrid = dynamic(
+  () => import('@/components/home/SelectedWorkGrid').then((mod) => mod.SelectedWorkGrid),
+  {
+    loading: () => <div className="min-h-[250px]" />,
+  }
+);
 
 interface ArtworkDetailPageProps {
   params: {

@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import './globals.css';
+import dynamic from 'next/dynamic';
 import { CartProvider } from '@/components/shop/CartContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { CartDrawer } from '@/components/shop/CartDrawer';
+
+const CartDrawer = dynamic(
+  () => import('@/components/shop/CartDrawer').then((mod) => mod.CartDrawer),
+  { ssr: false }
+);
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ['latin'],
@@ -83,6 +88,9 @@ export default function RootLayout({
       lang="en"
       className={`${cormorantGaramond.variable} ${jost.variable} scroll-smooth`}
     >
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+      </head>
       <body className="min-h-screen bg-paper text-ink antialiased selection:bg-blush/60 selection:text-ink">
         {/* Skip to Main Content Link for Keyboard Accessibility */}
         <a

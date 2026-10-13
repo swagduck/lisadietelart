@@ -41,7 +41,7 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
       maxPoolSize: 10, // Conservative pool size for Atlas M0 free tier in serverless
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 3000,
       socketTimeoutMS: 45000,
     };
 

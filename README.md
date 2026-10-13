@@ -89,7 +89,8 @@ Upserting 6 sample artworks...
    - `CLOUDINARY_API_KEY`: Your Cloudinary API key
    - `CLOUDINARY_API_SECRET`: Your Cloudinary API secret
    - `NEXT_PUBLIC_SITE_URL`: Your production domain (e.g. `https://your-domain.vercel.app`)
-4. Click **Deploy**. Vercel will build and launch your production site automatically.
+4. **Function Region Optimization**: In **Settings > Functions > Function Region**, select the region nearest to your MongoDB Atlas cluster (e.g., `iad1` Washington, D.C. for AWS `us-east-1` Atlas M0) to minimize database query latency.
+5. Click **Deploy**. Vercel will build and launch your production site automatically.
 
 ---
 

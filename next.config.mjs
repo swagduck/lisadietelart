@@ -1,6 +1,16 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  compress: true,
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   images: {
     loader: 'custom',
     loaderFile: './lib/image-loader.ts',
@@ -36,8 +46,18 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Immutable caching for static images
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

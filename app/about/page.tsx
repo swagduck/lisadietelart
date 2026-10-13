@@ -63,7 +63,7 @@ export default function AboutPage() {
                   src="/images/artist-studio.svg"
                   alt="Lisa Dietel in the studio"
                   fill
-                  loading="lazy"
+                  priority
                   placeholder="blur"
                   blurDataURL={getCloudinaryBlurUrl('/images/artist-studio.svg')}
                   className="object-cover"

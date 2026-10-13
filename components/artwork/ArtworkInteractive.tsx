@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Mail, Eye } from 'lucide-react';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
-import { WallPreviewModal } from './WallPreviewModal';
+
+const WallPreviewModal = dynamic(
+  () => import('./WallPreviewModal').then((mod) => mod.WallPreviewModal),
+  { ssr: false }
+);
 
 interface ArtworkInteractiveProps {
   artwork: IArtwork;
@@ -59,24 +64,15 @@ export function ArtworkInteractive({
             {artwork.title}
           </span>
           <span className="text-xs text-muted">
-            {isSold ? 'Private collection' : formatPrice(artwork.price)}
+            {isSold ? 'Sold out' : formatPrice(artwork.price, artwork.currency)}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setWallModalOpen(true)}
-            className="rounded-sm border border-line p-2 text-ink transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-            title="Preview on wall"
-            aria-label="Preview on wall"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-
+        <div>
           <a
             href={mailtoUrl}
-            className="inline-flex items-center gap-1.5 rounded-sm bg-ink px-4 py-2 text-xs font-normal text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="inline-flex items-center gap-1.5 rounded-sm bg-ink px-5 py-2.5 text-xs font-normal text-paper shadow-sm transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            aria-label={`Enquire about acquiring ${artwork.title}`}
           >
             <Mail className="h-3.5 w-3.5" />
             <span>Enquire</span>
@@ -84,15 +80,17 @@ export function ArtworkInteractive({
         </div>
       </div>
 
-      {/* Wall Preview Modal */}
-      <WallPreviewModal
-        isOpen={wallModalOpen}
-        onClose={() => setWallModalOpen(false)}
-        imageUrl={mainImage}
-        title={artwork.title}
-        dimensions={artwork.size || artwork.dimensions}
-        medium={artwork.medium}
-      />
+      {/* Wall Preview Modal: Loaded on demand */}
+      {wallModalOpen && (
+        <WallPreviewModal
+          isOpen={wallModalOpen}
+          onClose={() => setWallModalOpen(false)}
+          imageUrl={mainImage}
+          title={artwork.title}
+          dimensions={artwork.size || artwork.dimensions}
+          medium={artwork.medium}
+        />
+      )}
     </>
   );
 }

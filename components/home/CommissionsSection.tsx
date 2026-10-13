@@ -17,6 +17,9 @@ export function CommissionsSection() {
                 src="/images/artist-studio.svg"
                 alt="Lisa Dietel in the painting studio working on a custom commission"
                 fill
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL="/images/artist-studio.svg"
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 40vw"
               />

@@ -107,7 +107,7 @@ export default async function PrintsPage() {
               <ArtworkCardItem
                 key={artwork.id || artwork._id || artwork.slug}
                 artwork={artwork}
-                priority={idx < 2}
+                priority={idx === 0}
               />
             ))}
           </div>

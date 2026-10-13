@@ -31,7 +31,7 @@ export function SelectedWorkGrid({
   ariaLabel = 'Selected work carousel',
   id = 'selected-work-title',
   className = 'bg-paper py-20 md:py-28',
-  priorityLimit = 2,
+  priorityLimit = 0,
 }: SelectedWorkGridProps) {
   const displayItems = artworks.slice(0, 8);
   const wrapperRef = useRef<HTMLDivElement>(null);
