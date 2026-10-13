@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { HeroCarousel } from '@/components/hero/HeroCarousel';
+import { HomeHero } from '@/components/hero/HomeHero';
 import { IntroStatement } from '@/components/home/IntroStatement';
 import { SelectedWorkGrid } from '@/components/home/SelectedWorkGrid';
 import { CommissionsSection } from '@/components/home/CommissionsSection';
@@ -13,7 +13,6 @@ const TestimonialsSection = dynamic(
   }
 );
 import {
-  HERO_SLIDES,
   TESTIMONIALS_DATA,
   VALUE_PROPS_DATA,
 } from '@/lib/data';
@@ -87,8 +86,8 @@ async function AsyncSelectedWorks() {
 export default function HomePage() {
   return (
     <>
-      {/* Full-screen Hero Carousel (2 slides, crossfade, arrows, dots, autoplay respecting prefers-reduced-motion) */}
-      <HeroCarousel slides={HERO_SLIDES} />
+      {/* Data-driven Hero Slider (falls back to site title & tagline if none configured) */}
+      <HomeHero />
 
       {/* Intro statement with "Originals" and "Art prints" buttons */}
       <IntroStatement />

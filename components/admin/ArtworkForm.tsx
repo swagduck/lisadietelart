@@ -50,6 +50,11 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
   const [sold, setSold] = useState(false);
   const [featured, setFeatured] = useState(false);
   const [useWallMockup, setUseWallMockup] = useState(true);
+  const [showInHero, setShowInHero] = useState(false);
+  const [heroOrder, setHeroOrder] = useState<number | ''>('');
+  const [heroHeadline, setHeroHeadline] = useState('');
+  const [heroSubtitle, setHeroSubtitle] = useState('');
+  const [heroLabel, setHeroLabel] = useState('');
 
   // Initial loaded data for edit mode
   const [existingArtwork, setExistingArtwork] = useState<IArtwork | null>(null);
@@ -104,6 +109,11 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
           setSold(Boolean(art.sold || art.isSoldOut));
           setFeatured(Boolean(art.featured));
           setUseWallMockup(art.useWallMockup !== false);
+          setShowInHero(Boolean(art.showInHero));
+          setHeroOrder(typeof art.heroOrder === 'number' ? art.heroOrder : '');
+          setHeroHeadline(art.heroHeadline || '');
+          setHeroSubtitle(art.heroSubtitle || '');
+          setHeroLabel(art.heroLabel || '');
 
           // Check if a more recent local draft exists
           try {
@@ -160,6 +170,11 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
       if (parsed.sold !== undefined) setSold(parsed.sold);
       if (parsed.featured !== undefined) setFeatured(parsed.featured);
       if (parsed.useWallMockup !== undefined) setUseWallMockup(parsed.useWallMockup);
+      if (parsed.showInHero !== undefined) setShowInHero(parsed.showInHero);
+      if (parsed.heroOrder !== undefined) setHeroOrder(parsed.heroOrder);
+      if (parsed.heroHeadline !== undefined) setHeroHeadline(parsed.heroHeadline);
+      if (parsed.heroSubtitle !== undefined) setHeroSubtitle(parsed.heroSubtitle);
+      if (parsed.heroLabel !== undefined) setHeroLabel(parsed.heroLabel);
 
       setIsDirty(true);
       setDraftBannerVisible(false);
@@ -196,6 +211,11 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
         sold,
         featured,
         useWallMockup,
+        showInHero,
+        heroOrder,
+        heroHeadline,
+        heroSubtitle,
+        heroLabel,
         savedAt: new Date().toISOString(),
       };
       localStorage.setItem(draftKey, JSON.stringify(draft));
@@ -203,7 +223,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
     } catch {
       // ignore storage limits
     }
-  }, [title, slug, type, medium, size, price, currency, description, images, sold, featured, useWallMockup, draftKey]);
+  }, [title, slug, type, medium, size, price, currency, description, images, sold, featured, useWallMockup, showInHero, heroOrder, heroHeadline, heroSubtitle, heroLabel, draftKey]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -379,6 +399,11 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
       sold,
       featured,
       useWallMockup,
+      showInHero,
+      heroOrder: heroOrder === '' ? undefined : Number(heroOrder),
+      heroHeadline: heroHeadline.trim() || undefined,
+      heroSubtitle: heroSubtitle.trim() || undefined,
+      heroLabel: heroLabel.trim() || undefined,
     };
 
     // Client-side Zod validation
@@ -982,7 +1007,112 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
                   </span>
                 </div>
               </label>
+
+              {/* Show in Hero Slider Toggle */}
+              <label className="flex items-center gap-3 p-3.5 rounded-xl border border-line hover:bg-paper/40 cursor-pointer transition-colors sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={showInHero}
+                  onChange={(e) => {
+                    setShowInHero(e.target.checked);
+                    setIsDirty(true);
+                  }}
+                  className="w-5 h-5 rounded text-ink focus:ring-sage border-line accent-ink"
+                />
+                <div>
+                  <span className="block text-xs font-medium text-ink">Show in hero slider</span>
+                  <span className="block text-[11px] text-muted">
+                    Feature this artwork in the rotating full-screen hero carousel on the homepage
+                  </span>
+                </div>
+              </label>
             </div>
+
+            {/* Expanded Hero Slider Details */}
+            {showInHero && (
+              <div className="mt-4 p-4 sm:p-5 rounded-2xl border border-sage/40 bg-mist/20 space-y-4">
+                <div className="flex items-center justify-between border-b border-sage/20 pb-2.5">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-sage">
+                    Homepage Hero Presentation
+                  </span>
+                  <span className="text-[11px] text-muted">
+                    Leave headline &amp; subtitle empty to use artwork title &amp; description
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="art-hero-order" className="block text-xs font-medium text-muted mb-1.5">
+                      Hero order (optional)
+                    </label>
+                    <input
+                      id="art-hero-order"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={heroOrder}
+                      onChange={(e) => {
+                        setHeroOrder(e.target.value === '' ? '' : Number(e.target.value));
+                        setIsDirty(true);
+                      }}
+                      placeholder="e.g. 1 (lower numbers appear first)"
+                      className="w-full px-4 py-2.5 rounded-xl border border-line bg-white text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="art-hero-label" className="block text-xs font-medium text-muted mb-1.5">
+                      Hero eyebrow label (optional)
+                    </label>
+                    <input
+                      id="art-hero-label"
+                      type="text"
+                      value={heroLabel}
+                      onChange={(e) => {
+                        setHeroLabel(e.target.value);
+                        setIsDirty(true);
+                      }}
+                      placeholder="e.g. Studio Works · Archival Editions"
+                      className="w-full px-4 py-2.5 rounded-xl border border-line bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="art-hero-headline" className="block text-xs font-medium text-muted mb-1.5">
+                    Hero headline (optional)
+                  </label>
+                  <input
+                    id="art-hero-headline"
+                    type="text"
+                    value={heroHeadline}
+                    onChange={(e) => {
+                      setHeroHeadline(e.target.value);
+                      setIsDirty(true);
+                    }}
+                    placeholder={`Defaults to "${title || 'Artwork Title'}"`}
+                    className="w-full px-4 py-2.5 rounded-xl border border-line bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="art-hero-subtitle" className="block text-xs font-medium text-muted mb-1.5">
+                    Hero subtitle (optional)
+                  </label>
+                  <textarea
+                    id="art-hero-subtitle"
+                    rows={2}
+                    value={heroSubtitle}
+                    onChange={(e) => {
+                      setHeroSubtitle(e.target.value);
+                      setIsDirty(true);
+                    }}
+                    placeholder="Defaults to artwork story and description..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-line bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage resize-y leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </main>

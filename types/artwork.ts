@@ -34,6 +34,12 @@ export interface IArtwork {
   createdAt?: string | Date;
   updatedAt?: string | Date;
 
+  showInHero?: boolean;
+  heroOrder?: number;
+  heroHeadline?: string;
+  heroSubtitle?: string;
+  heroLabel?: string;
+
   // Compatibility helpers and UI properties
   year?: number;
   category?: ArtworkCategory | string;
@@ -87,15 +93,15 @@ export interface IHeroSlide {
   id: string;
   title: string;
   subtitle: string;
-  badge: string;
+  badge?: string;
   imageUrl: string;
-  artworkTitle: string;
-  artworkDetails: string;
-  primaryCta: {
+  artworkTitle?: string;
+  artworkDetails?: string;
+  primaryCta?: {
     label: string;
     href: string;
   };
-  secondaryCta: {
+  secondaryCta?: {
     label: string;
     href: string;
   };

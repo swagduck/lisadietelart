@@ -17,6 +17,23 @@ export const artworkInputSchema = z.object({
   sold: z.boolean().default(false),
   featured: z.boolean().default(false),
   useWallMockup: z.boolean().default(true),
+  showInHero: z.boolean().default(false),
+  heroOrder: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
+    z.number().int().min(0).optional()
+  ),
+  heroHeadline: z.preprocess(
+    (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.string().max(300).optional().nullable()
+  ),
+  heroSubtitle: z.preprocess(
+    (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.string().max(1000).optional().nullable()
+  ),
+  heroLabel: z.preprocess(
+    (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+    z.string().max(100).optional().nullable()
+  ),
 });
 
 export const inquiryInputSchema = z.object({

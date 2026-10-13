@@ -16,6 +16,7 @@ function invalidateArtworkCaches(slug?: string) {
     revalidateTag('artworks-originals');
     revalidateTag('artworks-prints');
     revalidateTag('artworks-selected');
+    revalidateTag('artworks-hero');
     if (slug) {
       revalidateTag(`artwork-${slug}`);
     }

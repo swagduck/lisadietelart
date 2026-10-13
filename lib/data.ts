@@ -1,44 +1,5 @@
-import { IArtwork, IHeroSlide, ITestimonial, IValueProp } from '@/types/artwork';
+import { IArtwork, ITestimonial, IValueProp } from '@/types/artwork';
 import { IExhibition } from '@/types/inquiry';
-
-export const HERO_SLIDES: IHeroSlide[] = [
-  {
-    id: 'slide-1',
-    title: 'Silent Horizons & Lingering Light',
-    subtitle:
-      'Original oil and mineral paintings exploring atmospheric weight, memory, and organic stillness on raw Belgian linen.',
-    badge: 'New Collection · Winter 2025',
-    imageUrl: '/images/nocturne-in-ochre.svg',
-    artworkTitle: 'Nocturne in Ochre (2024)',
-    artworkDetails: 'Oil on raw Belgian linen · 48 × 60 in',
-    primaryCta: {
-      label: 'Explore Originals',
-      href: '/originals',
-    },
-    secondaryCta: {
-      label: 'Browse Art Prints',
-      href: '/prints',
-    },
-  },
-  {
-    id: 'slide-2',
-    title: 'The Poetry of Ethereal Dawn',
-    subtitle:
-      'Hand-ground mineral pigments blended with cold-pressed walnut oil, creating textured surfaces that gently breathe with daylight.',
-    badge: 'Studio Works · Archival Editions',
-    imageUrl: '/images/the-breath-of-dawn.svg',
-    artworkTitle: 'The Breath of Dawn (2024)',
-    artworkDetails: 'Cold wax & chalk on linen · 30 × 40 in',
-    primaryCta: {
-      label: 'Shop Available Works',
-      href: '/originals',
-    },
-    secondaryCta: {
-      label: 'Commission a Piece',
-      href: '/commissions',
-    },
-  },
-];
 
 export const ARTWORKS_DATA: IArtwork[] = [
   // --- ORIGINALS ---

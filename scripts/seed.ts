@@ -18,6 +18,12 @@ const sampleArtworks: ArtworkInput[] = [
     sold: false,
     featured: true,
     useWallMockup: true,
+    showInHero: true,
+    heroOrder: 1,
+    heroHeadline: 'Silent Horizons & Lingering Light',
+    heroSubtitle:
+      'Original oil and mineral paintings exploring atmospheric weight, memory, and organic stillness on raw Belgian linen.',
+    heroLabel: 'Selected Collection',
   },
   {
     title: 'The Breath of Dawn',
@@ -33,6 +39,12 @@ const sampleArtworks: ArtworkInput[] = [
     sold: false,
     featured: true,
     useWallMockup: true,
+    showInHero: true,
+    heroOrder: 2,
+    heroHeadline: 'The Poetry of Ethereal Dawn',
+    heroSubtitle:
+      'Hand-ground mineral pigments blended with cold-pressed walnut oil, creating textured surfaces that gently breathe with daylight.',
+    heroLabel: 'Studio Works · Archival Editions',
   },
   {
     title: 'Coastal Solitude',
@@ -48,6 +60,7 @@ const sampleArtworks: ArtworkInput[] = [
     sold: false,
     featured: true,
     useWallMockup: true,
+    showInHero: false,
   },
   {
     title: 'Resonance in Sage',
@@ -63,6 +76,7 @@ const sampleArtworks: ArtworkInput[] = [
     sold: true,
     featured: true,
     useWallMockup: true,
+    showInHero: false,
   },
   {
     title: 'Passage of Light IV (Print)',
@@ -78,6 +92,7 @@ const sampleArtworks: ArtworkInput[] = [
     sold: false,
     featured: true,
     useWallMockup: true,
+    showInHero: false,
   },
   {
     title: 'Morning Mist (Collector Edition)',
@@ -93,6 +108,7 @@ const sampleArtworks: ArtworkInput[] = [
     sold: true,
     featured: true,
     useWallMockup: true,
+    showInHero: false,
   },
 ];
 

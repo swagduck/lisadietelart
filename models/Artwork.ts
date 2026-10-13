@@ -16,6 +16,11 @@ const ArtworkSchema = new Schema<IArtwork>(
     sold: { type: Boolean, default: false },
     featured: { type: Boolean, default: false },
     useWallMockup: { type: Boolean, default: true },
+    showInHero: { type: Boolean, default: false },
+    heroOrder: { type: Number },
+    heroHeadline: { type: String, trim: true },
+    heroSubtitle: { type: String, trim: true },
+    heroLabel: { type: String, trim: true },
     createdAt: { type: Date, default: Date.now },
   },
   {
@@ -27,6 +32,7 @@ const ArtworkSchema = new Schema<IArtwork>(
 ArtworkSchema.index({ slug: 1 }, { unique: true });
 ArtworkSchema.index({ type: 1, sold: 1, createdAt: -1 });
 ArtworkSchema.index({ featured: 1, createdAt: -1 });
+ArtworkSchema.index({ showInHero: 1, heroOrder: 1, createdAt: -1 });
 
 export const Artwork: Model<IArtwork> =
   (mongoose.models?.Artwork as Model<IArtwork>) ||

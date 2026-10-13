@@ -78,17 +78,24 @@ export function ArtworkCard({
               (e.target as HTMLImageElement).src = '/images/nocturne-in-ochre.svg';
             }}
           />
-          {artwork.type && (
-            <span
-              className={`absolute top-1.5 left-1.5 text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shadow-sm ${
-                artwork.type === 'original'
-                  ? 'bg-ink/90 text-paper'
-                  : 'bg-sage/90 text-white'
-              }`}
-            >
-              {artwork.type}
-            </span>
-          )}
+          <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 items-start">
+            {artwork.type && (
+              <span
+                className={`text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shadow-sm ${
+                  artwork.type === 'original'
+                    ? 'bg-ink/90 text-paper'
+                    : 'bg-sage/90 text-white'
+                }`}
+              >
+                {artwork.type}
+              </span>
+            )}
+            {artwork.showInHero && (
+              <span className="bg-sage/90 text-white text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded shadow-sm">
+                Hero
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Text Details */}
