@@ -30,6 +30,9 @@ export const metadata = {
       'Museum-grade limited edition archival pigment prints on 310gsm Hahnemühle German Etching paper.',
     images: ['/images/passage-of-light.svg'],
   },
+  alternates: {
+    canonical: '/prints',
+  },
 };
 
 export default async function PrintsPage() {

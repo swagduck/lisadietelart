@@ -28,6 +28,9 @@ export const metadata: Metadata = {
       'Contact painter Lisa Dietel regarding original painting acquisitions or commissions.',
     images: ['/images/coastal-solitude.svg'],
   },
+  alternates: {
+    canonical: '/contact',
+  },
 };
 
 export default function ContactPage({

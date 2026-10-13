@@ -29,6 +29,9 @@ export const metadata = {
       'Collaborate directly with Lisa Dietel to create a custom original oil and mineral painting.',
     images: ['/images/the-breath-of-dawn.svg'],
   },
+  alternates: {
+    canonical: '/commissions',
+  },
 };
 
 export default function CommissionsPage() {

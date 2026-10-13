@@ -72,6 +72,9 @@ export async function generateMetadata({
       description,
       images: [artworkImage],
     },
+    alternates: {
+      canonical: `/artwork/${artwork.slug}`,
+    },
   };
 }
 

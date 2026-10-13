@@ -31,6 +31,9 @@ export const metadata: Metadata = {
       'Read the story, artist statement, painterly philosophy, and exhibition CV of Lisa Dietel.',
     images: ['/images/artist-studio.svg'],
   },
+  alternates: {
+    canonical: '/about',
+  },
 };
 
 export default function AboutPage() {

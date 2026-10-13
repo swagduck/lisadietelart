@@ -30,6 +30,9 @@ export const metadata = {
       'Explore original oil and mineral paintings on raw Belgian linen by Lisa Dietel.',
     images: ['/images/nocturne-in-ochre.svg'],
   },
+  alternates: {
+    canonical: '/originals',
+  },
 };
 
 export default async function OriginalsPage() {

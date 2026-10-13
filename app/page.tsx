@@ -46,6 +46,9 @@ export const metadata = {
       'Original oil and mineral paintings, limited archival prints, and bespoke commissions.',
     images: ['/images/nocturne-in-ochre.svg'],
   },
+  alternates: {
+    canonical: '/',
+  },
 };
 
 function SelectedWorkSliderSkeleton() {
