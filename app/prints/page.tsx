@@ -78,15 +78,40 @@ export default async function PrintsPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {prints.map((artwork, idx) => (
-            <ArtworkCardItem
-              key={artwork.id || artwork._id || artwork.slug}
-              artwork={artwork}
-              priority={idx < 2}
-            />
-          ))}
-        </div>
+        {prints.length === 0 ? (
+          <div className="py-24 text-center max-w-lg mx-auto space-y-4">
+            <h2 className="font-heading text-2xl text-ink font-normal">
+              No print editions currently available
+            </h2>
+            <p className="text-sm font-light text-muted leading-relaxed">
+              Archival pigment editions are produced in strictly limited runs on Hahnemühle cotton paper. Check back soon or browse available original canvases.
+            </p>
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/originals"
+                className="bg-ink text-paper px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:bg-sage transition-colors"
+              >
+                Explore originals
+              </Link>
+              <Link
+                href="/contact"
+                className="border border-line text-ink px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:border-ink transition-colors"
+              >
+                Inquire with studio
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            {prints.map((artwork, idx) => (
+              <ArtworkCardItem
+                key={artwork.id || artwork._id || artwork.slug}
+                artwork={artwork}
+                priority={idx < 2}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

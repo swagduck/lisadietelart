@@ -1,3 +1,5 @@
+import 'server-only';
+
 interface RateLimitRecord {
   count: number;
   resetTime: number;

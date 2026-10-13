@@ -32,6 +32,7 @@ export interface IArtwork {
   featured?: boolean;
   useWallMockup?: boolean;
   createdAt?: string | Date;
+  updatedAt?: string | Date;
 
   // Compatibility helpers and UI properties
   year?: number;
@@ -62,6 +63,7 @@ export interface IInquiry {
 
 export interface ISubscriber {
   _id?: string;
+  id?: string;
   email: string;
   createdAt?: string | Date;
 }

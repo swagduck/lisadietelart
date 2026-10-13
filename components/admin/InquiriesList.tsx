@@ -183,7 +183,7 @@ export function InquiriesList({
       ) : (
         <div className="space-y-3">
           {filtered.map((item) => {
-            const inqId = (item as any).id || item._id;
+            const inqId = item.id || item._id || '';
             const isRead = Boolean(item.read);
             const dateStr = item.createdAt
               ? formatDate(new Date(item.createdAt))

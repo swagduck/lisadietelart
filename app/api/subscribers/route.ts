@@ -4,6 +4,10 @@ import { Subscriber } from '@/models/Subscriber';
 import { subscriberInputSchema } from '@/lib/validations';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
+export const dynamic = 'force-dynamic';
+
+const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' };
+
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
@@ -14,20 +18,21 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
+            ...noStoreHeaders,
             'Retry-After': String(Math.ceil((limitCheck.reset - Date.now()) / 1000)),
           },
         }
       );
     }
 
-    const json = await request.json();
+    const json = await request.json().catch(() => ({}));
 
     // Validate with Zod
     const parseResult = subscriberInputSchema.safeParse(json);
     if (!parseResult.success) {
       return NextResponse.json(
         { success: false, error: 'Please enter a valid email address.' },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -40,7 +45,7 @@ export async function POST(request: Request) {
           success: true,
           message: 'Thank you for subscribing to Lisa Dietel Studio Dispatch.',
         },
-        { status: 201 }
+        { status: 201, headers: noStoreHeaders }
       );
     }
 
@@ -64,12 +69,12 @@ export async function POST(request: Request) {
         success: true,
         message: 'Thank you for subscribing to Lisa Dietel Studio Dispatch.',
       },
-      { status: 201 }
+      { status: 201, headers: noStoreHeaders }
     );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Unable to process subscription. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }

@@ -77,15 +77,40 @@ export default async function OriginalsPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {originals.map((artwork, idx) => (
-            <ArtworkCardItem
-              key={artwork.id || artwork._id || artwork.slug}
-              artwork={artwork}
-              priority={idx < 2}
-            />
-          ))}
-        </div>
+        {originals.length === 0 ? (
+          <div className="py-24 text-center max-w-lg mx-auto space-y-4">
+            <h2 className="font-heading text-2xl text-ink font-normal">
+              No original paintings currently listed
+            </h2>
+            <p className="text-sm font-light text-muted leading-relaxed">
+              Original canvases are released in small seasonal collections. You can request a bespoke commissioned piece or join the studio dispatch for notifications of upcoming studio releases.
+            </p>
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/commissions"
+                className="bg-ink text-paper px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:bg-sage transition-colors"
+              >
+                Commission a painting
+              </Link>
+              <Link
+                href="/prints"
+                className="border border-line text-ink px-6 py-2.5 text-xs font-medium uppercase tracking-widest hover:border-ink transition-colors"
+              >
+                Browse prints
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            {originals.map((artwork, idx) => (
+              <ArtworkCardItem
+                key={artwork.id || artwork._id || artwork.slug}
+                artwork={artwork}
+                priority={idx < 2}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

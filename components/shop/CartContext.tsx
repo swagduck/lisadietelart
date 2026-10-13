@@ -5,7 +5,7 @@ import { ICartItem, ICartContext } from '@/types/cart';
 
 const CartContext = createContext<ICartContext | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'aura_vance_cart_v1';
+const CART_STORAGE_KEY = 'lisa_dietel_cart_v1';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ICartItem[]>([]);

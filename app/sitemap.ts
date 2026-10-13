@@ -18,9 +18,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (db) {
       const dbArtworks = await Artwork.find({}, 'slug updatedAt createdAt').lean().exec();
       if (dbArtworks && dbArtworks.length > 0) {
-        artworkSlugs = dbArtworks.map((item: any) => ({
+        artworkSlugs = dbArtworks.map((item) => ({
           slug: item.slug,
-          updatedAt: item.updatedAt || item.createdAt || new Date(),
+          updatedAt: item.updatedAt
+            ? new Date(item.updatedAt)
+            : item.createdAt
+              ? new Date(item.createdAt)
+              : new Date(),
         }));
       }
     }

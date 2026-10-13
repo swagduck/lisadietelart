@@ -1,3 +1,4 @@
+import 'server-only';
 import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IOrderItem {
@@ -82,10 +83,7 @@ const OrderSchema = new Schema<IOrder>(
 );
 
 export const Order: Model<IOrder> =
-  (mongoose?.models && mongoose.models.Order)
-    ? (mongoose.models.Order as Model<IOrder>)
-    : (typeof mongoose?.model === 'function'
-        ? mongoose.model<IOrder>('Order', OrderSchema)
-        : ({} as Model<IOrder>));
+  (mongoose.models?.Order as Model<IOrder>) ||
+  mongoose.model<IOrder>('Order', OrderSchema);
 
 export default Order;

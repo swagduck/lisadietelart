@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Artwork } from '@/models/Artwork';
-import { artworkInputSchema } from '@/lib/validations';
+import { artworkInputSchema, artworkUpdateSchema } from '@/lib/validations';
 import { ARTWORKS_DATA } from '@/lib/data';
+import { deleteCloudinaryImages } from '@/lib/cloudinary-server';
+import { FilterQuery } from 'mongoose';
+import { IArtwork } from '@/types/artwork';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +39,7 @@ export async function GET(request: Request) {
 
     const db = await connectToDatabase();
     if (db) {
-      const query: Record<string, any> = {};
+      const query: FilterQuery<IArtwork> = {};
       if (type && (type === 'original' || type === 'print')) {
         query.type = type;
       }
@@ -51,16 +54,23 @@ export async function GET(request: Request) {
         .exec();
 
       if (artworks && artworks.length > 0) {
-        return NextResponse.json({
-          success: true,
-          data: artworks.map((a: any) => ({
-            ...a,
-            id: a._id.toString(),
-            imageUrl: a.images?.[0] || '/images/nocturne-in-ochre.svg',
-            dimensions: a.size,
-            isSoldOut: a.sold,
-          })),
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            data: artworks.map((a) => ({
+              ...a,
+              id: a._id ? String(a._id) : a.slug,
+              imageUrl: a.images?.[0] || '/images/nocturne-in-ochre.svg',
+              dimensions: a.size,
+              isSoldOut: a.sold,
+            })),
+          },
+          {
+            headers: {
+              'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+            },
+          }
+        );
       }
     }
   } catch {
@@ -80,22 +90,29 @@ export async function GET(request: Request) {
     filtered = filtered.filter((a) => a.featured);
   }
 
-  return NextResponse.json({
-    success: true,
-    data: filtered,
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: filtered,
+    },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    }
+  );
 }
 
 export async function POST(request: Request) {
   try {
-    const json = await request.json();
+    const json = await request.json().catch(() => ({}));
 
     // Validate with Zod
     const parseResult = artworkInputSchema.safeParse(json);
     if (!parseResult.success) {
       return NextResponse.json(
         { success: false, error: 'Validation failed. Please verify the artwork payload.' },
-        { status: 400 }
+        { status: 400, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
@@ -103,7 +120,7 @@ export async function POST(request: Request) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: 'Database service is currently unavailable.' },
-        { status: 503 }
+        { status: 503, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
@@ -116,38 +133,46 @@ export async function POST(request: Request) {
       {
         success: true,
         data: {
-          id: createdArtwork._id.toString(),
+          id: String(createdArtwork._id),
           slug: createdArtwork.slug,
           title: createdArtwork.title,
         },
       },
-      { status: 201 }
+      { status: 201, headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
-  } catch (err: any) {
+  } catch (err) {
     // Handle unique slug collision or general database errors without leaking internal details
-    if (err?.code === 11000) {
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: number }).code === 11000) {
       return NextResponse.json(
         { success: false, error: 'An artwork with this slug already exists.' },
-        { status: 409 }
+        { status: 409, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
     return NextResponse.json(
       { success: false, error: 'Unable to process artwork creation request.' },
-      { status: 500 }
+      { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const json = await request.json();
+    const json = await request.json().catch(() => ({}));
     const { slug, ...updateData } = json;
 
     if (!slug) {
       return NextResponse.json(
         { success: false, error: 'Artwork slug is required for updates.' },
-        { status: 400 }
+        { status: 400, headers: { 'Cache-Control': 'no-store, max-age=0' } }
+      );
+    }
+
+    const parsed = artworkUpdateSchema.safeParse(updateData);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid update payload.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
@@ -155,34 +180,37 @@ export async function PUT(request: Request) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: 'Database service is currently unavailable.' },
-        { status: 503 }
+        { status: 503, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
     const updated = await Artwork.findOneAndUpdate(
       { slug },
-      { $set: updateData },
+      { $set: parsed.data },
       { new: true, runValidators: true }
     );
 
     if (!updated) {
       return NextResponse.json(
         { success: false, error: 'Artwork not found.' },
-        { status: 404 }
+        { status: 404, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
     // Call revalidateTag & revalidatePath for immediate cache invalidation
     invalidateArtworkCaches(updated.slug);
 
-    return NextResponse.json({
-      success: true,
-      data: updated,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: updated,
+      },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Unable to process artwork update.' },
-      { status: 500 }
+      { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   }
 }
@@ -197,7 +225,7 @@ export async function DELETE(request: Request) {
     if (!slug) {
       return NextResponse.json(
         { success: false, error: 'Artwork slug is required for deletion.' },
-        { status: 400 }
+        { status: 400, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
@@ -205,7 +233,7 @@ export async function DELETE(request: Request) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: 'Database service is currently unavailable.' },
-        { status: 503 }
+        { status: 503, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
     }
 
@@ -213,21 +241,29 @@ export async function DELETE(request: Request) {
     if (!deleted) {
       return NextResponse.json(
         { success: false, error: 'Artwork not found.' },
-        { status: 404 }
+        { status: 404, headers: { 'Cache-Control': 'no-store, max-age=0' } }
       );
+    }
+
+    // Cleanup associated Cloudinary images if present
+    if (deleted.images && Array.isArray(deleted.images) && deleted.images.length > 0) {
+      await deleteCloudinaryImages(deleted.images);
     }
 
     // Invalidate ISR cache tags and paths so deleted artwork purges instantly
     invalidateArtworkCaches(slug);
 
-    return NextResponse.json({
-      success: true,
-      message: `Artwork "${slug}" successfully deleted.`,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: `Artwork "${slug}" successfully deleted.`,
+      },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Unable to process artwork deletion.' },
-      { status: 500 }
+      { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   }
 }

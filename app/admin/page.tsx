@@ -304,7 +304,7 @@ export default function AdminDashboardPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error);
-      setInquiries((prev) => prev.filter((item: any) => (item.id || item._id) !== id));
+      setInquiries((prev) => prev.filter((item) => (item.id || item._id) !== id));
       showToast('Inquiry removed');
     } catch {
       showToast('Failed to delete inquiry', 'error');
@@ -319,7 +319,7 @@ export default function AdminDashboardPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error);
-      setSubscribers((prev) => prev.filter((item: any) => (item.id || item._id) !== id));
+      setSubscribers((prev) => prev.filter((item) => (item.id || item._id) !== id));
       showToast('Subscriber removed');
     } catch {
       showToast('Failed to delete subscriber', 'error');

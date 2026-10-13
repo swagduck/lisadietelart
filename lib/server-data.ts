@@ -9,18 +9,39 @@ import { ARTWORKS_DATA } from '@/lib/data';
 const ARTWORK_CARD_PROJECTION =
   'title slug type medium size dimensions price currency images sold featured createdAt';
 
+interface RawArtworkDoc {
+  _id?: unknown;
+  id?: string;
+  title?: string;
+  slug?: string;
+  type?: 'original' | 'print';
+  medium?: string;
+  size?: string;
+  dimensions?: string;
+  price?: number;
+  currency?: string;
+  description?: string;
+  images?: string[];
+  imageUrl?: string;
+  sold?: boolean;
+  isSoldOut?: boolean;
+  featured?: boolean;
+  createdAt?: string | Date | number;
+  [key: string]: unknown;
+}
+
 // Normalization helper for converting Mongoose lean documents to plain serializable objects
-export function serializeArtwork(doc: any): IArtwork {
+export function serializeArtwork(doc: RawArtworkDoc): IArtwork {
   return {
-    _id: doc._id ? doc._id.toString() : undefined,
-    id: doc._id ? doc._id.toString() : doc.slug,
-    title: doc.title,
-    slug: doc.slug,
-    type: doc.type,
-    medium: doc.medium,
+    _id: doc._id ? String(doc._id) : undefined,
+    id: doc._id ? String(doc._id) : (doc.slug || 'artwork'),
+    title: doc.title || 'Untitled',
+    slug: doc.slug || '',
+    type: (doc.type === 'print' ? 'print' : 'original') as 'original' | 'print',
+    medium: doc.medium || '',
     size: doc.size || doc.dimensions || '',
     dimensions: doc.size || doc.dimensions || '',
-    price: doc.price,
+    price: typeof doc.price === 'number' ? doc.price : 0,
     currency: doc.currency || 'USD',
     description: doc.description || '',
     images:

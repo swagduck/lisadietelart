@@ -480,8 +480,16 @@ export function SelectedWorkGrid({
 
         {/* Relative Slider Container: Starts exactly where the images start */}
         <div ref={wrapperRef} className="slider-track-container">
-          {/* Overlay div: top: 0, left: 0, right: 0, height: var(--img-h), align-items: center */}
-          <div className="slider-nav-overlay">
+          {displayItems.length === 0 ? (
+            <div className="py-16 text-center w-full px-6">
+              <p className="text-sm font-light text-muted">
+                New studio selections are currently being staged.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Overlay div: top: 0, left: 0, right: 0, height: var(--img-h), align-items: center */}
+              <div className="slider-nav-overlay">
             {/* Prev Arrow */}
             <button
               type="button"
@@ -554,6 +562,8 @@ export function SelectedWorkGrid({
               </div>
             ))}
           </div>
+            </>
+          )}
         </div>
       </div>
     </section>

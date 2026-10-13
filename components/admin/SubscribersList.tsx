@@ -128,7 +128,7 @@ export function SubscribersList({
           </div>
 
           {filtered.map((sub) => {
-            const subId = (sub as any).id || sub._id;
+            const subId = sub.id || sub._id || '';
             const dateStr = sub.createdAt
               ? formatDate(new Date(sub.createdAt))
               : 'Recent';

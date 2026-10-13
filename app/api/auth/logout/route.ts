@@ -4,10 +4,13 @@ import { ADMIN_COOKIE_NAME } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  const response = NextResponse.json({
-    success: true,
-    message: 'Logged out successfully.',
-  });
+  const response = NextResponse.json(
+    {
+      success: true,
+      message: 'Logged out successfully.',
+    },
+    { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+  );
 
   response.cookies.set(ADMIN_COOKIE_NAME, '', {
     httpOnly: true,

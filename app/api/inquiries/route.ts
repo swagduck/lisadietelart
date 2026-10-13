@@ -4,6 +4,10 @@ import { Inquiry } from '@/models/Inquiry';
 import { inquiryInputSchema } from '@/lib/validations';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
+export const dynamic = 'force-dynamic';
+
+const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' };
+
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
@@ -17,13 +21,14 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
+            ...noStoreHeaders,
             'Retry-After': String(Math.ceil((limitCheck.reset - Date.now()) / 1000)),
           },
         }
       );
     }
 
-    const json = await request.json();
+    const json = await request.json().catch(() => ({}));
 
     // Validate input with Zod
     const parseResult = inquiryInputSchema.safeParse(json);
@@ -33,7 +38,7 @@ export async function POST(request: Request) {
           success: false,
           error: 'Invalid input. Please provide a valid name, email, and message.',
         },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -46,7 +51,7 @@ export async function POST(request: Request) {
           success: true,
           message: 'Your inquiry has been received. The studio will respond shortly.',
         },
-        { status: 201 }
+        { status: 201, headers: noStoreHeaders }
       );
     }
 
@@ -70,12 +75,12 @@ export async function POST(request: Request) {
         success: true,
         message: 'Your inquiry has been received. The studio will respond shortly.',
       },
-      { status: 201 }
+      { status: 201, headers: noStoreHeaders }
     );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Unable to process inquiry. Please try again later.' },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' };
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No image file was provided.' },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     if (file.type && !validMimeTypes.includes(file.type) && !file.type.startsWith('image/')) {
       return NextResponse.json(
         { success: false, error: 'Please upload a valid image file (JPEG, PNG, WebP, AVIF, SVG).' },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (file.size > maxBytes) {
       return NextResponse.json(
         { success: false, error: 'File size exceeds maximum allowable limit (12MB).' },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         cloudFormData.append('file', base64DataUri);
 
         if (apiKey && apiSecret) {
-          // Signed upload (most secure and standard for server-side route handlers)
+          // Signed upload
           const toSign = `folder=artworks&timestamp=${timestamp}${apiSecret}`;
           const signature = crypto.createHash('sha1').update(toSign).digest('hex');
           cloudFormData.append('api_key', apiKey);
@@ -97,11 +97,14 @@ export async function POST(request: Request) {
     }
 
     if (cloudinarySuccessUrl) {
-      return NextResponse.json({
-        success: true,
-        url: cloudinarySuccessUrl,
-        provider: 'cloudinary',
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          url: cloudinarySuccessUrl,
+          provider: 'cloudinary',
+        },
+        { headers: noStoreHeaders }
+      );
     }
 
     return NextResponse.json(
@@ -110,13 +113,12 @@ export async function POST(request: Request) {
         error:
           'Cloudinary upload failed or is not configured. Please verify CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.',
       },
-      { status: 502 }
+      { status: 502, headers: noStoreHeaders }
     );
-  } catch (err: any) {
-    console.error('Upload route error:', err);
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal error processing image upload.' },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'server-only';
 import mongoose, { Schema, Model } from 'mongoose';
 import { IArtwork } from '@/types/artwork';
 
@@ -28,10 +29,7 @@ ArtworkSchema.index({ type: 1, sold: 1, createdAt: -1 });
 ArtworkSchema.index({ featured: 1, createdAt: -1 });
 
 export const Artwork: Model<IArtwork> =
-  (mongoose?.models && mongoose.models.Artwork)
-    ? (mongoose.models.Artwork as Model<IArtwork>)
-    : (typeof mongoose?.model === 'function'
-        ? mongoose.model<IArtwork>('Artwork', ArtworkSchema)
-        : ({} as Model<IArtwork>));
+  (mongoose.models?.Artwork as Model<IArtwork>) ||
+  mongoose.model<IArtwork>('Artwork', ArtworkSchema);
 
 export default Artwork;

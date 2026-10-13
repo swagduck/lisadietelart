@@ -1,3 +1,4 @@
+import 'server-only';
 import mongoose, { Schema, Model } from 'mongoose';
 import { IInquiry } from '@/types/artwork';
 
@@ -18,10 +19,7 @@ const InquirySchema = new Schema<IInquiry>(
 InquirySchema.index({ read: 1, createdAt: -1 });
 
 export const Inquiry: Model<IInquiry> =
-  (mongoose?.models && mongoose.models.Inquiry)
-    ? (mongoose.models.Inquiry as Model<IInquiry>)
-    : (typeof mongoose?.model === 'function'
-        ? mongoose.model<IInquiry>('Inquiry', InquirySchema)
-        : ({} as Model<IInquiry>));
+  (mongoose.models?.Inquiry as Model<IInquiry>) ||
+  mongoose.model<IInquiry>('Inquiry', InquirySchema);
 
 export default Inquiry;

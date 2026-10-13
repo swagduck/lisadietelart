@@ -3,6 +3,8 @@ import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
+const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' };
+
 export async function POST() {
   try {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -16,7 +18,7 @@ export async function POST() {
           error:
             'Cloudinary credentials are not configured in environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET). Direct signed upload cannot proceed.',
         },
-        { status: 500 }
+        { status: 500, headers: noStoreHeaders }
       );
     }
 
@@ -26,21 +28,24 @@ export async function POST() {
     const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto.createHash('sha1').update(toSign).digest('hex');
 
-    return NextResponse.json({
-      success: true,
-      signature,
-      timestamp,
-      apiKey,
-      cloudName,
-      folder,
-    });
-  } catch (err: any) {
+    return NextResponse.json(
+      {
+        success: true,
+        signature,
+        timestamp,
+        apiKey,
+        cloudName,
+        folder,
+      },
+      { headers: noStoreHeaders }
+    );
+  } catch {
     return NextResponse.json(
       {
         success: false,
         error: 'Unable to generate Cloudinary upload signature.',
       },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }

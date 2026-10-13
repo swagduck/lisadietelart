@@ -294,8 +294,8 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
 
         // Append to artwork images
         setImages((prev) => [...prev, uploadedUrl]);
-      } catch (err: any) {
-        const errorText = err?.message || 'Upload failed.';
+      } catch (err) {
+        const errorText = err instanceof Error ? err.message : 'Upload failed.';
         setUploadQueue((prev) =>
           prev.map((q) => (q.id === item.id ? { ...q, status: 'error', error: errorText } : q))
         );

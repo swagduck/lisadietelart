@@ -4,29 +4,34 @@ import { Subscriber } from '@/models/Subscriber';
 
 export const dynamic = 'force-dynamic';
 
+const noStoreHeaders = { 'Cache-Control': 'no-store, max-age=0' };
+
 export async function GET() {
   try {
     const db = await connectToDatabase();
     if (!db) {
       return NextResponse.json(
         { success: false, error: 'Database service unavailable' },
-        { status: 503 }
+        { status: 503, headers: noStoreHeaders }
       );
     }
 
     const subscribers = await Subscriber.find().sort({ createdAt: -1 }).lean().exec();
 
-    return NextResponse.json({
-      success: true,
-      data: subscribers.map((item: any) => ({
-        ...item,
-        id: item._id.toString(),
-      })),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: subscribers.map((item) => ({
+          ...item,
+          id: String(item._id),
+        })),
+      },
+      { headers: noStoreHeaders }
+    );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch subscribers' },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }
@@ -39,7 +44,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'Subscriber ID is required' },
-        { status: 400 }
+        { status: 400, headers: noStoreHeaders }
       );
     }
 
@@ -47,7 +52,7 @@ export async function DELETE(request: Request) {
     if (!db) {
       return NextResponse.json(
         { success: false, error: 'Database service unavailable' },
-        { status: 503 }
+        { status: 503, headers: noStoreHeaders }
       );
     }
 
@@ -55,18 +60,21 @@ export async function DELETE(request: Request) {
     if (!deleted) {
       return NextResponse.json(
         { success: false, error: 'Subscriber not found' },
-        { status: 404 }
+        { status: 404, headers: noStoreHeaders }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Subscriber removed.',
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Subscriber successfully removed.',
+      },
+      { headers: noStoreHeaders }
+    );
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to delete subscriber' },
-      { status: 500 }
+      { status: 500, headers: noStoreHeaders }
     );
   }
 }
