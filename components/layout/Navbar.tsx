@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '../shop/CartContext';
 import { ShoppingBag, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,30 +38,44 @@ export function Navbar() {
     return pathname === href;
   };
 
-  // Header scroll detection: solid on scroll & hide on scroll down / show on scroll up
+  const router = useRouter();
+
+  // Header scroll detection: passive and rAF-throttled with zero state churn
   useEffect(() => {
+    let rafId: number | null = null;
+    let lastScrollY = window.scrollY;
+    let currentIsScrolled = window.scrollY > 60;
+    let currentIsVisible = true;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const currentScrollY = window.scrollY;
 
-      // Solid background after 60px
-      if (currentScrollY > 60) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+        // Solid background after 60px
+        const nextIsScrolled = currentScrollY > 60;
+        if (nextIsScrolled !== currentIsScrolled) {
+          currentIsScrolled = nextIsScrolled;
+          setIsScrolled(nextIsScrolled);
+        }
 
-      // Hide on scroll down, show on scroll up
-      if (currentScrollY > 120 && currentScrollY > lastScrollY.current) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
+        // Hide on scroll down, show on scroll up
+        const nextIsVisible = !(currentScrollY > 120 && currentScrollY > lastScrollY);
+        if (nextIsVisible !== currentIsVisible) {
+          currentIsVisible = nextIsVisible;
+          setIsVisible(nextIsVisible);
+        }
 
-      lastScrollY.current = currentScrollY;
+        lastScrollY = currentScrollY;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Prevent background scroll and support Escape key when mobile menu is open
@@ -133,6 +147,7 @@ export function Navbar() {
                   key={link.label}
                   href={link.href}
                   prefetch={true}
+                  onMouseEnter={() => router.prefetch(link.href)}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'relative rounded-sm px-1 py-1.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',

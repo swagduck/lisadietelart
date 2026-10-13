@@ -15,13 +15,15 @@ export function CommissionForm() {
   });
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     setStatus('submitting');
 
     try {
-      await fetch('/api/inquiries', {
+      const res = await fetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -33,11 +35,20 @@ export function CommissionForm() {
           honeypot: formData.honeypot,
         }),
       });
-    } catch {
-      // Graceful fallback
-    }
 
-    setStatus('success');
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit commission proposal. Please try again.');
+      }
+
+      setStatus('success');
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
+      );
+      setStatus('idle');
+    }
   };
 
   if (status === 'success') {
@@ -76,6 +87,14 @@ export function CommissionForm() {
       onSubmit={handleSubmit}
       className="space-y-6 border border-line bg-paper p-8 shadow-sm"
     >
+      {errorMessage && (
+        <div
+          role="alert"
+          className="border border-red-200 bg-red-50/80 p-4 text-xs font-normal text-red-800"
+        >
+          {errorMessage}
+        </div>
+      )}
       {/* Honeypot field for bot protection */}
       <div className="hidden" aria-hidden="true">
         <input

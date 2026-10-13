@@ -8,23 +8,34 @@ export function NewsletterForm() {
   const [honeypot, setHoneypot] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setLoading(true);
+    setErrorMessage(null);
     try {
-      await fetch('/api/subscribers', {
+      const res = await fetch('/api/subscribers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, honeypot }),
       });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to subscribe. Please try again.');
+      }
+
       setSubscribed(true);
       setEmail('');
       setHoneypot('');
-    } catch {
-      setSubscribed(true);
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : 'Subscription failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -32,6 +43,11 @@ export function NewsletterForm() {
 
   return (
     <div aria-live="polite" className="mx-auto max-w-md pt-2">
+      {errorMessage && (
+        <p role="alert" className="mb-2 text-center text-xs text-red-600">
+          {errorMessage}
+        </p>
+      )}
       {subscribed ? (
         <div className="flex items-center justify-center gap-2 border border-line bg-mist/40 p-4 text-xs font-normal text-sage transition-all animate-in fade-in duration-300">
           <Check className="h-4 w-4 text-sage" />

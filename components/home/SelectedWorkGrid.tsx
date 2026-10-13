@@ -543,6 +543,7 @@ export function SelectedWorkGrid({
           <div
             ref={trackRef}
             role="region"
+            aria-roledescription="carousel"
             aria-label={ariaLabel}
             tabIndex={0}
             onKeyDown={handleKeyDown}
@@ -554,7 +555,13 @@ export function SelectedWorkGrid({
             className="slider-track no-scrollbar cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
           >
             {displayItems.map((artwork, idx) => (
-              <div key={artwork.id || artwork._id || artwork.slug} className="selected-work-slide">
+              <div
+                key={artwork.id || artwork._id || artwork.slug}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${idx + 1} of ${displayItems.length}: ${artwork.title}`}
+                className="selected-work-slide"
+              >
                 <ArtworkCardItem
                   artwork={artwork}
                   priority={idx < priorityLimit}
