@@ -30,6 +30,7 @@ export interface IArtwork {
   images?: string[];
   sold?: boolean;
   featured?: boolean;
+  useWallMockup?: boolean;
   createdAt?: string | Date;
 
   // Compatibility helpers and UI properties

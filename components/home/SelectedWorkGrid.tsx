@@ -1,206 +1,278 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { IArtwork } from '@/types/artwork';
-import { formatPrice } from '@/lib/format';
-import { ArrowRight } from 'lucide-react';
-import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-  CarouselDots,
-  useCarousel,
-} from '@/components/ui/Carousel';
+import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SelectedWorkGridProps {
   artworks: IArtwork[];
 }
 
-function SelectedWorkCard({
-  artwork,
-  index,
-  total,
-}: {
-  artwork: IArtwork;
-  index: number;
-  total: number;
-}) {
-  const { isPreloaded } = useCarousel();
-  const primaryImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
-  const secondImg =
-    (artwork.images && artwork.images.length > 1 ? artwork.images[1] : null) ||
-    (artwork.detailImages && artwork.detailImages.length > 0 ? artwork.detailImages[0] : null);
-
-  const shouldEagerLoad = isPreloaded(index);
-  const isSold = Boolean(artwork.isSoldOut || artwork.sold);
-
-  return (
-    <CarouselItem index={index} total={total}>
-      <article className="group flex h-full flex-col border border-line bg-paper p-3 transition-all duration-300 hover:border-ink/20 hover:shadow-sm">
-        {/* Portrait Aspect Ratio */}
-        <Link
-          href={`/artwork/${artwork.slug}`}
-          prefetch={true}
-          className="relative block aspect-[3/4] overflow-hidden bg-mist/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-          aria-label={`View details for ${artwork.title}${isSold ? ' (Sold)' : ''}`}
-        >
-          {/* Primary Image with Soft Hover Zoom (1.02) */}
-          <Image
-            src={primaryImg}
-            alt={artwork.title}
-            fill
-            loading={shouldEagerLoad ? 'eager' : 'lazy'}
-            placeholder="blur"
-            blurDataURL={getCloudinaryBlurUrl(primaryImg)}
-            className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none"
-            sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw"
-          />
-
-          {/* Second Image Crossfade on Hover if Available */}
-          {secondImg && (
-            <Image
-              src={secondImg}
-              alt={`${artwork.title} detail view`}
-              fill
-              loading="lazy"
-              placeholder="blur"
-              blurDataURL={getCloudinaryBlurUrl(secondImg)}
-              className="object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-[1.02] group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
-              sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          )}
-
-          {/* Small "Sold" Ribbon in Corner */}
-          {isSold ? (
-            <div className="pointer-events-none absolute left-0 top-0 z-20 h-16 w-16 overflow-hidden">
-              <div className="absolute -left-6 top-3 w-24 -rotate-45 bg-ink/90 py-0.5 text-center text-[9px] font-light tracking-widest text-paper shadow-sm">
-                Sold
-              </div>
-            </div>
-          ) : (
-            /* Subtle Type Pill in Sentence Case */
-            <div className="absolute right-3 top-3 z-10">
-              <span className="border border-line/80 bg-paper/95 px-2.5 py-0.5 text-[11px] font-normal text-sage backdrop-blur-sm">
-                {artwork.type === 'original' ? 'Original' : 'Art print'}
-              </span>
-            </div>
-          )}
-        </Link>
-
-        <div className="mt-4 flex flex-1 flex-col justify-between space-y-2 px-1">
-          <div>
-            <h3 className="font-heading text-2xl font-normal leading-snug text-ink transition-colors group-hover:text-sage">
-              <Link
-                href={`/artwork/${artwork.slug}`}
-                className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-              >
-                {artwork.title}
-              </Link>
-            </h3>
-            <p className="mt-0.5 line-clamp-1 text-xs font-light text-muted">
-              {artwork.medium}
-            </p>
-            <p className="font-sans text-[11px] tracking-wide text-muted/80">
-              {artwork.dimensions || artwork.size}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-line/60 pt-3 text-xs">
-            <div>
-              {isSold ? (
-                <span className="text-xs italic text-muted">
-                  Private collection
-                </span>
-              ) : (
-                <span className="text-sm font-normal text-ink">
-                  {formatPrice(artwork.price)}
-                </span>
-              )}
-            </div>
-
-            <Link
-              href={`/artwork/${artwork.slug}`}
-              className="flex items-center gap-1 rounded-sm text-xs font-normal text-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage group-hover:text-ink"
-            >
-              View artwork &rarr;
-            </Link>
-          </div>
-        </div>
-      </article>
-    </CarouselItem>
-  );
-}
-
 export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
-  const displayItems = artworks.slice(0, 6);
+  const displayItems = artworks.slice(0, 8);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Scroll state driven strictly by track.scrollLeft
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+
+  // Mouse drag state with click suppression when pointer moved > 5px
+  const isPointerDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+  const justDraggedRef = useRef(false);
+
+  // Update arrow disabled states directly from track.scrollLeft
+  const updateScrollState = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const { scrollLeft, clientWidth, scrollWidth } = track;
+    setCanPrev(scrollLeft > 4);
+    setCanNext(scrollLeft + clientWidth < scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let rafId: number | null = null;
+    const handleScroll = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateScrollState();
+      });
+    };
+
+    track.addEventListener('scroll', handleScroll, { passive: true });
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollState();
+    });
+    resizeObserver.observe(track);
+    Array.from(track.children).forEach((child) => resizeObserver.observe(child));
+
+    // Initial check
+    updateScrollState();
+
+    return () => {
+      track.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [updateScrollState]);
+
+  // Compute step size: first slide's offsetWidth + 12px gap
+  const getStepSize = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return 300;
+    const firstSlide = track.firstElementChild as HTMLElement | null;
+    if (!firstSlide) return track.clientWidth || 300;
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '12') || 12;
+    return firstSlide.offsetWidth + gap;
+  }, []);
+
+  const scrollPrev = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const step = getStepSize();
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollBy({ left: -step, behavior: prefersReduced ? 'auto' : 'smooth' });
+  }, [getStepSize]);
+
+  const scrollNext = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const step = getStepSize();
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollBy({ left: step, behavior: prefersReduced ? 'auto' : 'smooth' });
+  }, [getStepSize]);
+
+  // Mouse Drag Support with click suppression when pointer moved > 5px
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || !trackRef.current) return;
+    isPointerDownRef.current = true;
+    hasDraggedRef.current = false;
+    startXRef.current = e.clientX;
+    startScrollLeftRef.current = trackRef.current.scrollLeft;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || !trackRef.current) return;
+    const deltaX = e.clientX - startXRef.current;
+    if (Math.abs(deltaX) > 5) {
+      hasDraggedRef.current = true;
+      trackRef.current.scrollLeft = startScrollLeftRef.current - deltaX;
+    }
+  };
+
+  const handlePointerUpOrCancel = () => {
+    if (isPointerDownRef.current) {
+      isPointerDownRef.current = false;
+      if (hasDraggedRef.current) {
+        justDraggedRef.current = true;
+        setTimeout(() => {
+          justDraggedRef.current = false;
+        }, 120);
+      }
+    }
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (justDraggedRef.current || hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  // Keyboard navigation on track
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      scrollPrev();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      scrollNext();
+    }
+  };
 
   return (
     <section
-      className="border-b border-line bg-paper px-6 py-24 md:px-12"
+      className="bg-paper py-20 md:py-28 overflow-hidden"
       aria-labelledby="selected-work-title"
     >
-      <div className="mx-auto max-w-7xl">
-        <Carousel
-          variant="cards"
-          ariaLabel="Curated Selected Work Carousel"
-          totalSlidesCount={displayItems.length}
-          showSideFade={true}
-          sideFadeColor="light"
-          className="space-y-8"
+      {/* 
+        Container Gutter CSS variable matching page container:
+        Mobile: 24px
+        Tablet/Laptop: 48px
+        Desktop >= 1280px: calc((100vw - 1280px) / 2 + 48px)
+      */}
+      <style jsx>{`
+        .selected-work-section {
+          --container-gutter: 24px;
+        }
+        @media (min-width: 768px) {
+          .selected-work-section {
+            --container-gutter: 48px;
+          }
+        }
+        @media (min-width: 1280px) {
+          .selected-work-section {
+            --container-gutter: max(48px, calc((100vw - 1280px) / 2 + 48px));
+          }
+        }
+
+        .selected-work-slide {
+          width: calc((100vw - var(--container-gutter)) / 1.3);
+          flex-shrink: 0;
+          scroll-snap-align: start;
+        }
+        @media (min-width: 640px) {
+          .selected-work-slide {
+            width: calc((100vw - var(--container-gutter)) / 2.3);
+          }
+        }
+        @media (min-width: 1024px) {
+          .selected-work-slide {
+            width: calc((100vw - var(--container-gutter)) / 3.2);
+          }
+        }
+        @media (min-width: 1280px) {
+          .selected-work-slide {
+            width: calc((100vw - var(--container-gutter)) / 4.3);
+          }
+        }
+      `}</style>
+
+      <div className="selected-work-section space-y-10">
+        {/* Section Header Row: Title & Subtitle at Left, Plain "View all" and 40px Arrows at Right */}
+        <div
+          className="mx-auto max-w-7xl px-6 md:px-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6"
         >
-          {/* Header Row in Sentence Case with Generous Whitespace */}
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-              <span className="mb-2 block text-xs font-normal text-sage">
-                Curated selection
-              </span>
-              <h2
-                id="selected-work-title"
-                className="font-heading text-4xl font-normal text-ink md:text-5xl"
-              >
-                Selected work
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <Link
-                href="/originals"
-                className="group inline-flex items-center gap-2 rounded-sm text-xs font-medium text-ink transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-              >
-                <span>View all originals &amp; prints</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-              </Link>
-
-              {/* Accessible Controls: Left/Right Arrows */}
-              <div className="hidden md:flex items-center gap-2">
-                <CarouselPrevious className="h-9 w-9 p-2" />
-                <CarouselNext className="h-9 w-9 p-2" />
-              </div>
-            </div>
+          <div>
+            <h2
+              id="selected-work-title"
+              className="font-heading text-4xl sm:text-5xl text-ink font-normal tracking-tight"
+            >
+              Selected work
+            </h2>
+            <p className="mt-2 text-sm text-muted font-light">
+              Original paintings and archival print editions from the Hudson studio.
+            </p>
           </div>
 
-          {/* Cards Track: 1.15 visible on mobile, 2 on tablet, 3 on desktop with Peek */}
-          <CarouselContent className="py-2">
-            {displayItems.map((artwork, idx) => (
-              <SelectedWorkCard
-                key={artwork.id || artwork._id || artwork.slug}
+          <div className="flex items-center gap-6 self-start sm:self-end">
+            <Link
+              href="/originals"
+              className="text-sm font-normal text-ink hover:text-sage transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            >
+              View all
+            </Link>
+
+            {/* Small 40px round arrows next to "View all" on desktop, hidden on touch */}
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                type="button"
+                onClick={scrollPrev}
+                disabled={!canPrev}
+                aria-label="Previous artworks"
+                className="w-10 h-10 rounded-full border border-line bg-white flex items-center justify-center text-ink transition-all hover:border-ink disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={scrollNext}
+                disabled={!canNext}
+                aria-label="Next artworks"
+                className="w-10 h-10 rounded-full border border-line bg-white flex items-center justify-center text-ink transition-all hover:border-ink disabled:opacity-25 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Full-Bleed Scroll Track */}
+        <div
+          ref={trackRef}
+          role="region"
+          aria-label="Selected work carousel"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUpOrCancel}
+          onPointerCancel={handlePointerUpOrCancel}
+          onClickCapture={handleClickCapture}
+          className="flex w-full overflow-x-auto no-scrollbar gap-[12px] cursor-grab active:cursor-grabbing select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage"
+          style={{
+            scrollSnapType: 'x mandatory',
+            paddingInlineStart: 'var(--container-gutter)',
+            scrollPaddingInlineStart: 'var(--container-gutter)',
+            paddingInlineEnd: 'var(--container-gutter)',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {displayItems.map((artwork, idx) => (
+            <div key={artwork.id || artwork._id || artwork.slug} className="selected-work-slide">
+              <ArtworkCardItem
                 artwork={artwork}
-                index={idx}
-                total={displayItems.length}
+                priority={idx < 2}
               />
-            ))}
-          </CarouselContent>
-
-          {/* Pagination Dots */}
-          <div className="pt-2">
-            <CarouselDots />
-          </div>
-        </Carousel>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

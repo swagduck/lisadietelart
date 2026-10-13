@@ -16,6 +16,7 @@ export const artworkInputSchema = z.object({
   images: z.array(z.string().min(1)).min(1, 'At least one image is required'),
   sold: z.boolean().default(false),
   featured: z.boolean().default(false),
+  useWallMockup: z.boolean().default(true),
 });
 
 export const inquiryInputSchema = z.object({

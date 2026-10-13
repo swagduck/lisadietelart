@@ -14,6 +14,7 @@ const ArtworkSchema = new Schema<IArtwork>(
     images: { type: [String], required: true, default: [] },
     sold: { type: Boolean, default: false },
     featured: { type: Boolean, default: false },
+    useWallMockup: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
   },
   {

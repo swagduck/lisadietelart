@@ -17,6 +17,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/nocturne-in-ochre.svg', '/images/detail-nocturne.svg'],
     sold: false,
     featured: true,
+    useWallMockup: true,
   },
   {
     title: 'The Breath of Dawn',
@@ -31,6 +32,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/the-breath-of-dawn.svg'],
     sold: false,
     featured: true,
+    useWallMockup: true,
   },
   {
     title: 'Coastal Solitude',
@@ -45,6 +47,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/coastal-solitude.svg'],
     sold: false,
     featured: true,
+    useWallMockup: true,
   },
   {
     title: 'Resonance in Sage',
@@ -59,6 +62,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/resonance-in-sage.svg'],
     sold: true,
     featured: true,
+    useWallMockup: true,
   },
   {
     title: 'Passage of Light IV (Print)',
@@ -73,6 +77,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/passage-of-light.svg'],
     sold: false,
     featured: true,
+    useWallMockup: true,
   },
   {
     title: 'Morning Mist (Collector Edition)',
@@ -87,6 +92,7 @@ const sampleArtworks: ArtworkInput[] = [
     images: ['/images/morning-mist-print.svg'],
     sold: true,
     featured: true,
+    useWallMockup: true,
   },
 ];
 

@@ -67,9 +67,13 @@ export default async function OriginalsPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-3">
-          {originals.map((artwork) => (
-            <ArtworkCardItem key={artwork.id} artwork={artwork} />
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          {originals.map((artwork, idx) => (
+            <ArtworkCardItem
+              key={artwork.id || artwork._id || artwork.slug}
+              artwork={artwork}
+              priority={idx < 2}
+            />
           ))}
         </div>
       </section>

@@ -49,6 +49,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
   const [images, setImages] = useState<string[]>([]);
   const [sold, setSold] = useState(false);
   const [featured, setFeatured] = useState(false);
+  const [useWallMockup, setUseWallMockup] = useState(true);
 
   // Initial loaded data for edit mode
   const [existingArtwork, setExistingArtwork] = useState<IArtwork | null>(null);
@@ -102,6 +103,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
           setImages(initialImgs);
           setSold(Boolean(art.sold || art.isSoldOut));
           setFeatured(Boolean(art.featured));
+          setUseWallMockup(art.useWallMockup !== false);
 
           // Check if a more recent local draft exists
           try {
@@ -157,6 +159,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
       if (Array.isArray(parsed.images)) setImages(parsed.images);
       if (parsed.sold !== undefined) setSold(parsed.sold);
       if (parsed.featured !== undefined) setFeatured(parsed.featured);
+      if (parsed.useWallMockup !== undefined) setUseWallMockup(parsed.useWallMockup);
 
       setIsDirty(true);
       setDraftBannerVisible(false);
@@ -192,6 +195,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
         images,
         sold,
         featured,
+        useWallMockup,
         savedAt: new Date().toISOString(),
       };
       localStorage.setItem(draftKey, JSON.stringify(draft));
@@ -199,7 +203,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
     } catch {
       // ignore storage limits
     }
-  }, [title, slug, type, medium, size, price, currency, description, images, sold, featured, draftKey]);
+  }, [title, slug, type, medium, size, price, currency, description, images, sold, featured, useWallMockup, draftKey]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -374,6 +378,7 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
       images,
       sold,
       featured,
+      useWallMockup,
     };
 
     // Client-side Zod validation
@@ -956,6 +961,24 @@ export function ArtworkForm({ initialId, isNew = false }: ArtworkFormProps) {
                   <span className="block text-xs font-medium text-ink">Feature on homepage</span>
                   <span className="block text-[11px] text-muted">
                     Highlights piece in the selected works showcase
+                  </span>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3.5 rounded-xl border border-line hover:bg-paper/40 cursor-pointer transition-colors sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={!useWallMockup}
+                  onChange={(e) => {
+                    setUseWallMockup(!e.target.checked);
+                    setIsDirty(true);
+                  }}
+                  className="w-5 h-5 rounded text-ink focus:ring-sage border-line accent-ink"
+                />
+                <div>
+                  <span className="block text-xs font-medium text-ink">Photo already staged</span>
+                  <span className="block text-[11px] text-muted">
+                    Check if the uploaded photo is already captured in a gallery interior or room (renders full-bleed without studio mockup)
                   </span>
                 </div>
               </label>

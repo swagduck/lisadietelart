@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       }
 
       const artworks = await Artwork.find(query)
-        .select('title slug type medium size dimensions price currency images sold featured createdAt')
+        .select('title slug type medium size dimensions price currency images sold featured useWallMockup createdAt')
         .sort({ createdAt: -1 })
         .lean()
         .exec();
