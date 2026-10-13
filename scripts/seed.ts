@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { Artwork } from '../models/Artwork';
 import { artworkInputSchema, ArtworkInput } from '../lib/validations';
 
 const sampleArtworks: ArtworkInput[] = [
@@ -134,13 +133,14 @@ async function seed() {
   }
 
   console.log('Upserting 6 sample artworks...');
+  const collection = mongoose.connection.collection('artworks');
   for (const item of sampleArtworks) {
-    await Artwork.findOneAndUpdate(
+    await collection.updateOne(
       { slug: item.slug },
       { $set: item },
-      { upsert: true, new: true }
+      { upsert: true }
     );
-    console.log(` ✓ Seeded: "${item.title}" [${item.type}] (Sold: ${item.sold})`);
+    console.log(` ✓ Seeded: "${item.title}" [${item.type}] (Sold: ${item.sold}, Hero: ${Boolean(item.showInHero)})`);
   }
 
   console.log('\n🎉 Successfully seeded 6 artworks to MongoDB Atlas.');

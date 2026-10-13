@@ -25,6 +25,12 @@ export const ARTWORKS_DATA: IArtwork[] = [
     story:
       'Painted during early autumn in the studio, following prolonged walks through misty pine forests where twilight softens hard edges into tonal resonance.',
     featured: true,
+    showInHero: true,
+    heroOrder: 1,
+    heroHeadline: 'Silent Horizons & Lingering Light',
+    heroSubtitle:
+      'Original oil and mineral paintings exploring atmospheric weight, memory, and organic stillness on raw Belgian linen.',
+    heroLabel: 'Selected Collection',
     exhibitions: ['The Quiet Horizon (2025)', 'Earth & Resonance (2024)'],
   },
   {
@@ -48,6 +54,12 @@ export const ARTWORKS_DATA: IArtwork[] = [
     story:
       'Begun before sunrise when the bay was completely silver. A study in patience and the gentle transition of nocturnal blues into morning alabaster.',
     featured: true,
+    showInHero: true,
+    heroOrder: 2,
+    heroHeadline: 'The Poetry of Ethereal Dawn',
+    heroSubtitle:
+      'Hand-ground mineral pigments blended with cold-pressed walnut oil, creating textured surfaces that gently breathe with daylight.',
+    heroLabel: 'Studio Works · Archival Editions',
     exhibitions: ['Tribeca Fine Arts Spring Selection (2024)'],
   },
   {
