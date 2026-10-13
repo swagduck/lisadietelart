@@ -25,18 +25,21 @@ export type CarouselVariant = 'hero' | 'cards' | 'gallery';
 
 interface CarouselContextType {
   activeIndex: number;
-  totalSlides: number;
-  setTotalSlides: (total: number) => void;
-  scrollToIndex: (index: number) => void;
-  prevSlide: () => void;
-  nextSlide: () => void;
-  canScrollPrev: boolean;
-  canScrollNext: boolean;
-  isDragging: boolean;
+  slideCount: number;
+  totalSlides: number; // alias for slideCount
+  canPrev: boolean;
+  canNext: boolean;
+  canScrollPrev: boolean; // alias for canPrev
+  canScrollNext: boolean; // alias for canNext
+  scrollPrev: () => void;
+  scrollNext: () => void;
+  prevSlide: () => void; // alias for scrollPrev
+  nextSlide: () => void; // alias for scrollNext
+  scrollToSlide: (index: number) => void;
+  scrollToIndex: (index: number) => void; // alias for scrollToSlide
+  trackRef: React.RefObject<HTMLDivElement>;
   variant: CarouselVariant;
   isPreloaded: (index: number) => boolean;
-  updateActiveIndexFromScroll: (index: number) => void;
-  trackRef: React.RefObject<HTMLDivElement>;
   slidePrefixId: string;
 }
 
@@ -48,6 +51,31 @@ export function useCarousel() {
     throw new Error('useCarousel must be used within a <Carousel />');
   }
   return context;
+}
+
+/**
+ * Check if the track or any of its ancestors has RTL direction.
+ */
+function isRtlElement(element: HTMLElement | null): boolean {
+  if (typeof window === 'undefined' || !element) return false;
+  if (element.closest('[dir="rtl"]')) return true;
+  return document.dir === 'rtl' || window.getComputedStyle(element).direction === 'rtl';
+}
+
+/**
+ * Compute the exact step size from the first slide's offsetWidth plus track's column gap.
+ * Single source of truth across all breakpoints.
+ */
+function getStep(track: HTMLElement): number {
+  const firstSlide = track.firstElementChild as HTMLElement | null;
+  if (!firstSlide) return track.clientWidth || 300;
+
+  const style = window.getComputedStyle(track);
+  const gapStr = style.columnGap || style.gap || '0';
+  const gap = parseFloat(gapStr) || 0;
+  const step = firstSlide.offsetWidth + gap;
+
+  return step > 0 ? step : track.clientWidth;
 }
 
 /* =========================================================================
@@ -87,128 +115,180 @@ export function Carousel({
   children,
   ...props
 }: CarouselProps) {
+  // Navigation state derived SOLELY from the track scroll position
   const [activeIndex, setActiveIndex] = useState(0);
-  const [totalSlides, setTotalSlides] = useState(totalSlidesCount || 0);
-  const [isDragging, setIsDragging] = useState(false);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  const [slideCount, setSlideCount] = useState(totalSlidesCount || 0);
+
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const slidePrefixId = useId();
 
-  // Keep totalSlides in sync if prop provided
-  useEffect(() => {
-    if (totalSlidesCount !== undefined && totalSlidesCount !== totalSlides) {
-      setTotalSlides(totalSlidesCount);
+  // Recompute metrics from track.scrollLeft as single source of truth
+  const updateScrollMetrics = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const { scrollLeft, clientWidth, scrollWidth } = track;
+    const step = getStep(track);
+    const count = track.children.length;
+
+    if (count > 0 && count !== slideCount) {
+      setSlideCount(count);
     }
-  }, [totalSlidesCount, totalSlides]);
 
-  const canScrollPrev = loop ? true : activeIndex > 0;
-  const canScrollNext = loop ? true : activeIndex < totalSlides - 1;
+    // Single source of truth calculation:
+    // canPrev = scrollLeft > 4
+    // canNext = scrollLeft + clientWidth < scrollWidth - 4
+    // activeIndex = Math.round(scrollLeft / step), clamped to [0, slideCount - 1]
+    const nextCanPrev = scrollLeft > 4;
+    const nextCanNext = scrollLeft + clientWidth < scrollWidth - 4;
+    const rawIndex = step > 0 ? Math.round(scrollLeft / step) : 0;
+    const clampedIndex = Math.max(0, Math.min(rawIndex, Math.max(0, count - 1)));
 
-  // Preload current slide + next slide
+    setCanPrev(nextCanPrev);
+    setCanNext(nextCanNext);
+    setActiveIndex(clampedIndex);
+    onSlideChange?.(clampedIndex);
+  }, [slideCount, onSlideChange]);
+
+  // Scroll listener (throttled with requestAnimationFrame) and ResizeObserver
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let rafId: number | null = null;
+    const handleScroll = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateScrollMetrics();
+      });
+    };
+
+    track.addEventListener('scroll', handleScroll, { passive: true });
+
+    // ResizeObserver on track and children
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollMetrics();
+    });
+
+    resizeObserver.observe(track);
+    Array.from(track.children).forEach((child) => {
+      resizeObserver.observe(child);
+    });
+
+    // Initial measurement
+    updateScrollMetrics();
+
+    return () => {
+      track.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [updateScrollMetrics]);
+
+  // Arrow step navigation: track.scrollBy({ left: direction * step, behavior })
+  const scrollDirection = useCallback(
+    (direction: -1 | 1) => {
+      const track = trackRef.current;
+      if (!track) return;
+
+      const step = getStep(track);
+      const isRtl = isRtlElement(track);
+      const effectiveDirection = isRtl ? -direction : direction;
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      track.scrollBy({
+        left: effectiveDirection * step,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    },
+    []
+  );
+
+  const scrollPrev = useCallback(() => {
+    scrollDirection(-1);
+  }, [scrollDirection]);
+
+  const scrollNext = useCallback(() => {
+    scrollDirection(1);
+  }, [scrollDirection]);
+
+  // Dot navigation: track.scrollTo({ left: index * step, behavior })
+  const scrollToSlide = useCallback((index: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const step = getStep(track);
+    const count = track.children.length || 1;
+    const targetIndex = Math.max(0, Math.min(index, count - 1));
+    const isRtl = isRtlElement(track);
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    track.scrollTo({
+      left: isRtl ? -targetIndex * step : targetIndex * step,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  }, []);
+
+  // Preload current slide + adjacent slides
   const isPreloaded = useCallback(
     (index: number) => {
-      if (totalSlides <= 0) return true;
-      const nextIndex = (activeIndex + 1) % totalSlides;
-      const prevIndex = (activeIndex - 1 + totalSlides) % totalSlides;
-      return index === activeIndex || index === nextIndex || index === prevIndex;
+      return (
+        index === activeIndex ||
+        index === activeIndex + 1 ||
+        index === activeIndex - 1
+      );
     },
-    [activeIndex, totalSlides]
+    [activeIndex]
   );
 
-  // Smooth scroll track to target index
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      if (!trackRef.current || totalSlides === 0) return;
-      const targetIndex = loop
-        ? (index + totalSlides) % totalSlides
-        : Math.max(0, Math.min(index, totalSlides - 1));
-
-      const track = trackRef.current;
-      const slides = Array.from(track.children) as HTMLElement[];
-      const targetSlide = slides[targetIndex];
-
-      if (targetSlide) {
-        const trackLeft = track.getBoundingClientRect().left;
-        const slideLeft = targetSlide.getBoundingClientRect().left;
-        const offset = slideLeft - trackLeft + track.scrollLeft;
-
-        const prefersReducedMotion =
-          typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        track.scrollTo({
-          left: offset,
-          behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        });
-      }
-
-      setActiveIndex(targetIndex);
-      onSlideChange?.(targetIndex);
-      setLiveAnnouncement(`Slide ${targetIndex + 1} of ${totalSlides}`);
-    },
-    [loop, totalSlides, onSlideChange]
-  );
-
-  // Directly sync activeIndex from IntersectionObserver scroll without triggering scrollTo
-  const updateActiveIndexFromScroll = useCallback(
-    (targetIndex: number) => {
-      setActiveIndex(targetIndex);
-      onSlideChange?.(targetIndex);
-      setLiveAnnouncement(`Slide ${targetIndex + 1} of ${totalSlides}`);
-    },
-    [totalSlides, onSlideChange]
-  );
-
-  const prevSlide = useCallback(() => {
-    if (canScrollPrev) {
-      scrollToIndex(activeIndex - 1);
-    }
-  }, [canScrollPrev, activeIndex, scrollToIndex]);
-
-  const nextSlide = useCallback(() => {
-    if (canScrollNext) {
-      scrollToIndex(activeIndex + 1);
-    }
-  }, [canScrollNext, activeIndex, scrollToIndex]);
-
-  // Autoplay handler with pauses on hover, focus, tab-hidden, and reduced motion
+  // Autoplay support (pauses on hover, focus, tab hidden, and reduced motion)
   useEffect(() => {
-    if (!autoplay || totalSlides <= 1) return;
+    if (!autoplay || slideCount <= 1) return;
 
     if (typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (mediaQuery.matches) return;
     }
 
-    if (isHovered || isFocused) {
-      if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
-      return;
-    }
+    if (isHovered || isFocused) return;
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const intervalId = setInterval(() => {
+      if (document.visibilityState !== 'visible' || !trackRef.current) return;
+      const track = trackRef.current;
+      const { scrollLeft, clientWidth, scrollWidth } = track;
 
-    autoplayTimerRef.current = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        scrollToIndex((activeIndex + 1) % totalSlides);
+      // Wrap around if at end, else scroll right by 1 step
+      if (scrollLeft + clientWidth >= scrollWidth - 4) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        scrollDirection(1);
       }
     }, autoplayInterval);
 
-    return () => {
-      if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [autoplay, autoplayInterval, totalSlides, isHovered, isFocused, activeIndex, scrollToIndex]);
+    return () => clearInterval(intervalId);
+  }, [autoplay, autoplayInterval, slideCount, isHovered, isFocused, scrollDirection]);
 
-  // Keyboard navigation handler (Left, Right, Home, End)
+  // Update screen-reader live announcements
+  useEffect(() => {
+    if (slideCount > 0) {
+      setLiveAnnouncement(`Slide ${activeIndex + 1} of ${slideCount}`);
+    }
+  }, [activeIndex, slideCount]);
+
+  // Keyboard navigation on focused track: ArrowLeft, ArrowRight, Home, End
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (
       e.target instanceof HTMLInputElement ||
@@ -217,41 +297,49 @@ export function Carousel({
       return;
     }
 
+    const track = trackRef.current;
+    if (!track) return;
+    const isRtl = isRtlElement(track);
+
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      prevSlide();
+      scrollDirection(isRtl ? 1 : -1);
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      nextSlide();
+      scrollDirection(isRtl ? -1 : 1);
     } else if (e.key === 'Home') {
       e.preventDefault();
-      scrollToIndex(0);
+      scrollToSlide(0);
     } else if (e.key === 'End') {
       e.preventDefault();
-      scrollToIndex(totalSlides - 1);
+      scrollToSlide(slideCount - 1);
     }
   };
 
   const isLight = sideFadeColor === 'light';
-  const showLeftFade = showSideFade && variant === 'cards' && activeIndex > 0;
-  const showRightFade = showSideFade && variant === 'cards' && activeIndex < totalSlides - 1;
+  // Edge fades strictly derived from canPrev / canNext
+  const showLeftFade = showSideFade && canPrev;
+  const showRightFade = showSideFade && canNext;
 
   return (
     <CarouselContext.Provider
       value={{
         activeIndex,
-        totalSlides,
-        setTotalSlides,
-        scrollToIndex,
-        prevSlide,
-        nextSlide,
-        canScrollPrev,
-        canScrollNext,
-        isDragging,
+        slideCount,
+        totalSlides: slideCount,
+        canPrev,
+        canNext,
+        canScrollPrev: canPrev,
+        canScrollNext: canNext,
+        scrollPrev,
+        scrollNext,
+        prevSlide: scrollPrev,
+        nextSlide: scrollNext,
+        scrollToSlide,
+        scrollToIndex: scrollToSlide,
+        trackRef,
         variant,
         isPreloaded,
-        updateActiveIndexFromScroll,
-        trackRef,
         slidePrefixId,
       }}
     >
@@ -271,12 +359,12 @@ export function Carousel({
         )}
         {...props}
       >
-        {/* Screen Reader Live Region for Announcements */}
+        {/* Screen Reader Live Region */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {liveAnnouncement}
         </div>
 
-        {/* Left Side Fade Gradient */}
+        {/* Left Edge Fade Gradient (visible only when canPrev) */}
         {showLeftFade && (
           <div
             aria-hidden="true"
@@ -289,7 +377,7 @@ export function Carousel({
           />
         )}
 
-        {/* Right Side Fade Gradient */}
+        {/* Right Edge Fade Gradient (visible only when canNext) */}
         {showRightFade && (
           <div
             aria-hidden="true"
@@ -309,7 +397,7 @@ export function Carousel({
 }
 
 /* =========================================================================
-   2. Carousel Track (Scroll-Snap & Mouse/Touch Drag)
+   2. Carousel Content / Scroll Track
    ========================================================================= */
 
 export interface CarouselContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -321,22 +409,15 @@ export function CarouselContent({
   children,
   ...props
 }: CarouselContentProps) {
-  const { trackRef, activeIndex, updateActiveIndexFromScroll, setTotalSlides, variant } = useCarousel();
+  const { trackRef, variant } = useCarousel();
 
+  // Mouse Drag support for desktop
   const isMouseDownRef = useRef(false);
   const startXRef = useRef(0);
   const startScrollLeftRef = useRef(0);
   const hasDraggedRef = useRef(false);
   const justFinishedDragRef = useRef(false);
 
-  // Sync total children slides count
-  useEffect(() => {
-    if (!trackRef.current) return;
-    const slides = Array.from(trackRef.current.children);
-    setTotalSlides(slides.length);
-  }, [children, setTotalSlides, trackRef]);
-
-  // Global mouseup listener so drag ends even if pointer leaves carousel div
   useEffect(() => {
     const handleGlobalMouseUp = () => {
       if (isMouseDownRef.current) {
@@ -353,58 +434,8 @@ export function CarouselContent({
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
   }, []);
 
-  // IntersectionObserver to sync activeIndex on scroll
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const slides = Array.from(track.children) as HTMLElement[];
-    if (slides.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find slide with highest intersection ratio
-        let bestEntry: IntersectionObserverEntry | null = null;
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
-              bestEntry = entry;
-            }
-          }
-        }
-
-        if (bestEntry && bestEntry.intersectionRatio >= 0.5) {
-          const idx = Number(bestEntry.target.getAttribute('data-slide-index'));
-          if (!Number.isNaN(idx)) {
-            // Only update if changed
-            if (idx !== activeIndex) {
-              updateActiveIndexFromScroll(idx);
-            }
-          }
-        }
-      },
-      {
-        root: track,
-        threshold: [0.5, 0.75],
-      }
-    );
-
-    slides.forEach((slide, idx) => {
-      slide.setAttribute('data-slide-index', String(idx));
-      observer.observe(slide);
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [trackRef, activeIndex, updateActiveIndexFromScroll]);
-
-  // Mouse Drag Support
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
-    // Only primary mouse button
-    if (e.button !== 0) return;
-
+    if (!trackRef.current || e.button !== 0) return;
     isMouseDownRef.current = true;
     hasDraggedRef.current = false;
     startXRef.current = e.pageX;
@@ -414,7 +445,6 @@ export function CarouselContent({
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isMouseDownRef.current || !trackRef.current) return;
     const deltaX = e.pageX - startXRef.current;
-
     if (Math.abs(deltaX) > 6) {
       hasDraggedRef.current = true;
       trackRef.current.scrollLeft = startScrollLeftRef.current - deltaX;
@@ -433,7 +463,6 @@ export function CarouselContent({
     }
   };
 
-  // Prevent accidental card/link click if user was dragging
   const handleClickCapture = (e: React.MouseEvent) => {
     if (justFinishedDragRef.current || hasDraggedRef.current) {
       e.preventDefault();
@@ -451,14 +480,14 @@ export function CarouselContent({
       onClickCapture={handleClickCapture}
       className={cn(
         'no-scrollbar flex w-full overflow-x-auto select-none',
-        'scroll-smooth',
-        // Native CSS Scroll-Snap
-        variant === 'hero' ? 'snap-x snap-mandatory' : 'snap-x snap-mandatory gap-6 md:gap-8',
+        // Native CSS Scroll-Snap Track (no transforms)
+        variant === 'hero' ? 'gap-0' : 'gap-6 md:gap-8',
         'cursor-grab active:cursor-grabbing',
         className
       )}
       style={{
         scrollSnapType: 'x mandatory',
+        scrollPaddingInline: 'inherit',
         WebkitOverflowScrolling: 'touch',
       }}
       {...props}
@@ -485,18 +514,15 @@ export function CarouselItem({
   children,
   ...props
 }: CarouselItemProps) {
-  const { totalSlides, variant, slidePrefixId } = useCarousel();
-  const effectiveTotal = total || totalSlides;
+  const { slideCount, variant, slidePrefixId } = useCarousel();
+  const effectiveTotal = total || slideCount;
 
-  // Responsive peek sizing for variants
+  // Responsive slide layout sizing - each slide with scroll-snap-align: start
   const variantClasses = {
-    // Hero: full-bleed 100svh
-    hero: 'w-full shrink-0 snap-center min-h-[100svh]',
-    // Cards: 1.15 visible on mobile (peek of next slide), 2 on tablet, 3 on desktop
+    hero: 'w-full shrink-0 snap-start min-h-[100svh]',
     cards:
       'w-[82vw] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-2rem)/3)] shrink-0 snap-start',
-    // Gallery: single large image item per slide
-    gallery: 'w-full shrink-0 snap-center',
+    gallery: 'w-full shrink-0 snap-start',
   }[variant];
 
   return (
@@ -505,6 +531,9 @@ export function CarouselItem({
       role="group"
       aria-roledescription="slide"
       aria-label={`Slide ${index + 1} of ${effectiveTotal}`}
+      style={{
+        scrollSnapAlign: 'start',
+      }}
       className={cn(variantClasses, className)}
       {...props}
     >
@@ -514,7 +543,7 @@ export function CarouselItem({
 }
 
 /* =========================================================================
-   4. Accessible Arrow Buttons (hidden on touch, disabled at ends, focus-visible)
+   4. Accessible Arrow Buttons (hidden on touch, disabled state from canPrev/canNext)
    ========================================================================= */
 
 export interface CarouselButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -526,13 +555,13 @@ export function CarouselPrevious({
   iconClassName,
   ...props
 }: CarouselButtonProps) {
-  const { prevSlide, canScrollPrev, variant } = useCarousel();
+  const { scrollPrev, canPrev, variant } = useCarousel();
 
   return (
     <button
       type="button"
-      onClick={prevSlide}
-      disabled={!canScrollPrev}
+      onClick={scrollPrev}
+      disabled={!canPrev}
       aria-label="Previous slide"
       className={cn(
         // Hidden on touch devices; fine pointer / desktop only
@@ -557,13 +586,13 @@ export function CarouselNext({
   iconClassName,
   ...props
 }: CarouselButtonProps) {
-  const { nextSlide, canScrollNext, variant } = useCarousel();
+  const { scrollNext, canNext, variant } = useCarousel();
 
   return (
     <button
       type="button"
-      onClick={nextSlide}
-      disabled={!canScrollNext}
+      onClick={scrollNext}
+      disabled={!canNext}
       aria-label="Next slide"
       className={cn(
         // Hidden on touch devices; fine pointer / desktop only
@@ -584,7 +613,7 @@ export function CarouselNext({
 }
 
 /* =========================================================================
-   5. Interactive Pagination Dots & Thin Progress Bar
+   5. Interactive Pagination Dots
    ========================================================================= */
 
 export interface CarouselDotsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -598,10 +627,9 @@ export function CarouselDots({
   inactiveColor,
   ...props
 }: CarouselDotsProps) {
-  const { activeIndex, totalSlides, scrollToIndex, variant } = useCarousel();
+  const { activeIndex, slideCount, scrollToSlide, variant } = useCarousel();
 
-  if (totalSlides <= 1) return null;
-
+  if (slideCount <= 1) return null;
   const isHero = variant === 'hero';
 
   return (
@@ -611,7 +639,7 @@ export function CarouselDots({
       className={cn('flex items-center justify-center gap-2.5 py-4', className)}
       {...props}
     >
-      {Array.from({ length: totalSlides }).map((_, idx) => {
+      {Array.from({ length: slideCount }).map((_, idx) => {
         const isActive = idx === activeIndex;
         return (
           <button
@@ -619,8 +647,8 @@ export function CarouselDots({
             type="button"
             role="tab"
             aria-selected={isActive}
-            aria-label={`Go to slide ${idx + 1} of ${totalSlides}`}
-            onClick={() => scrollToIndex(idx)}
+            aria-label={`Go to slide ${idx + 1} of ${slideCount}`}
+            onClick={() => scrollToSlide(idx)}
             className={cn(
               'h-2 rounded-full transition-all duration-300',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-1',
@@ -644,18 +672,18 @@ export function CarouselProgress({
   barClassName,
   ...props
 }: CarouselProgressProps) {
-  const { activeIndex, totalSlides } = useCarousel();
+  const { activeIndex, slideCount } = useCarousel();
 
-  if (totalSlides <= 1) return null;
-  const progressPercent = Math.min(100, Math.max(0, ((activeIndex + 1) / totalSlides) * 100));
+  if (slideCount <= 1) return null;
+  const progressPercent = Math.min(100, Math.max(0, ((activeIndex + 1) / slideCount) * 100));
 
   return (
     <div
       role="progressbar"
       aria-valuenow={activeIndex + 1}
       aria-valuemin={1}
-      aria-valuemax={totalSlides}
-      aria-label={`Slide ${activeIndex + 1} of ${totalSlides}`}
+      aria-valuemax={slideCount}
+      aria-label={`Slide ${activeIndex + 1} of ${slideCount}`}
       className={cn('h-0.5 w-full overflow-hidden bg-line/60', className)}
       {...props}
     >
@@ -668,7 +696,7 @@ export function CarouselProgress({
 }
 
 /* =========================================================================
-   6. Fullscreen Accessible Lightbox (Pinch/Double-Click Zoom, Swipe, Esc, Focus Trap)
+   6. Fullscreen Accessible Lightbox
    ========================================================================= */
 
 export interface LightboxProps {
@@ -705,7 +733,6 @@ export function Lightbox({
     setPosition({ x: 0, y: 0 });
   }, [initialIndex, isOpen]);
 
-  // Focus trap & Key listeners (Escape, Arrows)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -726,7 +753,6 @@ export function Lightbox({
           setCurrentIndex((prev) => prev + 1);
         }
       } else if (e.key === 'Tab') {
-        // Focus trap
         if (!containerRef.current) return;
         const focusable = containerRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -748,9 +774,10 @@ export function Lightbox({
 
     document.addEventListener('keydown', handleKeyDown);
 
-    // Initial focus on close button
     const timer = setTimeout(() => {
-      const closeBtn = containerRef.current?.querySelector<HTMLElement>('button[aria-label="Close lightbox"]');
+      const closeBtn = containerRef.current?.querySelector<HTMLElement>(
+        'button[aria-label="Close lightbox"]'
+      );
       closeBtn?.focus();
     }, 50);
 
@@ -774,7 +801,6 @@ export function Lightbox({
     }
   };
 
-  // Touch Swipe & Pinch Support
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const dist = Math.hypot(
@@ -824,7 +850,6 @@ export function Lightbox({
       setIsPanning(false);
     }
 
-    // Double tap to toggle zoom
     const now = Date.now();
     if (now - lastTapTimeRef.current < 300) {
       handleToggleZoom();
@@ -837,7 +862,6 @@ export function Lightbox({
       const deltaX = e.changedTouches[0].clientX - touchStartRef.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStartRef.current.y;
 
-      // Horizontal swipe threshold
       if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
         if (deltaX < 0 && currentIndex < images.length - 1) {
           setCurrentIndex((prev) => prev + 1);
@@ -849,7 +873,6 @@ export function Lightbox({
     touchStartRef.current = null;
   };
 
-  // Desktop Mouse Pan when Zoomed
   const handleMouseDown = (e: React.MouseEvent) => {
     if (scale > 1) {
       setIsPanning(true);
@@ -899,7 +922,6 @@ export function Lightbox({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Zoom Toggle Button */}
           <button
             type="button"
             onClick={handleToggleZoom}
@@ -909,7 +931,6 @@ export function Lightbox({
             {scale > 1 ? <ZoomOut className="h-5 w-5" /> : <ZoomIn className="h-5 w-5" />}
           </button>
 
-          {/* Close Lightbox Button */}
           <button
             type="button"
             onClick={onClose}
@@ -1026,7 +1047,7 @@ export function Lightbox({
 }
 
 /* =========================================================================
-   7. Gallery Carousel Component (Large Image per slide + Thumbnails + Fullscreen Lightbox)
+   7. Gallery Carousel Component
    ========================================================================= */
 
 export interface GalleryCarouselProps {
@@ -1095,7 +1116,6 @@ export function GalleryCarousel({
                     sizes="(max-width: 1024px) 100vw, 60vw"
                   />
 
-                  {/* Visual expand badge in corner */}
                   <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-sm bg-ink/75 px-2.5 py-1 text-[11px] font-medium tracking-wider text-paper backdrop-blur-sm transition-opacity opacity-90 group-hover/thumb:opacity-100">
                     <Maximize2 className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Inspect Detail</span>
@@ -1105,7 +1125,6 @@ export function GalleryCarousel({
             ))}
           </CarouselContent>
 
-          {/* Navigation Arrows for Gallery */}
           {displayImages.length > 1 && (
             <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-6">
               <CarouselPrevious className="pointer-events-auto" />
@@ -1114,7 +1133,6 @@ export function GalleryCarousel({
           )}
         </div>
 
-        {/* Thumbnail Strip underneath */}
         {displayImages.length > 1 && (
           <ThumbnailStrip
             images={displayImages}
@@ -1126,7 +1144,6 @@ export function GalleryCarousel({
         )}
       </Carousel>
 
-      {/* Fullscreen Lightbox Modal */}
       <Lightbox
         images={displayImages}
         initialIndex={lightboxIndex}
@@ -1147,7 +1164,7 @@ function ThumbnailStrip({
   activeIndex: number;
   onSelectThumb: (index: number) => void;
 }) {
-  const { scrollToIndex } = useCarousel();
+  const { scrollToSlide } = useCarousel();
 
   return (
     <div
@@ -1166,7 +1183,7 @@ function ThumbnailStrip({
             aria-label={`Show view ${idx + 1}`}
             onClick={() => {
               onSelectThumb(idx);
-              scrollToIndex(idx);
+              scrollToSlide(idx);
             }}
             className={cn(
               'relative h-20 w-20 flex-shrink-0 border bg-paper p-1 transition-all',

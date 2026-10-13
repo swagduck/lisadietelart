@@ -17,6 +17,27 @@ export function Navbar() {
 
   const isHome = pathname === '/';
 
+  // Navigation Links with "Home" as the first item before Originals
+  const navLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Originals', href: '/originals' },
+    { label: 'Art prints', href: '/prints' },
+    { label: 'Commissions', href: '/commissions' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+  ];
+
+  // Check if link is active, including highlighting Originals for both /originals and /artwork/*
+  const isLinkActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    if (href === '/originals') {
+      return pathname === '/originals' || pathname.startsWith('/artwork/');
+    }
+    return pathname === href;
+  };
+
   // Header scroll detection: solid on scroll & hide on scroll down / show on scroll up
   useEffect(() => {
     const handleScroll = () => {
@@ -64,14 +85,6 @@ export function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  const navLinks = [
-    { label: 'Originals', href: '/originals' },
-    { label: 'Art prints', href: '/prints' },
-    { label: 'Commissions', href: '/commissions' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-  ];
-
   const isSolid = !isHome || isScrolled;
 
   return (
@@ -86,7 +99,7 @@ export function Navbar() {
         )}
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-12">
-          {/* Brand Signature */}
+          {/* Brand Signature - Links to "/" */}
           <Link
             href="/"
             className={cn(
@@ -108,32 +121,37 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation in Sentence Case */}
+          {/* Desktop Navigation with Active Page Highlighting & Subtle Sage Underline */}
           <nav
             aria-label="Main Navigation"
             className="hidden items-center space-x-8 text-sm font-normal md:flex"
           >
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = isLinkActive(link.href);
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   prefetch={true}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'relative rounded-sm px-1 py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
+                    'relative rounded-sm px-1 py-1.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2',
                     isSolid
                       ? isActive
                         ? 'font-medium text-sage'
                         : 'text-ink/80 hover:text-sage'
                       : isActive
-                        ? 'font-medium text-paper underline decoration-sage underline-offset-8'
+                        ? 'font-medium text-paper'
                         : 'text-paper/90 hover:text-paper'
                   )}
                 >
-                  {link.label}
-                  {isActive && isSolid && (
-                    <span className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-sage" />
+                  <span>{link.label}</span>
+                  {/* Subtle underline in sage colour for current page */}
+                  {isActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-sage rounded-full transition-all"
+                    />
                   )}
                 </Link>
               );
@@ -183,16 +201,20 @@ export function Navbar() {
           aria-modal="true"
           aria-label="Mobile Navigation Menu"
         >
-          {/* Header Bar inside Menu */}
+          {/* Header Bar inside Menu - Logo Links to "/" */}
           <div className="flex items-center justify-between border-b border-line/60 pb-6">
-            <div>
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            >
               <span className="block font-heading text-2xl text-ink">
                 Lisa Dietel
               </span>
               <span className="text-xs text-muted">
                 Fine art &middot; Studio
               </span>
-            </div>
+            </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-full p-2.5 text-ink transition-colors hover:bg-mist/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
@@ -202,20 +224,21 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Navigation Links with Large Elegant Serif Typography */}
+          {/* Navigation Links with "Home" first, active state and subtle sage underline */}
           <nav className="my-auto space-y-6 py-8" aria-label="Mobile Menu Links">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = isLinkActive(link.href);
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   prefetch={true}
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     'block font-heading text-3xl font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage',
                     isActive
-                      ? 'text-sage pl-3 border-l-2 border-sage'
+                      ? 'text-sage pl-3 border-l-2 border-sage underline decoration-sage underline-offset-8 decoration-[1.5px]'
                       : 'text-ink/80 hover:text-sage'
                   )}
                 >
