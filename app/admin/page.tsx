@@ -7,6 +7,7 @@ import { ArtworkCard } from '@/components/admin/ArtworkCard';
 import { ArtworkModal } from '@/components/admin/ArtworkModal';
 import { InquiriesList } from '@/components/admin/InquiriesList';
 import { SubscribersList } from '@/components/admin/SubscribersList';
+import { Palette, Check, X } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'artworks' | 'inquiries' | 'subscribers'>('artworks');
@@ -262,9 +263,9 @@ export default function AdminDashboardPage() {
             }`}
           >
             {toast.type === 'success' ? (
-              <span className="text-sage text-base">✓</span>
+              <Check className="h-4 w-4 text-sage shrink-0" />
             ) : (
-              <span className="text-red-300 text-base">✕</span>
+              <X className="h-4 w-4 text-red-300 shrink-0" />
             )}
             <span className="text-xs sm:text-sm font-medium">{toast.message}</span>
           </div>
@@ -347,7 +348,7 @@ export default function AdminDashboardPage() {
               </div>
             ) : filteredArtworks.length === 0 ? (
               <div className="text-center py-20 px-4 bg-white rounded-2xl border border-line">
-                <span className="text-3xl block mb-2">🎨</span>
+                <Palette className="h-8 w-8 text-sage mx-auto mb-2" strokeWidth={1.5} />
                 <h3 className="font-serif text-lg text-ink font-normal">
                   {artSearch || artFilter !== 'all' ? 'No matching artworks found' : 'No artworks in catalog'}
                 </h3>

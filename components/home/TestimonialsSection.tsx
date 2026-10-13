@@ -25,7 +25,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
       <div className="mx-auto max-w-7xl">
         <Carousel
           variant="cards"
-          ariaLabel="Collector Reflections Carousel"
+          ariaLabel="Collector reflections carousel"
           totalSlidesCount={testimonials.length}
           showSideFade={true}
           sideFadeColor="light"
@@ -34,14 +34,14 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
           {/* Header Row with Title and Carousel Arrows */}
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div className="max-w-2xl">
-              <span className="mb-2 block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-                Collector Reflections
+              <span className="mb-2 block text-xs font-normal text-sage">
+                Collector reflections
               </span>
               <h2
                 id="testimonials-title"
                 className="font-heading text-4xl font-normal text-ink md:text-5xl"
               >
-                Words from Private Collectors
+                Words from private collectors
               </h2>
             </div>
 
@@ -60,20 +60,20 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                 index={idx}
                 total={testimonials.length}
               >
-                <figure className="relative flex h-full flex-col justify-between border border-line bg-paper p-8 shadow-sm transition-all duration-300 hover:border-ink/20 hover:shadow-md">
-                  <Quote className="mb-6 h-8 w-8 text-mist" strokeWidth={1} />
+                <figure className="relative flex h-full flex-col justify-between border border-line bg-paper p-8 transition-all duration-300 hover:border-ink/20">
+                  <Quote className="mb-6 h-7 w-7 text-mist" strokeWidth={1.5} />
 
-                  <blockquote className="flex-1 text-sm font-light italic leading-relaxed text-ink/90 md:text-base">
+                  <blockquote className="flex-1 text-sm font-light italic leading-relaxed text-ink/90 md:text-base max-w-[60ch]">
                     &ldquo;{test.quote}&rdquo;
                   </blockquote>
 
                   <figcaption className="mt-8 border-t border-line/60 pt-4">
-                    <div className="font-heading text-lg font-medium text-ink">
+                    <div className="font-heading text-lg font-normal text-ink">
                       {test.author}
                     </div>
                     <div className="text-xs font-light text-muted">{test.location}</div>
                     {test.acquiredArtwork && (
-                      <div className="mt-1 text-[11px] font-medium uppercase tracking-wide text-sage">
+                      <div className="mt-1 text-xs font-normal text-sage">
                         {test.acquiredArtwork}
                       </div>
                     )}

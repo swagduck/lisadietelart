@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ISubscriber } from '@/types/artwork';
 import { formatDate } from '@/lib/format';
+import { Users } from 'lucide-react';
 
 interface SubscribersListProps {
   subscribers: ISubscriber[];
@@ -116,7 +117,7 @@ export function SubscribersList({
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 px-4 bg-white rounded-2xl border border-line">
-          <span className="text-3xl block mb-2">👥</span>
+          <Users className="h-8 w-8 text-sage mx-auto mb-2" strokeWidth={1.5} />
           <h3 className="font-serif text-lg text-ink font-normal">
             {search ? 'No matching subscribers found' : 'No subscribers yet'}
           </h3>

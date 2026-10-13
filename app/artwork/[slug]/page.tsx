@@ -1,14 +1,20 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ARTWORKS_DATA } from '@/lib/data';
-import { getArtworkBySlug } from '@/lib/server-data';
+import { getArtworkBySlug, getOriginals, getPrints } from '@/lib/server-data';
 import { formatPrice } from '@/lib/format';
-import { Mail, ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
-import { getCloudinaryBlurUrl } from '@/lib/cloudinary-url';
 import { GalleryCarousel } from '@/components/ui/Carousel';
+import { ArtworkInteractive } from '@/components/artwork/ArtworkInteractive';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselDots,
+} from '@/components/ui/Carousel';
+import { ArtworkCardItem } from '@/components/gallery/ArtworkCardItem';
 
 interface ArtworkDetailPageProps {
   params: {
@@ -24,14 +30,24 @@ export function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: ArtworkDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ArtworkDetailPageProps): Promise<Metadata> {
   const artwork = await getArtworkBySlug(params.slug);
+
   if (!artwork) {
-    return { title: 'Artwork Not Found' };
+    return {
+      title: 'Artwork Not Found — Lisa Dietel Art',
+      description: 'The requested artwork could not be found in the gallery archive.',
+    };
   }
 
-  const artworkImage = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
-  const description = `${artwork.title} by Lisa Dietel. ${artwork.medium}, ${artwork.size || artwork.dimensions}. ${artwork.description.slice(0, 140)}...`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lisadietelart.com';
+  const artworkImage =
+    artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const description =
+    artwork.description ||
+    `${artwork.title} by Lisa Dietel. ${artwork.medium}, ${artwork.size || artwork.dimensions}.`;
 
   return {
     title: `${artwork.title} — Lisa Dietel Art`,
@@ -40,7 +56,6 @@ export async function generateMetadata({ params }: ArtworkDetailPageProps): Prom
       title: `${artwork.title} — Lisa Dietel Art`,
       description,
       url: `/artwork/${artwork.slug}`,
-      type: 'article',
       images: [
         {
           url: artworkImage,
@@ -68,6 +83,13 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
 
   const mainImage = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lisadietelart.com';
+
+  // Fetch related collection pieces
+  const collectionWorks =
+    artwork.type === 'original' ? await getOriginals() : await getPrints();
+  const relatedArtworks = collectionWorks
+    .filter((item) => item.slug !== artwork.slug)
+    .slice(0, 6);
 
   // JSON-LD Product & VisualArtwork structured data
   const jsonLd = {
@@ -97,7 +119,7 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
   };
 
   // Pre-fill mailto inquiry link with artwork title and dimensions
-  const mailtoSubject = encodeURIComponent(`Acquisition Enquiry: "${artwork.title}"`);
+  const mailtoSubject = encodeURIComponent(`Acquisition enquiry: "${artwork.title}"`);
   const mailtoBody = encodeURIComponent(
     `Hello Lisa,\n\nI am interested in "${artwork.title}" (${artwork.size || artwork.dimensions}, ${artwork.medium}).\n\nPlease let me know further details regarding acquisition, shipping, or viewing.\n\nThank you,\n`
   );
@@ -105,10 +127,12 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
 
   const backLink = artwork.type === 'original' ? '/originals' : '/prints';
   const backLabel =
-    artwork.type === 'original' ? 'Back to Originals' : 'Back to Art Prints';
+    artwork.type === 'original' ? 'Back to originals' : 'Back to art prints';
+
+  const isSold = Boolean(artwork.isSoldOut || artwork.sold);
 
   return (
-    <div className="min-h-screen bg-paper pb-24 pt-28">
+    <div className="min-h-screen bg-paper pb-28 pt-28">
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
@@ -120,14 +144,14 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
         <nav aria-label="Breadcrumb" className="mb-8">
           <Link
             href={backLink}
-            className="inline-flex items-center gap-2 rounded-sm text-xs uppercase tracking-widest text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="inline-flex items-center gap-2 rounded-sm text-xs text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>{backLabel}</span>
           </Link>
         </nav>
 
-        {/* Artwork Presentation Grid */}
+        {/* Artwork Presentation Grid: Clean Two-Column Layout */}
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
           {/* Left Column: Gallery Carousel with Lightbox */}
           <div className="space-y-4 lg:col-span-7">
@@ -146,21 +170,21 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
             />
 
             <div className="flex justify-between pt-1 text-[11px] text-muted">
-              <span>Natural ambient daylight rendering &bull; Click to inspect fullscreen</span>
-              <span>Direct from Lisa Dietel Studio</span>
+              <span>Natural ambient daylight rendering &bull; Tap image to inspect detail</span>
+              <span>Lisa Dietel Studio</span>
             </div>
           </div>
 
-          {/* Right Column: Metadata & Enquire Action */}
+          {/* Right Column: Metadata, Specs & Acquisition Actions */}
           <div className="space-y-8 lg:col-span-5">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium uppercase tracking-[0.25em] text-sage">
-                  {artwork.type === 'original' ? 'Original Work' : 'Archival Print'}
+                <span className="text-xs font-normal text-sage">
+                  {artwork.type === 'original' ? 'Original work' : 'Archival print'}
                 </span>
-                {artwork.isSoldOut && (
-                  <span className="border border-line bg-mist/50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted">
-                    Private Collection
+                {isSold && (
+                  <span className="border border-line bg-mist/40 px-2 py-0.5 text-[11px] text-muted">
+                    Private collection
                   </span>
                 )}
               </div>
@@ -169,13 +193,13 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
                 {artwork.title}
               </h1>
 
-              <div className="pt-2">
-                {artwork.isSoldOut ? (
+              <div className="pt-1">
+                {isSold ? (
                   <div className="text-sm italic text-muted">
-                    Original piece resides in a private collection
+                    This piece resides in a private collection
                   </div>
                 ) : (
-                  <div className="font-heading text-3xl font-medium text-ink">
+                  <div className="font-heading text-3xl font-normal text-ink">
                     {formatPrice(artwork.price)}
                   </div>
                 )}
@@ -183,41 +207,35 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
             </div>
 
             {/* Artwork Specifications Table */}
-            <div className="space-y-3 border-y border-line py-5 text-xs">
+            <div className="space-y-3 border-y border-line/70 py-5 text-xs">
               <div className="grid grid-cols-3">
-                <span className="text-[11px] uppercase tracking-wider text-muted">
-                  Medium
-                </span>
+                <span className="text-muted">Medium</span>
                 <span className="col-span-2 font-light text-ink">{artwork.medium}</span>
               </div>
               <div className="grid grid-cols-3">
-                <span className="text-[11px] uppercase tracking-wider text-muted">
-                  Size
-                </span>
+                <span className="text-muted">Size</span>
                 <span className="col-span-2 font-light text-ink">
                   {artwork.size || artwork.dimensions}
                 </span>
               </div>
               {artwork.surface && (
                 <div className="grid grid-cols-3">
-                  <span className="text-[11px] uppercase tracking-wider text-muted">
-                    Substrate
-                  </span>
+                  <span className="text-muted">Substrate</span>
                   <span className="col-span-2 font-light text-ink">
                     {artwork.surface}
                   </span>
                 </div>
               )}
-              <div className="grid grid-cols-3">
-                <span className="text-[11px] uppercase tracking-wider text-muted">
-                  Year
-                </span>
-                <span className="col-span-2 font-light text-ink">{artwork.year}</span>
-              </div>
+              {artwork.year && (
+                <div className="grid grid-cols-3">
+                  <span className="text-muted">Year</span>
+                  <span className="col-span-2 font-light text-ink">{artwork.year}</span>
+                </div>
+              )}
             </div>
 
-            {/* Description & Story */}
-            <div className="space-y-4 text-sm font-light leading-relaxed text-muted">
+            {/* Description & Story: Line length under 70 characters */}
+            <div className="max-w-[65ch] space-y-4 text-sm font-light leading-relaxed text-muted">
               <p>{artwork.description}</p>
               {artwork.story && (
                 <p className="border-l-2 border-sage/60 pl-3 italic text-ink/80">
@@ -226,26 +244,24 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
               )}
             </div>
 
-            {/* Enquire Button that opens prefilled mailto */}
-            <div className="space-y-4 pt-4">
-              <a
-                href={mailtoUrl}
-                className="flex w-full items-center justify-center gap-2 bg-ink px-6 py-4 text-xs font-medium uppercase tracking-widest text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
-              >
-                <Mail className="h-4 w-4" />
-                <span>Enquire About This Artwork</span>
-              </a>
+            {/* Interactive Actions: "See it on your wall" + Enquire Button + Sticky Mobile Bar */}
+            <div className="space-y-4 pt-2">
+              <ArtworkInteractive
+                artwork={artwork}
+                mailtoUrl={mailtoUrl}
+                mainImage={mainImage}
+              />
 
-              {artwork.isSoldOut && (
-                <div className="space-y-2 border border-line bg-mist/30 p-4 text-xs">
-                  <p className="font-medium text-ink">Interested in a similar piece?</p>
+              {isSold && (
+                <div className="space-y-2 border border-line bg-mist/20 p-4 text-xs">
+                  <p className="font-normal text-ink">Interested in a similar piece?</p>
                   <p className="text-muted">
-                    Lisa accepts a limited number of bespoke commissions each season based
-                    on requested dimensions and color resonance.
+                    Lisa creates a limited number of bespoke commissions each season based
+                    on specific dimensions and tone palette.
                   </p>
                   <Link
                     href="/commissions"
-                    className="inline-block text-[11px] font-medium uppercase tracking-wider text-sage underline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                    className="inline-block text-xs text-sage underline hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                   >
                     Learn about commissioning a bespoke canvas &rarr;
                   </Link>
@@ -253,19 +269,63 @@ export default async function ArtworkDetailPage({ params }: ArtworkDetailPagePro
               )}
 
               {/* Collector Guarantees */}
-              <div className="grid grid-cols-2 gap-4 border-t border-line/60 pt-2 text-[11px] text-muted">
+              <div className="grid grid-cols-2 gap-4 border-t border-line/60 pt-4 text-[11px] text-muted">
                 <div className="flex items-center gap-2">
                   <Truck className="h-4 w-4 flex-shrink-0 text-sage" />
-                  <span>Insured white-glove courier</span>
+                  <span>Insured courier delivery</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 flex-shrink-0 text-sage" />
-                  <span>Signed Certificate of Authenticity</span>
+                  <span>Certificate of Authenticity</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* "More from this collection" Slider at Bottom */}
+        {relatedArtworks.length > 0 && (
+          <section className="mt-24 border-t border-line/70 pt-16">
+            <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <span className="text-xs font-normal text-sage">
+                  {artwork.type === 'original' ? 'Original works' : 'Archival prints'}
+                </span>
+                <h2 className="font-heading text-3xl font-normal text-ink md:text-4xl">
+                  More from this collection
+                </h2>
+              </div>
+
+              <Link
+                href={backLink}
+                className="text-xs text-muted hover:text-ink transition-colors"
+              >
+                {backLabel} &rarr;
+              </Link>
+            </div>
+
+            <Carousel
+              variant="cards"
+              ariaLabel="More from this collection"
+              totalSlidesCount={relatedArtworks.length}
+              showSideFade={true}
+              sideFadeColor="light"
+              className="space-y-6"
+            >
+              <CarouselContent className="py-2">
+                {relatedArtworks.map((item, idx) => (
+                  <CarouselItem key={item.slug} index={idx} total={relatedArtworks.length}>
+                    <ArtworkCardItem artwork={item} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              <div className="pt-2">
+                <CarouselDots />
+              </div>
+            </Carousel>
+          </section>
+        )}
       </div>
     </div>
   );

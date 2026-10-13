@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '../shop/CartContext';
@@ -11,21 +11,34 @@ export function Navbar() {
   const pathname = usePathname();
   const { openCart, totalItems } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const lastScrollY = useRef(0);
 
   const isHome = pathname === '/';
 
+  // Header scroll detection: solid on scroll & hide on scroll down / show on scroll up
   useEffect(() => {
     const handleScroll = () => {
-      // Turn solid after scrolling 80px or past hero top
-      if (window.scrollY > 80) {
+      const currentScrollY = window.scrollY;
+
+      // Solid background after 60px
+      if (currentScrollY > 60) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
       }
+
+      // Hide on scroll down, show on scroll up
+      if (currentScrollY > 120 && currentScrollY > lastScrollY.current) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
 
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -53,7 +66,7 @@ export function Navbar() {
 
   const navLinks = [
     { label: 'Originals', href: '/originals' },
-    { label: 'Art Prints', href: '/prints' },
+    { label: 'Art prints', href: '/prints' },
     { label: 'Commissions', href: '/commissions' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
@@ -65,10 +78,11 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          'fixed left-0 right-0 top-0 z-40 transition-all duration-300',
+          'fixed left-0 right-0 top-0 z-40 transition-all duration-300 ease-in-out',
+          isVisible || mobileMenuOpen ? 'translate-y-0' : '-translate-y-full',
           isSolid
             ? 'border-b border-line bg-paper/95 text-ink shadow-sm backdrop-blur-md'
-            : 'border-b border-white/15 bg-transparent text-paper'
+            : 'border-b border-white/10 bg-transparent text-paper'
         )}
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-12">
@@ -81,23 +95,23 @@ export function Navbar() {
             )}
             aria-label="Lisa Dietel Art - Home"
           >
-            <span className="font-heading text-2xl font-normal tracking-wide transition-colors group-hover:text-sage md:text-3xl">
+            <span className="font-heading text-2xl font-normal tracking-tight transition-colors group-hover:text-sage md:text-3xl">
               Lisa Dietel
             </span>
             <span
               className={cn(
-                '-mt-1 font-sans text-[10px] uppercase tracking-[0.25em] transition-colors',
+                '-mt-1 font-sans text-xs font-light transition-colors',
                 isSolid ? 'text-muted' : 'text-paper/80'
               )}
             >
-              Fine Art &middot; Studio
+              Fine art &middot; Studio
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation in Sentence Case */}
           <nav
             aria-label="Main Navigation"
-            className="hidden items-center space-x-9 text-xs font-light uppercase tracking-widest md:flex"
+            className="hidden items-center space-x-8 text-sm font-normal md:flex"
           >
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -152,7 +166,7 @@ export function Navbar() {
               )}
               aria-label="Open mobile menu"
               aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-navigation-drawer"
+              aria-controls="mobile-navigation-fullscreen"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -160,73 +174,62 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Slide-in Menu (Drawer) */}
+      {/* Mobile Full-Screen Menu with Smooth Slide */}
       {mobileMenuOpen && (
         <div
-          id="mobile-navigation-drawer"
-          className="fixed inset-0 z-50 md:hidden"
+          id="mobile-navigation-fullscreen"
+          className="fixed inset-0 z-50 flex flex-col justify-between bg-paper p-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-300"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation Menu"
         >
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-ink/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          {/* Slide-in Panel from Right */}
-          <div className="animate-in slide-in-from-right fixed inset-y-0 right-0 flex w-full max-w-xs flex-col justify-between border-l border-line bg-paper p-6 shadow-2xl duration-300">
+          {/* Header Bar inside Menu */}
+          <div className="flex items-center justify-between border-b border-line/60 pb-6">
             <div>
-              {/* Header inside drawer */}
-              <div className="flex items-center justify-between border-b border-line pb-6">
-                <div>
-                  <span className="block font-heading text-2xl text-ink">
-                    Lisa Dietel
-                  </span>
-                  <span className="text-[10px] uppercase tracking-widest text-muted">
-                    Fine Art &middot; Studio
-                  </span>
-                </div>
-                <button
+              <span className="block font-heading text-2xl text-ink">
+                Lisa Dietel
+              </span>
+              <span className="text-xs text-muted">
+                Fine art &middot; Studio
+              </span>
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-full p-2.5 text-ink transition-colors hover:bg-mist/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              aria-label="Close mobile menu"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Navigation Links with Large Elegant Serif Typography */}
+          <nav className="my-auto space-y-6 py-8" aria-label="Mobile Menu Links">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  prefetch={true}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-full p-2 text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-                  aria-label="Close mobile menu"
+                  className={cn(
+                    'block font-heading text-3xl font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage',
+                    isActive
+                      ? 'text-sage pl-3 border-l-2 border-sage'
+                      : 'text-ink/80 hover:text-sage'
+                  )}
                 >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-              {/* Navigation Links */}
-              <nav className="space-y-4 py-6" aria-label="Mobile Menu Links">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      prefetch={true}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        'block rounded-sm border-b border-line/40 py-2 text-sm uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage',
-                        isActive
-                          ? 'border-l-2 border-l-sage pl-2 font-medium text-sage'
-                          : 'text-ink/80 hover:text-sage'
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Bottom info in mobile menu */}
-            <div className="space-y-2 border-t border-line pt-6 text-xs text-muted">
-              <p className="font-medium text-ink">Private Studio &amp; Gallery</p>
-              <p>Inquiries: studio@lisadietelart.com</p>
-              <p className="text-[11px] text-muted">Worldwide insured courier delivery</p>
-            </div>
+          {/* Bottom Studio Info */}
+          <div className="border-t border-line/60 pt-6 text-xs text-muted space-y-1.5">
+            <p className="font-medium text-ink">Lisa Dietel Studio &amp; Archive</p>
+            <p>Private inquiries: studio@lisadietelart.com</p>
+            <p className="text-[11px] text-muted">Complimentary insured courier delivery worldwide</p>
           </div>
         </div>
       )}

@@ -51,8 +51,8 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
       aria-labelledby="contact-heading"
     >
       <div className="mx-auto max-w-4xl px-6 text-center md:px-12">
-        <span className="mb-2 block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-          Direct Communications
+        <span className="mb-2 block text-xs font-medium tracking-wide text-sage">
+          Direct communications
         </span>
         <h2
           id="contact-heading"
@@ -60,15 +60,15 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
         >
           Inquire About an Artwork or Studio Visit
         </h2>
-        <p className="mx-auto mb-10 max-w-xl text-sm font-light leading-relaxed text-muted md:text-base">
+        <p className="mx-auto mb-10 max-w-[65ch] text-sm font-light leading-relaxed text-muted md:text-base">
           For original painting acquisitions, private commissions, gallery representation,
           or studio viewings in Hudson, NY.
         </p>
 
         <div aria-live="polite">
           {status === 'success' ? (
-            <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8 shadow-sm">
-              <h3 className="font-heading text-2xl text-ink">Message Received</h3>
+            <div className="mx-auto max-w-xl space-y-3 border border-line bg-paper p-8">
+              <h3 className="font-heading text-2xl text-ink">Message received</h3>
               <p className="text-xs leading-relaxed text-muted">
                 Thank you for reaching out. Lisa Dietel or the studio assistant will review
                 your inquiry and respond within two business days.
@@ -78,9 +78,9 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
                   setStatus('idle');
                   setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
                 }}
-                className="mt-4 border border-ink px-6 py-2.5 text-xs uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="mt-4 border border-ink px-6 py-2.5 text-xs text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Send Another Inquiry
+                Send another inquiry
               </button>
             </div>
           ) : (
@@ -100,9 +100,9 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
               <div>
                 <label
                   htmlFor="contact-name"
-                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted"
+                  className="mb-1 block text-xs font-medium text-muted"
                 >
-                  Your Name *
+                  Your name *
                 </label>
                 <input
                   id="contact-name"
@@ -117,9 +117,9 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
               <div>
                 <label
                   htmlFor="contact-email"
-                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted"
+                  className="mb-1 block text-xs font-medium text-muted"
                 >
-                  Email Address *
+                  Email address *
                 </label>
                 <input
                   id="contact-email"
@@ -136,9 +136,9 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
             <div>
               <label
                 htmlFor="contact-subj"
-                className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted"
+                className="mb-1 block text-xs font-medium text-muted"
               >
-                Subject / Artwork of Interest *
+                Subject / Artwork of interest *
               </label>
               <input
                 id="contact-subj"
@@ -154,7 +154,7 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
             <div>
               <label
                 htmlFor="contact-msg"
-                className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted"
+                className="mb-1 block text-xs font-medium text-muted"
               >
                 Message *
               </label>
@@ -172,9 +172,9 @@ export function ContactSection({ initialArtworkTitle = '' }: ContactSectionProps
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="w-full bg-ink py-4 text-xs font-medium uppercase tracking-widest text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+              className="w-full bg-ink py-4 text-xs font-medium text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
             >
-              {status === 'loading' ? 'Submitting...' : 'Send Studio Message'}
+              {status === 'loading' ? 'Submitting...' : 'Send studio message'}
             </button>
           </form>
         )}

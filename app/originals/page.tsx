@@ -40,13 +40,13 @@ export default async function OriginalsPage() {
       {/* Editorial Header */}
       <section className="border-b border-line bg-mist/20 px-6 py-16 md:px-12">
         <div className="mx-auto max-w-4xl space-y-4 text-center">
-          <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-            Unique Works &middot; Oeuvre
+          <span className="block text-xs font-normal text-sage">
+            Unique works &middot; Oeuvre
           </span>
           <h1 className="font-heading text-4xl font-normal text-ink sm:text-5xl md:text-6xl">
-            Original Paintings
+            Original paintings
           </h1>
-          <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-muted md:text-base">
+          <p className="mx-auto max-w-[65ch] text-sm font-light leading-relaxed text-muted md:text-base">
             One-of-a-kind canvases crafted with historical earth pigments, natural chalk,
             and French walnut oil on hand-stretched Belgian linen.
           </p>
@@ -55,13 +55,13 @@ export default async function OriginalsPage() {
 
       {/* Grid */}
       <section className="mx-auto max-w-7xl px-6 py-20 md:px-12">
-        <div className="mb-10 flex items-center justify-between border-b border-line pb-4 text-xs">
-          <span className="uppercase tracking-wider text-muted">
-            Showing {originals.length} Original Paintings
+        <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4 text-xs">
+          <span className="text-muted">
+            Showing {originals.length} original paintings
           </span>
           <Link
             href="/commissions"
-            className="rounded-sm font-medium uppercase tracking-widest text-sage transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="rounded-sm font-normal text-sage transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
             Looking for custom sizing? Commission a piece &rarr;
           </Link>

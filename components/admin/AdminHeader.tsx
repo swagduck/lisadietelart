@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Palette, Mail, Users } from 'lucide-react';
 
 interface AdminHeaderProps {
   activeTab: 'artworks' | 'inquiries' | 'subscribers';
@@ -102,7 +103,8 @@ export function AdminHeader({
                 : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
-            <span>🎨 Artworks</span>
+            <Palette className="h-4 w-4" />
+            <span>Artworks</span>
             <span
               className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
                 activeTab === 'artworks' ? 'bg-white/20 text-paper' : 'bg-line text-muted'
@@ -120,7 +122,8 @@ export function AdminHeader({
                 : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
-            <span>✉️ Inquiries</span>
+            <Mail className="h-4 w-4" />
+            <span>Inquiries</span>
             <span
               className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
                 activeTab === 'inquiries' ? 'bg-white/20 text-paper' : 'bg-line text-muted'
@@ -138,7 +141,8 @@ export function AdminHeader({
                 : 'text-muted hover:text-ink hover:bg-white/60'
             }`}
           >
-            <span>👥 Subscribers</span>
+            <Users className="h-4 w-4" />
+            <span>Subscribers</span>
             <span
               className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
                 activeTab === 'subscribers' ? 'bg-white/20 text-paper' : 'bg-line text-muted'

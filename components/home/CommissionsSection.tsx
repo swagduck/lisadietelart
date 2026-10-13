@@ -11,8 +11,8 @@ export function CommissionsSection() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 lg:grid-cols-12">
         {/* Left: Studio image */}
         <div className="relative lg:col-span-5">
-          <div className="border border-line bg-paper p-3 shadow-md">
-            <div className="relative aspect-[4/5] overflow-hidden bg-mist/40">
+          <div className="border border-line bg-paper p-3 shadow-sm">
+            <div className="relative aspect-[4/5] overflow-hidden bg-mist/30">
               <Image
                 src="/images/artist-studio.svg"
                 alt="Lisa Dietel in the painting studio working on a custom commission"
@@ -22,18 +22,18 @@ export function CommissionsSection() {
               />
             </div>
           </div>
-          <div className="absolute -bottom-6 -right-6 hidden max-w-[200px] border border-line bg-paper p-4 text-center shadow-lg sm:block">
-            <p className="font-heading text-2xl text-sage">Custom Scale</p>
-            <p className="mt-1 text-[10px] uppercase tracking-widest text-muted">
-              Bespoke Palettes
+          <div className="absolute -bottom-6 -right-6 hidden max-w-[200px] border border-line bg-paper p-4 text-center shadow-sm sm:block">
+            <p className="font-heading text-2xl font-normal text-sage">Custom scale</p>
+            <p className="mt-1 text-xs font-light text-muted">
+              Bespoke palettes
             </p>
           </div>
         </div>
 
         {/* Right: Copy & CTA */}
         <div className="space-y-6 lg:col-span-7">
-          <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-            Bespoke Artwork &middot; Private Commissions
+          <span className="block text-xs font-normal text-sage">
+            Bespoke artwork &middot; Private commissions
           </span>
 
           <h2
@@ -43,7 +43,7 @@ export function CommissionsSection() {
             Original paintings created specifically for your home and architectural space.
           </h2>
 
-          <div className="space-y-4 text-sm font-light leading-relaxed text-muted md:text-base">
+          <div className="max-w-[65ch] space-y-4 text-sm font-light leading-relaxed text-muted md:text-base">
             <p>
               A commission is a collaborative journey. Whether you are seeking a grand
               focal piece for a double-height living room or an intimate triptych for a
@@ -60,15 +60,15 @@ export function CommissionsSection() {
           <div className="flex flex-wrap gap-4 pt-4">
             <Link
               href="/commissions"
-              className="bg-ink px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+              className="rounded-sm bg-ink px-8 py-3.5 text-xs font-normal text-paper shadow-sm transition-all duration-300 hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
-              Explore Commission Process &amp; Pricing
+              Explore commission process &amp; pricing
             </Link>
             <Link
               href="/contact"
-              className="border border-ink px-8 py-3.5 text-xs font-medium uppercase tracking-widest text-ink transition-all duration-300 hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+              className="rounded-sm border border-line bg-paper px-8 py-3.5 text-xs font-normal text-ink transition-all duration-300 hover:border-ink hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
             >
-              Inquire Directly
+              Inquire directly
             </Link>
           </div>
         </div>

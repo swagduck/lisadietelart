@@ -35,28 +35,28 @@ export default function CommissionsPage() {
   const steps = [
     {
       step: '01',
-      title: 'Initial Dialogue & Spatial Study',
+      title: 'Initial dialogue & spatial study',
       description:
         'We begin with a conversation discussing your room proportions, wall dimensions, and ambient light exposure. You are invited to share photographs or architectural plans of the space.',
       icon: <Compass className="h-5 w-5 text-sage" />,
     },
     {
       step: '02',
-      title: 'Color Palette & Composition Studies',
+      title: 'Color palette & composition studies',
       description:
         'Lisa prepares small-scale gouache and oil studies on Arches cotton paper exploring color resonance, mineral temperature, and structural horizons tailored to your interior.',
       icon: <Palette className="h-5 w-5 text-sage" />,
     },
     {
       step: '03',
-      title: 'Linen Preparation & Painting',
+      title: 'Linen preparation & painting',
       description:
         'Upon study approval, raw European flax linen is hand-stretched over custom mortise-and-tenon cedar bars. Lisa constructs the painting through deliberate translucent glazes and impasto.',
       icon: <Layers className="h-5 w-5 text-sage" />,
     },
     {
       step: '04',
-      title: 'Archival Curation & Delivery',
+      title: 'Archival curation & delivery',
       description:
         'Each finished commission is signed, catalogued, and accompanied by an embossed Certificate of Authenticity. We coordinate custom timber crating and insured white-glove transit.',
       icon: <Truck className="h-5 w-5 text-sage" />,
@@ -68,13 +68,13 @@ export default function CommissionsPage() {
       {/* Editorial Header */}
       <section className="border-b border-line bg-mist/20 px-6 py-16 md:px-12">
         <div className="mx-auto max-w-4xl space-y-4 text-center">
-          <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-            Private Commissions &middot; Bespoke Oeuvre
+          <span className="block text-xs font-normal text-sage">
+            Private commissions &middot; Bespoke oeuvre
           </span>
           <h1 className="font-heading text-4xl font-normal text-ink sm:text-5xl md:text-6xl">
-            Commission a Custom Painting
+            Commission a custom painting
           </h1>
-          <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-muted md:text-base">
+          <p className="mx-auto max-w-[65ch] text-sm font-light leading-relaxed text-muted md:text-base">
             Collaborate directly with painter Lisa Dietel to create a site-specific
             original painting tailored to the scale, light, and architectural spirit of
             your home.
@@ -85,11 +85,11 @@ export default function CommissionsPage() {
       {/* Process Explanation */}
       <section className="mx-auto max-w-7xl border-b border-line px-6 py-20 md:px-12">
         <div className="mb-16 max-w-2xl">
-          <span className="mb-2 block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-            The Method
+          <span className="mb-2 block text-xs font-normal text-sage">
+            The method
           </span>
           <h2 className="font-heading text-4xl font-normal text-ink">
-            How a Private Commission Unfolds
+            How a private commission unfolds
           </h2>
         </div>
 

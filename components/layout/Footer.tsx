@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { NewsletterForm } from './NewsletterForm';
+import { Instagram, Globe, Mail, Truck, ShieldCheck } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -14,14 +15,14 @@ export function Footer() {
         aria-labelledby="newsletter-heading"
       >
         <div className="mx-auto max-w-4xl space-y-4 text-center">
-          <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-            Collector&apos;s Circle &middot; Private Previews
+          <span className="block text-xs font-normal text-sage">
+            Collector&apos;s circle &middot; Private previews
           </span>
           <h2
             id="newsletter-heading"
             className="font-heading text-3xl font-normal text-ink md:text-4xl"
           >
-            Join Lisa Dietel&apos;s Studio Dispatch
+            Join Lisa Dietel&apos;s studio dispatch
           </h2>
           <p className="mx-auto max-w-lg text-xs font-light leading-relaxed text-muted md:text-sm">
             Receive exclusive private access to newly released original paintings and
@@ -39,19 +40,19 @@ export function Footer() {
         <div className="space-y-3 md:col-span-1">
           <div className="flex flex-col">
             <span className="font-heading text-2xl text-ink">Lisa Dietel</span>
-            <span className="text-[10px] uppercase tracking-widest text-muted">
-              Fine Art &middot; Studio
+            <span className="text-xs font-light text-muted">
+              Fine art &middot; Studio
             </span>
           </div>
-          <p className="text-[11px] font-light leading-relaxed text-muted">
+          <p className="text-xs font-light leading-relaxed text-muted max-w-[40ch]">
             Original oil and mineral paintings exploring atmospheric horizon lines,
             memory, and silence on European flax linen.
           </p>
         </div>
 
-        {/* Col 2: Navigation */}
+        {/* Col 2: Collections */}
         <nav aria-label="Footer Collection Links" className="space-y-3">
-          <span className="block text-[10px] font-medium uppercase tracking-widest text-muted">
+          <span className="block text-xs font-normal text-muted">
             Collections
           </span>
           <ul className="space-y-2 text-ink/80">
@@ -60,7 +61,7 @@ export function Footer() {
                 href="/originals"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Original Paintings
+                Original paintings
               </Link>
             </li>
             <li>
@@ -68,7 +69,7 @@ export function Footer() {
                 href="/prints"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Archival Art Prints
+                Archival art prints
               </Link>
             </li>
             <li>
@@ -76,16 +77,16 @@ export function Footer() {
                 href="/commissions"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Bespoke Commissions
+                Bespoke commissions
               </Link>
             </li>
           </ul>
         </nav>
 
-        {/* Col 3: Studio & Practice */}
+        {/* Col 3: The Studio & Shipping Info */}
         <nav aria-label="Footer Studio Links" className="space-y-3">
-          <span className="block text-[10px] font-medium uppercase tracking-widest text-muted">
-            The Studio
+          <span className="block text-xs font-normal text-muted">
+            The studio
           </span>
           <ul className="space-y-2 text-ink/80">
             <li>
@@ -93,7 +94,7 @@ export function Footer() {
                 href="/about"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                About the Artist
+                About the artist
               </Link>
             </li>
             <li>
@@ -101,32 +102,35 @@ export function Footer() {
                 href="/contact"
                 className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Private Inquiries &amp; Appointments
+                Private inquiries &amp; appointments
               </Link>
             </li>
-            <li>
-              <span className="text-muted">Insured Courier Shipping</span>
+            <li className="flex items-center gap-1.5 text-muted pt-1">
+              <Truck className="h-3.5 w-3.5 text-sage flex-shrink-0" />
+              <span>Complimentary insured shipping</span>
             </li>
-            <li>
-              <span className="text-muted">Certificate of Authenticity</span>
+            <li className="flex items-center gap-1.5 text-muted">
+              <ShieldCheck className="h-3.5 w-3.5 text-sage flex-shrink-0" />
+              <span>Signed Certificate of Authenticity</span>
             </li>
           </ul>
         </nav>
 
-        {/* Col 4: Social Links */}
+        {/* Col 4: Social Icons & Connect */}
         <div className="space-y-3">
-          <span className="block text-[10px] font-medium uppercase tracking-widest text-muted">
-            Follow &amp; Connect
+          <span className="block text-xs font-normal text-muted">
+            Connect
           </span>
-          <ul className="space-y-2 text-ink/80">
+          <ul className="space-y-2.5 text-ink/80">
             <li>
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="inline-flex items-center gap-2 rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Instagram &middot; @lisadietelart
+                <Instagram className="h-4 w-4 text-sage" />
+                <span>Instagram &middot; @lisadietelart</span>
               </a>
             </li>
             <li>
@@ -134,19 +138,19 @@ export function Footer() {
                 href="https://artsy.net"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="inline-flex items-center gap-2 rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Artsy Profile
+                <Globe className="h-4 w-4 text-sage" />
+                <span>Artsy gallery profile</span>
               </a>
             </li>
             <li>
               <a
-                href="https://substack.com"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                href="mailto:studio@lisadietelart.com"
+                className="inline-flex items-center gap-2 rounded-sm transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                Substack &middot; Letters from the Studio
+                <Mail className="h-4 w-4 text-sage" />
+                <span>studio@lisadietelart.com</span>
               </a>
             </li>
           </ul>
@@ -155,12 +159,12 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-line px-6 py-6 md:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-[11px] text-muted sm:flex-row">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-xs text-muted sm:flex-row">
           <p>&copy; 2025 Lisa Dietel Fine Art. All rights reserved.</p>
-          <div className="flex space-x-6 text-[10px] uppercase tracking-wider">
-            <span>Privacy Policy</span>
-            <span>Terms of Acquisition</span>
-            <span>Archival Care Guide</span>
+          <div className="flex space-x-6 text-xs text-muted/80">
+            <span>Privacy policy</span>
+            <span>Terms of acquisition</span>
+            <span>Archival care guide</span>
           </div>
         </div>
       </div>

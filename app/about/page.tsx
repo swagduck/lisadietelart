@@ -39,13 +39,13 @@ export default function AboutPage() {
       {/* Editorial Header */}
       <section className="border-b border-line bg-mist/20 px-6 py-16 md:px-12">
         <div className="mx-auto max-w-4xl space-y-3 text-center">
-          <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
+          <span className="block text-xs font-medium tracking-wide text-sage">
             Biography &middot; Philosophy
           </span>
           <h1 className="font-heading text-4xl font-normal text-ink sm:text-5xl md:text-6xl">
             Lisa Dietel
           </h1>
-          <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-muted md:text-base">
+          <p className="mx-auto max-w-[65ch] text-sm font-light leading-relaxed text-muted md:text-base">
             Independent contemporary painter exploring geological memory, mineral pigment,
             and quiet atmospheric horizons.
           </p>
@@ -57,7 +57,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-12">
           {/* Left Column: Portrait and Studio Details */}
           <div className="space-y-8 lg:col-span-5">
-            <div className="border border-line bg-paper p-3 shadow-md">
+            <div className="border border-line bg-paper p-3">
               <div className="relative aspect-[4/5] overflow-hidden bg-mist/40">
                 <Image
                   src="/images/artist-studio.svg"
@@ -76,8 +76,8 @@ export default function AboutPage() {
             </div>
 
             <div className="space-y-3 border border-line bg-mist/30 p-6 text-xs">
-              <span className="block text-[10px] font-medium uppercase tracking-widest text-muted">
-                Studio Particulars
+              <span className="block text-xs font-medium tracking-wide text-muted">
+                Studio particulars
               </span>
               <ul className="space-y-2 font-light leading-relaxed text-ink/80">
                 <li>
@@ -85,7 +85,7 @@ export default function AboutPage() {
                   Arts &amp; Painting
                 </li>
                 <li>
-                  &bull; <strong className="font-medium">Primary Media:</strong> Oil on
+                  &bull; <strong className="font-medium">Primary media:</strong> Oil on
                   linen, cold wax, raw minerals, distemper
                 </li>
                 <li>
@@ -93,7 +93,7 @@ export default function AboutPage() {
                   Hand-stretched European flax linen
                 </li>
                 <li>
-                  &bull; <strong className="font-medium">Selected Collections:</strong>{' '}
+                  &bull; <strong className="font-medium">Selected collections:</strong>{' '}
                   Private collections across New York, London, Paris, and Zurich
                 </li>
               </ul>
@@ -103,8 +103,8 @@ export default function AboutPage() {
           {/* Right Column: Artist Statement */}
           <div className="space-y-8 lg:col-span-7">
             <div className="space-y-4">
-              <span className="block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-                Artist Statement
+              <span className="block text-xs font-medium tracking-wide text-sage">
+                Artist statement
               </span>
               <h2 className="font-heading text-3xl font-normal leading-snug text-ink sm:text-4xl">
                 &ldquo;I am drawn to the subtle threshold where physical terrain dissolves
@@ -112,7 +112,7 @@ export default function AboutPage() {
               </h2>
             </div>
 
-            <div className="space-y-5 text-sm font-light leading-relaxed text-muted md:text-base">
+            <div className="max-w-[65ch] space-y-5 text-sm font-light leading-relaxed text-muted md:text-base">
               <p>
                 My paintings are born out of repetitive observation of wild, quiet
                 topographies: coastal cliffs during dense marine fog, limestone quarries
@@ -137,7 +137,7 @@ export default function AboutPage() {
             {/* Materials breakdown */}
             <div className="space-y-4 border-t border-line pt-6">
               <h3 className="font-heading text-2xl text-ink">
-                Materials &amp; Archival Standards
+                Materials &amp; archival standards
               </h3>
               <div className="grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
                 <div className="border border-line bg-paper p-4">
@@ -151,7 +151,7 @@ export default function AboutPage() {
                 </div>
                 <div className="border border-line bg-paper p-4">
                   <h4 className="font-heading text-lg font-medium text-ink">
-                    Pigments &amp; Binders
+                    Pigments &amp; binders
                   </h4>
                   <p className="mt-1 font-light leading-relaxed text-muted">
                     Cold-pressed alkali-refined walnut oil, Venetian turpentine, and pure
@@ -164,15 +164,15 @@ export default function AboutPage() {
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
                 href="/originals"
-                className="bg-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="bg-ink px-6 py-3 text-xs font-medium text-paper transition-colors hover:bg-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
-                View Originals
+                View originals
               </Link>
               <Link
                 href="/commissions"
-                className="border border-ink px-6 py-3 text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="border border-ink px-6 py-3 text-xs font-medium text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
               >
-                Commission a Piece
+                Commission a piece
               </Link>
             </div>
           </div>

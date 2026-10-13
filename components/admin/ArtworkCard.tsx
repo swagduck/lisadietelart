@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { IArtwork } from '@/types/artwork';
 import { formatPrice } from '@/lib/format';
+import { Star } from 'lucide-react';
 
 interface ArtworkCardProps {
   artwork: IArtwork;
@@ -163,12 +164,12 @@ export function ArtworkCard({
             <span className="animate-pulse">Updating...</span>
           ) : isFeatured ? (
             <>
-              <span>★</span>
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               <span>Featured</span>
             </>
           ) : (
             <>
-              <span className="text-muted/60">☆</span>
+              <Star className="w-3.5 h-3.5 text-muted/60" />
               <span>Not Featured</span>
             </>
           )}

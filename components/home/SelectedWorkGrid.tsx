@@ -31,50 +31,70 @@ function SelectedWorkCard({
   total: number;
 }) {
   const { isPreloaded } = useCarousel();
-  const artworkImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const primaryImg = artwork.imageUrl || artwork.images?.[0] || '/images/nocturne-in-ochre.svg';
+  const secondImg =
+    (artwork.images && artwork.images.length > 1 ? artwork.images[1] : null) ||
+    (artwork.detailImages && artwork.detailImages.length > 0 ? artwork.detailImages[0] : null);
+
   const shouldEagerLoad = isPreloaded(index);
+  const isSold = Boolean(artwork.isSoldOut || artwork.sold);
 
   return (
     <CarouselItem index={index} total={total}>
-      <article className="group flex h-full flex-col border border-line bg-paper p-3 shadow-sm transition-all duration-300 hover:border-ink/20 hover:shadow-xl">
+      <article className="group flex h-full flex-col border border-line bg-paper p-3 transition-all duration-300 hover:border-ink/20 hover:shadow-sm">
+        {/* Portrait Aspect Ratio */}
         <Link
           href={`/artwork/${artwork.slug}`}
           prefetch={true}
-          className="relative block aspect-[3/4] overflow-hidden bg-mist/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-          aria-label={`View details for ${artwork.title}`}
+          className="relative block aspect-[3/4] overflow-hidden bg-mist/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          aria-label={`View details for ${artwork.title}${isSold ? ' (Sold)' : ''}`}
         >
+          {/* Primary Image with Soft Hover Zoom (1.02) */}
           <Image
-            src={artworkImg}
+            src={primaryImg}
             alt={artwork.title}
             fill
             loading={shouldEagerLoad ? 'eager' : 'lazy'}
             placeholder="blur"
-            blurDataURL={getCloudinaryBlurUrl(artworkImg)}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+            blurDataURL={getCloudinaryBlurUrl(primaryImg)}
+            className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none"
             sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw"
           />
 
-          {/* Status Badges */}
-          <div className="absolute right-3 top-3 z-10">
-            {artwork.isSoldOut || artwork.sold ? (
-              <span className="border border-line bg-paper/95 px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted">
-                Sold Out
+          {/* Second Image Crossfade on Hover if Available */}
+          {secondImg && (
+            <Image
+              src={secondImg}
+              alt={`${artwork.title} detail view`}
+              fill
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL={getCloudinaryBlurUrl(secondImg)}
+              className="object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-[1.02] group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
+              sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          )}
+
+          {/* Small "Sold" Ribbon in Corner */}
+          {isSold ? (
+            <div className="pointer-events-none absolute left-0 top-0 z-20 h-16 w-16 overflow-hidden">
+              <div className="absolute -left-6 top-3 w-24 -rotate-45 bg-ink/90 py-0.5 text-center text-[9px] font-light tracking-widest text-paper shadow-sm">
+                Sold
+              </div>
+            </div>
+          ) : (
+            /* Subtle Type Pill in Sentence Case */
+            <div className="absolute right-3 top-3 z-10">
+              <span className="border border-line/80 bg-paper/95 px-2.5 py-0.5 text-[11px] font-normal text-sage backdrop-blur-sm">
+                {artwork.type === 'original' ? 'Original' : 'Art print'}
               </span>
-            ) : artwork.type === 'original' ? (
-              <span className="border border-line bg-paper/95 px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest text-sage shadow-sm">
-                Original
-              </span>
-            ) : (
-              <span className="border border-line bg-blush/90 px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest text-ink shadow-sm">
-                Art Print
-              </span>
-            )}
-          </div>
+            </div>
+          )}
         </Link>
 
         <div className="mt-4 flex flex-1 flex-col justify-between space-y-2 px-1">
           <div>
-            <h3 className="font-heading text-2xl leading-snug text-ink transition-colors group-hover:text-sage">
+            <h3 className="font-heading text-2xl font-normal leading-snug text-ink transition-colors group-hover:text-sage">
               <Link
                 href={`/artwork/${artwork.slug}`}
                 className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
@@ -92,12 +112,12 @@ function SelectedWorkCard({
 
           <div className="flex items-center justify-between border-t border-line/60 pt-3 text-xs">
             <div>
-              {artwork.isSoldOut || artwork.sold ? (
-                <span className="text-[11px] italic text-muted">
-                  Private Collection
+              {isSold ? (
+                <span className="text-xs italic text-muted">
+                  Private collection
                 </span>
               ) : (
-                <span className="text-sm font-medium text-ink">
+                <span className="text-sm font-normal text-ink">
                   {formatPrice(artwork.price)}
                 </span>
               )}
@@ -105,9 +125,9 @@ function SelectedWorkCard({
 
             <Link
               href={`/artwork/${artwork.slug}`}
-              className="flex items-center gap-1 rounded-sm text-[10px] font-medium uppercase tracking-wider text-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage group-hover:text-ink"
+              className="flex items-center gap-1 rounded-sm text-xs font-normal text-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage group-hover:text-ink"
             >
-              View Artwork &rarr;
+              View artwork &rarr;
             </Link>
           </div>
         </div>
@@ -133,27 +153,27 @@ export function SelectedWorkGrid({ artworks }: SelectedWorkGridProps) {
           sideFadeColor="light"
           className="space-y-8"
         >
-          {/* Header Row with Title, Link, and Carousel Arrows */}
+          {/* Header Row in Sentence Case with Generous Whitespace */}
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
-              <span className="mb-2 block text-xs font-medium uppercase tracking-[0.25em] text-sage">
-                Curated Selection
+              <span className="mb-2 block text-xs font-normal text-sage">
+                Curated selection
               </span>
               <h2
                 id="selected-work-title"
                 className="font-heading text-4xl font-normal text-ink md:text-5xl"
               >
-                Selected Work
+                Selected work
               </h2>
             </div>
 
             <div className="flex items-center gap-6">
               <Link
                 href="/originals"
-                className="group inline-flex items-center gap-2 rounded-sm text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="group inline-flex items-center gap-2 rounded-sm text-xs font-medium text-ink transition-colors hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                <span>View All Originals &amp; Prints</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span>View all originals &amp; prints</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
 
               {/* Accessible Controls: Left/Right Arrows */}
